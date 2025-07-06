@@ -1,0 +1,9 @@
+.venv
+.qodo
+.vscode
+.git
+.dockerignore
+.python-version
+config
+docker-compose.yml
+tests

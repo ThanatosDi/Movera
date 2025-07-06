@@ -1,15 +1,28 @@
 class Job:
-    def __init__(self, include, move_to, filename_regex, rename):
+    def __init__(
+        self, include, move_to, src_filename_regex=None, dst_filename_regex=None
+    ):
         self.include = include
         self.move_to = move_to
-        self.filename_regex = filename_regex
-        self.rename = rename
+        self.src_filename_regex = src_filename_regex
+        self.dst_filename_regex = dst_filename_regex
 
     def __str__(self):
-        return f"Job(include='{self.include}', move_to='{self.move_to}', filename_regex='{self.filename_regex}', rename='{self.rename}')"
+        return f"Job(include='{self.include}', move_to='{self.move_to}', src_filename_regex='{self.src_filename_regex}', dst_filename_regex='{self.dst_filename_regex}')"
 
     def __repr__(self):
         return self.__str__()
+
+    def __dict__(self):
+        return {
+            "include": self.include,
+            "move_to": self.move_to,
+            "src_filename_regex": self.src_filename_regex,
+            "dst_filename_regex": self.dst_filename_regex,
+        }
+
+    def items(self):
+        return self.__dict__().items()
 
 
 class Jobs:
@@ -36,12 +49,12 @@ class Jobs:
 
 
 class Config:
-    def __init__(self, watch_dir, jobs):
-        self.watch_dir = watch_dir
+    def __init__(self, watches, jobs):
+        self.watches = watches
         self.jobs = Jobs(jobs)
 
     def __str__(self):
-        return f"Config(watch_dir={self.watch_dir}, jobs={self.jobs})"
+        return f"Config(watches={self.watches}, jobs={self.jobs})"
 
     def __repr__(self):
         return self.__str__()
