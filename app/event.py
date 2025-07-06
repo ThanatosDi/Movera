@@ -24,7 +24,9 @@ class FileEventHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         if not event.is_directory:
-            logger.info(f"Modified: {event.src_path}")
+            if wait_until_file_stable(event.src_path) is True:
+                logger.info(f"Modified: {event.src_path}")
+                self.queue.put(event.src_path)
 
     def on_moved(self, event):
         if not event.is_directory:
