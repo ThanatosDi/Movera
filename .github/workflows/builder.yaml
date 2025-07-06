@@ -33,5 +33,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            - thanatosdi/movera:latest
-            - thanatosdi/movera:${{ github.sha }}
+            thanatosdi/movera:latest
+            thanatosdi/movera:${{ github.sha }}
