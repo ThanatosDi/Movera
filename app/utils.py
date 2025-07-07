@@ -22,7 +22,38 @@ def read_config(config_yaml_path: str | Path) -> Config:
     """
 
     config = yaml.safe_load(open(config_yaml_path, "r", encoding="utf-8"))
-    return Config(config["watches"], config["jobs"])
+    return Config(watches=config["watches"], jobs=config["jobs"], log=config["log"])
+
+
+def is_file_stable(
+    src_path: str | Path, check_interval: float = 1.0, stable_checks: int = 3
+):
+    """
+    NFS 環境下判斷檔案是否穩定：
+    連續 stable_checks 次檢查檔案大小不變
+    """
+    if isinstance(src_path, str):
+        src_path = Path(src_path)
+    if not src_path.is_file():
+        return False
+
+    stable_count = 0
+    file_stat = src_path.stat()
+
+    last_size = file_stat.st_size
+
+    while stable_count < stable_checks:
+        time.sleep(check_interval)
+        try:
+            current_size = os.path.getsize(src_path)
+        except FileNotFoundError:
+            return False
+        if current_size == last_size:
+            stable_count += 1
+        else:
+            stable_count = 0
+            last_size = current_size
+    return True
 
 
 def wait_until_file_stable(
@@ -75,9 +106,9 @@ def match_job(filename: str, config: Config) -> Job | None:
         Job | None: 符合的 Job 或 None
     """
     for job in config.jobs:
-        logger.debug(f"matching: {job}")
+        logger.debug(f"比對: {job}")
         if config.jobs[job].include in filename:
-            logger.info(f"matched: {job}")
+            logger.info(f"比對成功: {job}")
             return config.jobs[job]
         else:
             continue
@@ -119,16 +150,3 @@ def move(src_path: str | Path, job: Job):
         src_path = Path(src_path)
     dst = job.move_to
     shutil.move(src_path, dst)
-
-
-def job(src_path: str, config: Config):
-    job = match_job(src_path, config)
-    # 沒有 job 符合
-    if job is None:
-        logger.info(f"沒有符合的 job: {src_path}")
-        return
-    # 當 dst_filename_regex 和 src_filename_regex 都不為空
-    # 代表使用者需要將檔案重新命名
-    if job.dst_filename_regex is not None and job.src_filename_regex is not None:
-        src_path = rename(src_path, job)
-    move(src_path, job)
