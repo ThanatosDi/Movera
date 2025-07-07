@@ -17,8 +17,12 @@ class Worker:
             src_path = self.queue.get()
             config = read_config(MOVERA_CONFIG)
             logger.info(f"處理檔案: {src_path}")
-            self.__job_flow(src_path, config)
-            self.queue.task_done()
+            try:
+                self.__job_flow(src_path, config)
+            except Exception as e:
+                logger.error(f"處理檔案時發生錯誤: {str(e)}")
+            finally:
+                self.queue.task_done()
 
     def __job_flow(self, src_path: str, config: Config):
         job = match_job(src_path, config)
