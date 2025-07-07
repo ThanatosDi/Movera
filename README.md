@@ -94,6 +94,6 @@ worker 會從 queue 取出檔案絕對路徑並進行處理
 
 
 詳細正規表示法規則可以使用 [regex101.com](https://regex101.com/) 進行測試👍  
-![alt text](image.png)
+![image](https://github.com/user-attachments/assets/abc3b30d-a18e-4078-a530-7e621c4d3854)
 
 dst_filename_regex 的重新命名規則使用可以使用 src_filename_regex 的 group，使用方式為直接在字串中使用 \1 \2 \3 來代表 group1 group2 group3
