@@ -1,4 +1,5 @@
 import os
+import sys
 import threading
 import time
 from pathlib import Path
@@ -7,36 +8,40 @@ from queue import Queue
 from loguru import logger
 from watchdog.observers.polling import PollingObserver
 
-from app.event import FileEventHandler
+from app.event import FileMonitorHandler
 from app.utils import read_config
+from app.worker import Worker
 
 MOVERA_CONFIG = os.getenv("MOVERA_CONFIG", "./config/movera.yaml")
 
 if not Path(MOVERA_CONFIG).exists():
     raise FileNotFoundError("請設定 MOVERA_CONFIG 環境變數")
 
-config = read_config(MOVERA_CONFIG)
-queue = Queue()
 
+def main():
+    config = read_config(MOVERA_CONFIG)
+    queue = Queue()
+    worker = Worker(queue)
 
-def file_processing_worker(queue: Queue):
-    from app.utils import job
+    handlers = [
+        {"sink": sys.stdout, "level": config.log.level, "colorize": True},
+        {
+            "sink": "./storages/logs/app_{time:YYYY-MM-DD}.log",
+            "level": config.log.level,
+            "format": "{time} | {level: <8} | {name}:{function}:{line} - {message} | {extra}",
+            "rotation": "00:00",
+            "enqueue": True,
+            "colorize": True,
+        },
+    ]
 
-    while True:
-        src_path = queue.get()
-        logger.info(f"處理檔案: {src_path}")
-        job(src_path, config)
-        queue.task_done()
+    logger.configure(handlers=handlers)
 
-
-if __name__ == "__main__":
-    t = threading.Thread(
-        target=file_processing_worker, kwargs={"queue": queue}, daemon=True
-    )
+    t = threading.Thread(target=worker.file_processing_worker, daemon=True)
     t.start()
 
     observer = PollingObserver()
-    event_handler = FileEventHandler(config, queue)
+    event_handler = FileMonitorHandler(queue)
     for watch_dir in config.watches:
         observer.schedule(event_handler, watch_dir, recursive=False)
     observer.start()
@@ -46,4 +51,9 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         observer.stop()
+    t.join()
     observer.join()
+
+
+if __name__ == "__main__":
+    main()
