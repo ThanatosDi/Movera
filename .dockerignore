@@ -4,6 +4,7 @@
 .git
 .dockerignore
 .python-version
+__pycache__
 config
 docker-compose.yml
 tests
