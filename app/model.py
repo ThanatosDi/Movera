@@ -48,13 +48,25 @@ class Jobs:
         return self.__str__()
 
 
-class Config:
-    def __init__(self, watches, jobs):
-        self.watches = watches
-        self.jobs = Jobs(jobs)
+class Log:
+    def __init__(self, level: str = "INFO"):
+        self.level = level.upper()
 
     def __str__(self):
-        return f"Config(watches={self.watches}, jobs={self.jobs})"
+        return f"Log(level='{self.level}')"
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class Config:
+    def __init__(self, watches, jobs, log):
+        self.watches = watches
+        self.jobs = Jobs(jobs)
+        self.log = Log(**log)
+
+    def __str__(self):
+        return f"Config(watches={self.watches}, jobs={self.jobs}, log={self.log})"
 
     def __repr__(self):
         return self.__str__()
