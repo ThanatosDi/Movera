@@ -23,7 +23,7 @@ jobs:
           # generate Docker tags based on the following events/attributes
           tags: |
             type=ref,event=branch
-            type=sha,prefix=,suffix=,format=short
+            type=sha,prefix=sha-,suffix=,format=short
             type=semver,pattern={{version}}
 
       - name: Login to Docker Hub
