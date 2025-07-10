@@ -40,6 +40,10 @@ def main():
     t = threading.Thread(target=worker.file_processing_worker, daemon=True)
     t.start()
 
+    monitor = threading.Thread(target=worker.monitor_thread, args=(observer,), daemon=True)
+    monitor.start()
+
+
     observer = PollingObserver()
     event_handler = FileMonitorHandler(queue)
     for watch_dir in config.watches:
@@ -52,6 +56,7 @@ def main():
     except KeyboardInterrupt:
         observer.stop()
     t.join()
+    monitor.join()
     observer.join()
 
 

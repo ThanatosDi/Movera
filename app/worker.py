@@ -35,3 +35,11 @@ class Worker:
         if job.dst_filename_regex is not None and job.src_filename_regex is not None:
             src_path = rename(src_path, job)
         move(src_path, job)
+
+    def monitor_thread(self, observer):
+        import time
+        while True:
+            if not observer.is_alive():
+                logger.error("Watchdog observer thread stopped unexpectedly!")
+                break
+            time.sleep(10)
