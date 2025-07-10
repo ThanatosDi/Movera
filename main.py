@@ -22,6 +22,8 @@ def main():
     config = read_config(MOVERA_CONFIG)
     queue = Queue()
     worker = Worker(queue)
+    observer = PollingObserver()
+    event_handler = FileMonitorHandler(queue)
 
     handlers = [
         {"sink": sys.stdout, "level": config.log.level, "colorize": True},
@@ -43,9 +45,6 @@ def main():
     monitor = threading.Thread(target=worker.monitor_thread, args=(observer,), daemon=True)
     monitor.start()
 
-
-    observer = PollingObserver()
-    event_handler = FileMonitorHandler(queue)
     for watch_dir in config.watches:
         observer.schedule(event_handler, watch_dir, recursive=False)
     observer.start()
