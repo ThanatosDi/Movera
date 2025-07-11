@@ -9,12 +9,56 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { toTypedSchema } from '@vee-validate/zod';
 import { Plus } from 'lucide-vue-next';
 import { useForm } from 'vee-validate';
 import { ref } from 'vue';
+import * as z from 'zod';
+
+// 表單驗證 schema
+const formSchema = toTypedSchema(z.object({
+  TaskName: z.string()
+    .min(1, '任務名稱為必填欄位')
+    .min(2, '任務名稱至少需要 2 個字符')
+    .max(50, '任務名稱不能超過 50 個字符')
+    .regex(/^[a-zA-Z0-9\u4e00-\u9fa5_\-\s]+$/, '任務名稱只能包含字母、數字、中文、底線、連字號和空格'),
+
+  FileNameInclude: z.string()
+    .min(1, '檔案名稱包含為必填欄位')
+    .min(1, '請輸入檔案名稱關鍵字')
+    .max(100, '檔案名稱關鍵字不能超過 100 個字符'),
+
+  MoveTo: z.string()
+    .min(1, '移動至為必填欄位')
+    .min(3, '路徑至少需要 3 個字符')
+    .max(500, '路徑不能超過 500 個字符')
+    .regex(/^[^\<\>\:\"\|\?\*]+$/, '路徑包含無效字符'),
+
+  SrcFilenameRegex: z.string()
+    .optional()
+    .refine((val) => {
+      if (!val) return true; // 可選欄位
+      try {
+        new RegExp(val);
+        return true;
+      } catch {
+        return false;
+      }
+    }, '正規表達式格式無效'),
+
+  DstFilenameRegex: z.string()
+    .optional()
+}))
 
 const form = useForm({
-  // validationSchema: formSchema,
+  validationSchema: formSchema,
+  initialValues: {
+    TaskName: '',
+    FileNameInclude: '',
+    MoveTo: '',
+    SrcFilenameRegex: '',
+    DstFilenameRegex: ''
+  }
 })
 
 // 正規表達式相關的響應式變數
@@ -23,6 +67,19 @@ const dstRegex = ref('')
 
 const onSubmit = form.handleSubmit((values) => {
   console.log('Form submitted!', values)
+  // 這裡可以添加提交到後端的邏輯
+  alert('任務創建成功！\n' + JSON.stringify(values, null, 2))
+}, (errors) => {
+  console.log('Form validation failed:', errors)
+  // 滾動到第一個錯誤欄位
+  const firstErrorField = Object.keys(errors)[0]
+  if (firstErrorField) {
+    const element = document.querySelector(`[name="${firstErrorField}"]`)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      element.focus()
+    }
+  }
 })
 
 // 處理正規表達式更新
@@ -51,12 +108,15 @@ const updateDstRegex = (value) => {
           name="TaskName"
         >
           <FormItem>
-            <FormLabel class="text-lg">任務名稱</FormLabel>
+            <FormLabel class="text-lg">
+              任務名稱 <span class="text-red-500">*</span>
+            </FormLabel>
             <FormControl>
               <Input
                 type="text"
                 v-bind="componentField"
-                class="rounded-full text-lg border-2 "
+                class="rounded-full text-lg border-2"
+                placeholder="輸入任務名稱"
               />
             </FormControl>
             <FormMessage />
@@ -67,12 +127,15 @@ const updateDstRegex = (value) => {
           name="FileNameInclude"
         >
           <FormItem>
-            <FormLabel class="text-lg">檔案名稱包含</FormLabel>
+            <FormLabel class="text-lg">
+              檔案名稱包含 <span class="text-red-500">*</span>
+            </FormLabel>
             <FormControl>
               <Input
                 type="text"
                 v-bind="componentField"
-                class="rounded-full text-lg border-2 "
+                class="rounded-full text-lg border-2"
+                placeholder="輸入檔案名稱關鍵字"
               />
             </FormControl>
             <FormMessage />
@@ -83,12 +146,15 @@ const updateDstRegex = (value) => {
           name="MoveTo"
         >
           <FormItem>
-            <FormLabel class="text-lg">移動至</FormLabel>
+            <FormLabel class="text-lg">
+              移動至 <span class="text-red-500">*</span>
+            </FormLabel>
             <FormControl>
               <Input
                 type="text"
                 v-bind="componentField"
                 class="rounded-full text-lg border-2"
+                placeholder="輸入目標資料夾路徑，例如：/Anime/動漫名稱"
               />
             </FormControl>
             <FormMessage />
@@ -99,7 +165,9 @@ const updateDstRegex = (value) => {
           name="SrcFilenameRegex"
         >
           <FormItem>
-            <FormLabel class="text-lg">檔案名稱正規表示法</FormLabel>
+            <FormLabel class="text-lg">
+              檔案名稱正規表示法 <span class="text-gray-400 text-sm">(可選)</span>
+            </FormLabel>
             <FormControl>
               <Input
                 type="text"
@@ -117,7 +185,9 @@ const updateDstRegex = (value) => {
           name="DstFilenameRegex"
         >
           <FormItem>
-            <FormLabel class="text-lg">重新命名正規表示法</FormLabel>
+            <FormLabel class="text-lg">
+              重新命名正規表示法 <span class="text-gray-400 text-sm">(可選)</span>
+            </FormLabel>
             <FormControl>
               <Input
                 type="text"
@@ -141,12 +211,24 @@ const updateDstRegex = (value) => {
 
         <!-- 提交按鈕區域 -->
         <div class="mt-6 pt-4 border-t border-gray-600">
-          <Button
-            type="submit"
-            class="bg-green-400 hover:bg-green-400 text-base text-black font-bold py-2 px-4 rounded-full"
-          >
-            <Plus class="w-4 h-4 mr-2" />新增任務
-          </Button>
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-400">
+              <span class="text-red-500">*</span> 為必填欄位
+            </div>
+            <Button
+              type="submit"
+              :disabled="!form.meta.value.valid"
+              :class="[
+                'text-base font-bold py-2 px-4 rounded-full transition-all duration-200',
+                form.meta.value.valid
+                  ? 'bg-green-400 hover:bg-green-500 text-black'
+                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+              ]"
+            >
+              <Plus class="w-4 h-4 mr-2" />
+              {{ form.isSubmitting.value ? '創建中...' : '新增任務' }}
+            </Button>
+          </div>
         </div>
       </form>
     </div>
