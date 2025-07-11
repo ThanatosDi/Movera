@@ -42,53 +42,90 @@ const updateDstRegex = (value) => {
       <h1 class="text-2xl">建立任務</h1>
     </div>
     <div class="bg-gray-800 p-4 rounded-md">
-      <form @submit="onSubmit" class="text-white text-lg flex flex-col gap-6">
-        <FormField v-slot="{ componentField }" name="TaskName">
+      <form
+        @submit="onSubmit"
+        class="text-white text-lg flex flex-col gap-6"
+      >
+        <FormField
+          v-slot="{ componentField }"
+          name="TaskName"
+        >
           <FormItem>
             <FormLabel class="text-lg">任務名稱</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" class="rounded-full text-lg border-2 " />
+              <Input
+                type="text"
+                v-bind="componentField"
+                class="rounded-full text-lg border-2 "
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField }" name="FileNameInclude">
+        <FormField
+          v-slot="{ componentField }"
+          name="FileNameInclude"
+        >
           <FormItem>
             <FormLabel class="text-lg">檔案名稱包含</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" class="rounded-full text-lg border-2 " />
+              <Input
+                type="text"
+                v-bind="componentField"
+                class="rounded-full text-lg border-2 "
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField }" name="MoveTo">
+        <FormField
+          v-slot="{ componentField }"
+          name="MoveTo"
+        >
           <FormItem>
             <FormLabel class="text-lg">移動至</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" class="rounded-full text-lg border-2" />
+              <Input
+                type="text"
+                v-bind="componentField"
+                class="rounded-full text-lg border-2"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField }" name="SrcFilenameRegex">
+        <FormField
+          v-slot="{ componentField }"
+          name="SrcFilenameRegex"
+        >
           <FormItem>
             <FormLabel class="text-lg">檔案名稱正規表示法</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField"
+              <Input
+                type="text"
+                v-bind="componentField"
                 @input="(e) => { updateSrcRegex(e.target.value); componentField['onInput'](e) }"
-                class="rounded-full text-lg border-2" placeholder="例如: 公爵千金的家庭教師 - (\d{2})(v2)? .+\.mp4" />
+                class="rounded-full text-lg border-2"
+                placeholder="例如: 公爵千金的家庭教師 - (\d{2})(v2)? .+\.mp4"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         </FormField>
-        <FormField v-slot="{ componentField }" name="DstFilenameRegex">
+        <FormField
+          v-slot="{ componentField }"
+          name="DstFilenameRegex"
+        >
           <FormItem>
             <FormLabel class="text-lg">重新命名正規表示法</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField"
+              <Input
+                type="text"
+                v-bind="componentField"
                 @input="(e) => { updateDstRegex(e.target.value); componentField['onInput'](e) }"
                 class="rounded-full text-lg border-2"
-                placeholder="例如: 公爵千金的家庭教師 - S01E\\1 [1080P][WEB-DL][AAC AVC][CHT].mp4" />
+                placeholder="例如: 公爵千金的家庭教師 - S01E\\1 [1080P][WEB-DL][AAC AVC][CHT].mp4"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -104,8 +141,10 @@ const updateDstRegex = (value) => {
 
         <!-- 提交按鈕區域 -->
         <div class="mt-6 pt-4 border-t border-gray-600">
-          <Button type="submit"
-            class="bg-green-400 hover:bg-green-400 text-base text-black font-bold py-2 px-4 rounded-full">
+          <Button
+            type="submit"
+            class="bg-green-400 hover:bg-green-400 text-base text-black font-bold py-2 px-4 rounded-full"
+          >
             <Plus class="w-4 h-4 mr-2" />新增任務
           </Button>
         </div>
