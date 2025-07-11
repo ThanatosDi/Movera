@@ -19,7 +19,7 @@ const props = defineProps({
 const emit = defineEmits(['update:srcRegex', 'update:dstRegex']);
 
 // 測試用的檔案名稱
-const testFilename = ref('');
+const testFilename = ref('公爵千金的家庭教師 - 01 [1080P][WEB-DL][AAC AVC][CHT].mp4');
 
 // 正規表達式匹配結果
 const regexResult = computed(() => {
@@ -122,16 +122,32 @@ const highlightedFilename = computed(() => {
     <!-- 測試檔案名稱輸入 -->
     <div class="mb-4">
       <label class="block text-sm font-medium mb-2">測試檔案名稱：</label>
-      <Input v-model="testFilename" class="bg-gray-800 border-gray-600 text-white" placeholder="輸入要測試的檔案名稱" />
+      <Input
+        v-model="testFilename"
+        class="bg-gray-800 border-gray-600 text-white"
+        placeholder="輸入要測試的檔案名稱"
+      />
       <!-- 快速測試案例 -->
       <div class="mt-2 flex flex-wrap gap-2">
-        <button @click="loadTestCase('anime1')" class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">
+        <button
+          type="button"
+          @click="loadTestCase('anime1')"
+          class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded transition-colors"
+        >
           動漫案例1
         </button>
-        <button @click="loadTestCase('anime2')" class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">
+        <button
+          type="button"
+          @click="loadTestCase('anime2')"
+          class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded transition-colors"
+        >
           動漫案例2
         </button>
-        <button @click="loadTestCase('movie')" class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">
+        <button
+          type="button"
+          @click="loadTestCase('movie')"
+          class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded transition-colors"
+        >
           電影案例
         </button>
       </div>
@@ -141,15 +157,24 @@ const highlightedFilename = computed(() => {
     <div class="space-y-4">
       <!-- 匹配狀態 -->
       <div class="flex items-center space-x-2">
-        <CheckCircle v-if="regexResult.isValid" class="w-5 h-5 text-green-400" />
-        <AlertCircle v-else class="w-5 h-5 text-red-400" />
+        <CheckCircle
+          v-if="regexResult.isValid"
+          class="w-5 h-5 text-green-400"
+        />
+        <AlertCircle
+          v-else
+          class="w-5 h-5 text-red-400"
+        />
         <span :class="regexResult.isValid ? 'text-green-400' : 'text-red-400'">
           {{ regexResult.isValid ? '匹配成功' : (regexResult.error || '無匹配') }}
         </span>
       </div>
 
       <!-- 高亮顯示匹配結果 -->
-      <div v-if="regexResult.isValid" class="bg-gray-800 p-3 rounded border">
+      <div
+        v-if="regexResult.isValid"
+        class="bg-gray-800 p-3 rounded border"
+      >
         <div class="text-sm text-gray-400 mb-2">匹配結果：</div>
         <div class="font-mono text-sm">
           <span class="text-gray-300">{{ highlightedFilename.before }}</span>
@@ -159,10 +184,17 @@ const highlightedFilename = computed(() => {
       </div>
 
       <!-- 群組顯示 -->
-      <div v-if="regexResult.isValid && regexResult.groups.length > 0" class="bg-gray-800 p-3 rounded border">
+      <div
+        v-if="regexResult.isValid && regexResult.groups.length > 0"
+        class="bg-gray-800 p-3 rounded border"
+      >
         <div class="text-sm text-gray-400 mb-2">捕獲群組：</div>
         <div class="space-y-1">
-          <div v-for="(group, index) in regexResult.groups" :key="index" class="font-mono text-sm">
+          <div
+            v-for="(group, index) in regexResult.groups"
+            :key="index"
+            class="font-mono text-sm"
+          >
             <span class="text-blue-400">群組 {{ index + 1 }}:</span>
             <span class="text-green-400 ml-2 bg-gray-900 px-2 py-1 rounded">{{ group }}</span>
           </div>
@@ -170,7 +202,10 @@ const highlightedFilename = computed(() => {
       </div>
 
       <!-- 重新命名預覽 -->
-      <div v-if="regexResult.isValid && regexResult.renamedFilename" class="bg-gray-800 p-3 rounded border">
+      <div
+        v-if="regexResult.isValid && regexResult.renamedFilename"
+        class="bg-gray-800 p-3 rounded border"
+      >
         <div class="text-sm text-gray-400 mb-2">重新命名後：</div>
         <div class="font-mono text-sm">
           <span class="text-green-400">{{ regexResult.renamedFilename }}</span>
