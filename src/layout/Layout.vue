@@ -5,8 +5,6 @@ import Sidebar from '../components/Sidebar.vue'
 const router = useRouter()
 const route = useRoute()
 
-const services = ['emby', 'jellyfin', 'pangolin', 'qbittorrent']
-
 // function goToService(TaskName) {
 //     router.push(`/services/${TaskName}`)
 // }
