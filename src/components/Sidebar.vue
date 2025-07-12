@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Filter, Plus, Search, X } from 'lucide-vue-next'
+import { Filter, Plus, Search, Trash2, X } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import SidebarItem from './SidebarItem.vue'
 
@@ -13,6 +13,10 @@ const selected = ref(null)
 const showCheckboxes = ref(false)
 const searchQuery = ref('')
 const selectedTags = ref([])
+
+// 選擇模式相關狀態
+const selectedItems = ref(new Set())
+const isSelectAllChecked = ref(false)
 
 // 模擬任務數據（包含標籤）
 const services = [
@@ -84,15 +88,14 @@ const filteredServices = computed(() => {
     return filtered
 })
 
-// 顯示模式選項
-const displayModeOptions = [
-    { value: 'normal', label: '一般模式' },
-    { value: 'checkbox', label: '選擇模式' }
-]
-
 // 切換顯示模式
-const toggleDisplayMode = (mode) => {
-    showCheckboxes.value = mode === 'checkbox'
+const toggleDisplayMode = () => {
+    showCheckboxes.value = !showCheckboxes.value
+    if (!showCheckboxes.value) {
+        // 退出選擇模式時清除所有選擇
+        selectedItems.value.clear()
+        isSelectAllChecked.value = false
+    }
 }
 
 // 添加標籤到過濾器
@@ -118,6 +121,55 @@ const clearAllFilters = () => {
 const hasActiveFilters = computed(() => {
     return searchQuery.value.trim() !== '' || selectedTags.value.length > 0
 })
+
+// 選擇模式相關功能
+const handleItemSelection = (itemName, isSelected) => {
+    if (isSelected) {
+        selectedItems.value.add(itemName)
+    } else {
+        selectedItems.value.delete(itemName)
+    }
+
+    // 更新全選狀態
+    updateSelectAllState()
+}
+
+const updateSelectAllState = () => {
+    const totalItems = filteredServices.value.length
+    const selectedCount = selectedItems.value.size
+    isSelectAllChecked.value = totalItems > 0 && selectedCount === totalItems
+}
+
+const handleSelectAll = () => {
+    if (isSelectAllChecked.value) {
+        // 取消全選
+        selectedItems.value.clear()
+    } else {
+        // 全選
+        filteredServices.value.forEach(service => {
+            selectedItems.value.add(service.name)
+        })
+    }
+    isSelectAllChecked.value = !isSelectAllChecked.value
+}
+
+const deleteSelectedItems = () => {
+    if (selectedItems.value.size === 0) return
+
+    // 這裡可以添加確認對話框
+    if (confirm(`確定要刪除 ${selectedItems.value.size} 個選中的項目嗎？`)) {
+        // 實際刪除邏輯，這裡只是模擬
+        console.log('刪除項目:', Array.from(selectedItems.value))
+        selectedItems.value.clear()
+        isSelectAllChecked.value = false
+
+        // 實際應用中，這裡應該調用 API 刪除項目
+        // 然後更新 services 數據
+    }
+}
+
+// 計算選中項目數量
+const selectedCount = computed(() => selectedItems.value.size)
 </script>
 
 <template>
@@ -140,21 +192,15 @@ const hasActiveFilters = computed(() => {
             <div class="flex items-center gap-3">
                 <!-- 顯示模式切換 -->
                 <div class="flex-shrink-0">
-                    <Select @update:model-value="toggleDisplayMode">
-                        <SelectTrigger class="w-32 bg-gray-700 border-gray-600 text-white text-sm">
-                            <SelectValue placeholder="一般模式" />
-                        </SelectTrigger>
-                        <SelectContent class="bg-gray-700 border-gray-600">
-                            <SelectItem
-                                v-for="option in displayModeOptions"
-                                :key="option.value"
-                                :value="option.value"
-                                class="text-white hover:bg-gray-600"
-                            >
-                                {{ option.label }}
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <Button
+                        @click="toggleDisplayMode"
+                        :variant="showCheckboxes ? 'default' : 'outline'"
+                        size="sm"
+                        class="text-sm"
+                        :class="showCheckboxes ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-600 border-gray-600 text-gray-300 hover:bg-gray-500'"
+                    >
+                        {{ showCheckboxes ? '選擇模式' : '一般模式' }}
+                    </Button>
                 </div>
 
                 <!-- 搜尋框 -->
@@ -250,6 +296,38 @@ const hasActiveFilters = computed(() => {
                     已套用過濾器
                 </span>
             </div>
+
+            <!-- 選擇模式控制行 -->
+            <div
+                v-if="showCheckboxes"
+                class="flex items-center gap-3 pt-2 border-t border-gray-700"
+            >
+                <!-- 全選 checkbox -->
+                <div class="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        v-model="isSelectAllChecked"
+                        @change="handleSelectAll"
+                        class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span class="text-sm text-gray-300">
+                        全選 ({{ selectedCount }}/{{ filteredServices.length }})
+                    </span>
+                </div>
+
+                <!-- 刪除按鈕 -->
+                <Button
+                    @click="deleteSelectedItems"
+                    :disabled="selectedCount === 0"
+                    variant="destructive"
+                    size="sm"
+                    class="ml-auto text-sm"
+                    :class="selectedCount === 0 ? 'opacity-50 cursor-not-allowed' : ''"
+                >
+                    <Trash2 class="w-4 h-4 mr-1" />
+                    刪除選中項目 ({{ selectedCount }})
+                </Button>
+            </div>
         </div>
 
         <!-- 任務列表 -->
@@ -279,6 +357,8 @@ const hasActiveFilters = computed(() => {
                 :tags="item.tags"
                 :status="item.status"
                 :description="item.description"
+                :isSelected="selectedItems.has(item.name)"
+                @update:selected="handleItemSelection"
             />
         </div>
     </aside>
