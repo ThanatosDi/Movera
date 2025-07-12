@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/ui/badge';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
   TaskName: {
