@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Filter, Plus, Search, Trash2, X } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import SidebarItem from './SidebarItem.vue'
 
 const selected = ref(null)
@@ -136,21 +136,26 @@ const handleItemSelection = (itemName, isSelected) => {
 
 const updateSelectAllState = () => {
     const totalItems = filteredServices.value.length
-    const selectedCount = selectedItems.value.size
+    const selectedCount = Array.from(selectedItems.value).filter(itemName => 
+        filteredServices.value.some(service => service.name === itemName)
+    ).length
     isSelectAllChecked.value = totalItems > 0 && selectedCount === totalItems
 }
 
 const handleSelectAll = () => {
     if (isSelectAllChecked.value) {
-        // 取消全選
-        selectedItems.value.clear()
+        // 取消全選 - 只取消當前過濾結果中的項目
+        filteredServices.value.forEach(service => {
+            selectedItems.value.delete(service.name)
+        })
+        isSelectAllChecked.value = false
     } else {
-        // 全選
+        // 全選 - 選中當前過濾結果中的所有項目
         filteredServices.value.forEach(service => {
             selectedItems.value.add(service.name)
         })
+        isSelectAllChecked.value = true
     }
-    isSelectAllChecked.value = !isSelectAllChecked.value
 }
 
 const deleteSelectedItems = () => {
@@ -169,7 +174,16 @@ const deleteSelectedItems = () => {
 }
 
 // 計算選中項目數量
-const selectedCount = computed(() => selectedItems.value.size)
+const selectedCount = computed(() => {
+    return Array.from(selectedItems.value).filter(itemName => 
+        filteredServices.value.some(service => service.name === itemName)
+    ).length
+})
+
+// 監聽過濾條件變化，更新全選狀態
+watch(filteredServices, () => {
+    updateSelectAllState()
+})
 </script>
 
 <template>
@@ -331,7 +345,7 @@ const selectedCount = computed(() => selectedItems.value.size)
         </div>
 
         <!-- 任務列表 -->
-        <div class="flex-1 overflow-y-auto bg-gray-800 rounded-md">
+        <div class="flex-1 overflow-y-auto bg-gray-800 rounded-md custom-scrollbar">
             <div
                 v-if="filteredServices.length === 0"
                 class="p-4 text-center text-gray-400"

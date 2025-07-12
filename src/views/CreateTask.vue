@@ -94,7 +94,7 @@ const updateDstRegex = (value) => {
 }
 </script>
 <template>
-  <main class="flex-1 flex flex-col p-4 space-y-4 overflow-auto min-h-0">
+  <main class="flex-1 flex flex-col p-4 space-y-4 overflow-auto min-h-0 custom-scrollbar">
     <div class="pt-2 pb-2 col-span-1 col-start-1">
       <h1 class="text-2xl">建立任務</h1>
     </div>
