@@ -14,5 +14,6 @@
     "editor.defaultFormatter": "Vue.volar"
   },
   "html.format.wrapAttributes": "force-expand-multiline",
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "codium.codeCompletion.enable": true
 }
