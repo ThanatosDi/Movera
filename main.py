@@ -1,63 +1,73 @@
-import os
-import sys
 import threading
-import time
-from pathlib import Path
-from queue import Queue
+from contextlib import asynccontextmanager
 
+import uvicorn
+from alembic import command
+from alembic.config import Config
+from fastapi import FastAPI, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from loguru import logger
-from watchdog.observers.polling import PollingObserver
 
-from app.event import FileMonitorHandler
-from app.utils import read_config
-from app.worker import Worker
+from api.routers import log, tag, task, task_tag_mapping
 
-MOVERA_CONFIG = os.getenv("MOVERA_CONFIG", "./config/movera.yaml")
-
-if not Path(MOVERA_CONFIG).exists():
-    raise FileNotFoundError("請設定 MOVERA_CONFIG 環境變數")
+# from main import main
 
 
-def main():
-    config = read_config(MOVERA_CONFIG)
-    queue = Queue()
-    worker = Worker(queue)
-    observer = PollingObserver()
-    event_handler = FileMonitorHandler(queue)
-
-    handlers = [
-        {"sink": sys.stdout, "level": config.log.level, "colorize": True},
-        {
-            "sink": "./storages/logs/app_{time:YYYY-MM-DD}.log",
-            "level": config.log.level,
-            "format": "{time} | {level: <8} | {name}:{function}:{line} - {message} | {extra}",
-            "rotation": "00:00",
-            "enqueue": True,
-            "colorize": True,
-        },
-    ]
-
-    logger.configure(handlers=handlers)
-
-    t = threading.Thread(target=worker.file_processing_worker, daemon=True)
-    t.start()
-
-    monitor = threading.Thread(target=worker.monitor_thread, args=(observer,), daemon=True)
-    monitor.start()
-
-    for watch_dir in config.watches:
-        observer.schedule(event_handler, watch_dir, recursive=False)
-    observer.start()
-    logger.info(f"開始監控資料夾: {config.watches}")
+def run_migrations():
     try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    t.join()
-    monitor.join()
-    observer.join()
+        print("開始資料庫遷移...")
+        alembic_cfg = Config("alembic.ini")
+        command.upgrade(alembic_cfg, "head")
+        logger.info("資料庫遷移完成")
+    except Exception as e:
+        logger.info(f"遷移失敗: {e}")
+        raise
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Load
+    # await run_migrations()
+    run_migrations()
+    yield
+    # Clean up
+    pass
+
+
+app = FastAPI(lifespan=lifespan, debug=True, root_path="/api/v1")
+
+
+app.include_router(task.router)
+app.include_router(tag.router)
+app.include_router(task_tag_mapping.router)
+app.include_router(log.router)
+# app.include_router(setting.router)
+
+# 掛載 Vue build 出來的靜態檔
+# app.mount("/", StaticFiles(directory="../frontend/dist", html=True), name="static")
+
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/healthy")
+def healthy():
+    return JSONResponse({"status": "healthy"}, status_code=status.HTTP_200_OK)
 
 
 if __name__ == "__main__":
-    main()
+    # watchdog = threading.Thread(target=main, daemon=True)
+    # watchdog.start()
+    uvicorn.run("API:app", host="0.0.0.0", port=8080, reload=True)
