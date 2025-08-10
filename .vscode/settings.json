@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
-        "movera"
+        "lucide",
+        "movera",
+        "reka"
     ],
     "[javascript]": {
         "editor.tabSize": 2
@@ -8,5 +10,10 @@
     "[python]": {
         "editor.tabSize": 4
     },
-    "editor.detectIndentation": false
+    "[vue]": {
+        "editor.tabSize": 2,
+        "editor.defaultFormatter": "Vue.volar"
+    },
+    "editor.detectIndentation": false,
+    "html.format.wrapAttributes": "force-expand-multiline",
 }
