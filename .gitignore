@@ -212,3 +212,7 @@ __marimo__/
 # Movera config
 config/*
 !config/.gitkeep
+
+# Movera Database
+database/*
+!database/.gitkeep
