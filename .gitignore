@@ -216,3 +216,6 @@ config/*
 # Movera Database
 database/*
 !database/.gitkeep
+
+*.bak*
+*.log*
