@@ -18,4 +18,4 @@ fi
 
 curl -X POST "$URL" \
   -H "Content-Type: application/json" \
-  -d "{\"file_path\": \"$FILE_PATH\", \"category\": \"$CATEGORY\", tags: \"$TAGS\"}"
+  -d "{\"filepath\": \"$FILE_PATH\", \"category\": \"$CATEGORY\", tags: \"$TAGS\"}"
