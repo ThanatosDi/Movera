@@ -24,6 +24,7 @@ logger.add(
     enqueue=True,
     encoding="utf-8",
     colorize=True,
+    retention=3,
 )
 logger.add(
     LOG_DIR.as_posix() + "/APP_{time:YYYY-MM-DD}.log",
@@ -34,4 +35,5 @@ logger.add(
     encoding="utf-8",
     colorize=True,
     filter=lambda record: record["extra"].get("app", None) == "app",
+    retention=3,
 )
