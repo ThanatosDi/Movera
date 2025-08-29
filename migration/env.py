@@ -7,7 +7,7 @@ from sqlalchemy import engine_from_config, pool
 
 # 匯入專案的 Loguru 設定，確保 handlers 已經建立
 try:
-    from utils.logger import logger as app_logger  # noqa: F401
+    from core.utils.logger import logger as app_logger  # noqa: F401
 except Exception:
     # 若直接匯入失敗，將專案根目錄放入 sys.path 再嘗試
     import sys
@@ -15,7 +15,7 @@ except Exception:
     PROJECT_ROOT = Path(__file__).resolve().parents[1]
     if str(PROJECT_ROOT) not in sys.path:
         sys.path.insert(0, str(PROJECT_ROOT))
-    from utils.logger import logger as app_logger  # noqa: F401
+    from core.utils.logger import logger as app_logger  # noqa: F401
 
 
 class InterceptHandler(logging.Handler):
