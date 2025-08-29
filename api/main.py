@@ -12,7 +12,7 @@ from fastapi import FastAPI
 
 from api.middlewares import setup_cors
 from api.routers import log, task, webhook
-from utils.logger import logger as _logger
+from core.utils.logger import logger as _logger
 
 logger = _logger.bind(app="api")
 
