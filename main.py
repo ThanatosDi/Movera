@@ -1,73 +1,50 @@
-import threading
-from contextlib import asynccontextmanager
+import logging
 
 import uvicorn
-from alembic import command
-from alembic.config import Config
-from fastapi import FastAPI, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
-from loguru import logger
 
-from api.routers import log, tag, task, task_tag_mapping
+from core.utils.logger import logger as _logger
 
-# from main import main
+logger = _logger.bind(app="web")
 
+def main():
+    # 在背景執行緒啟動檔案監控服務
+    # monitoring_service_thread = threading.Thread(target=start_monitoring_service, daemon=True)
+    # monitoring_service_thread.start()
 
-def run_migrations():
-    try:
-        print("開始資料庫遷移...")
-        alembic_cfg = Config("alembic.ini")
-        command.upgrade(alembic_cfg, "head")
-        logger.info("資料庫遷移完成")
-    except Exception as e:
-        logger.info(f"遷移失敗: {e}")
-        raise
+    # 在主執行緒啟動 FastAPI 伺服器
+    logger.info("Starting Movera API server...")
 
+    # 將 Uvicorn / FastAPI 的標準 logging 導入 Loguru，並保留 stdlib extra
+    class InterceptHandler(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            from loguru import logger as __logger
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Load
-    # await run_migrations()
-    run_migrations()
-    yield
-    # Clean up
-    pass
+            try:
+                level = __logger.level(record.levelname).name
+            except ValueError:
+                level = record.levelno
 
+            # 維持正確的呼叫堆疊深度（避免顯示為 logging 自身）
+            frame, depth = logging.currentframe(), 2
+            while frame and frame.f_code.co_filename == logging.__file__:
+                frame = frame.f_back
+                depth += 1
 
-app = FastAPI(lifespan=lifespan, debug=True, root_path="/api/v1")
+            logger.opt(
+                depth=depth,
+                exception=record.exc_info,
+            ).log(level, record.getMessage())
 
+    # root_logger = logging.getLogger()
+    # root_logger.handlers = [InterceptHandler()]
+    # root_logger.setLevel(logging.NOTSET)
+    for name in ("uvicorn", "uvicorn.error", "uvicorn.access", "fastapi"):
+        log = logging.getLogger(name)
+        log.handlers = [InterceptHandler()]
+        log.propagate = False
 
-app.include_router(task.router)
-app.include_router(tag.router)
-app.include_router(task_tag_mapping.router)
-app.include_router(log.router)
-# app.include_router(setting.router)
-
-# 掛載 Vue build 出來的靜態檔
-# app.mount("/", StaticFiles(directory="../frontend/dist", html=True), name="static")
-
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.get("/healthy")
-def healthy():
-    return JSONResponse({"status": "healthy"}, status_code=status.HTTP_200_OK)
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, log_config=None)
 
 
 if __name__ == "__main__":
-    # watchdog = threading.Thread(target=main, daemon=True)
-    # watchdog.start()
-    uvicorn.run("API:app", host="0.0.0.0", port=8080, reload=True)
+    main()

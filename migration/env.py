@@ -34,7 +34,10 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        _logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        _logger.opt(depth=depth, exception=record.exc_info).log(
+            level, record.getMessage()
+        )
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -103,9 +106,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
