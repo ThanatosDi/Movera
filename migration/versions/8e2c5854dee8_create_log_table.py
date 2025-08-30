@@ -1,7 +1,7 @@
 """create log table
 
 Revision ID: 8e2c5854dee8
-Revises: b19a8deb7481
+Revises: 28d5ebf0011f
 Create Date: 2025-07-20 03:11:54.462949
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "8e2c5854dee8"
-down_revision: Union[str, Sequence[str], None] = "b19a8deb7481"
+down_revision: Union[str, Sequence[str], None] = "28d5ebf0011f"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

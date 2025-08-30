@@ -1,157 +1,76 @@
-from datetime import date
-from typing import Optional
+# api/routers/log.py
+from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from fastapi.responses import JSONResponse
-from sqlalchemy.exc import IntegrityError
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from api.models import database as db_models
-from api.models import fastapi as fa_models
-from api.models.database import get_session
-from api.repositories.log import LogRepository
-from api.utils.logger import logger
+from core import schemas
+from core.database import get_db
+from core.repositories.log import LogRepository
+from core.services.log import LogService
 
-router = APIRouter(
-    prefix="/log",
-    tags=["Log"],
-)
+router = APIRouter(prefix="/api/v1", tags=["Logs"])
+
+
+def get_log_service(db: Session = Depends(get_db)) -> LogService:
+    """
+    依賴函數：取得 LogService 的實例
+
+    依賴 db 來建立 LogRepository，然後將其交由 LogService 的建構函數來產生實例
+
+    Args:
+        db (Session, optional): SQLAlchemy 的 Session 物件. Defaults to Depends(get_db).
+
+    Returns:
+        LogService: LogService 的實例
+    """
+    repo = LogRepository(db)
+    return LogService(repo)
 
 
 @router.get(
-    "/task/{task_id}",
-    summary="取得任務日誌",
-    description="根據任務 ID，檢索與該任務關聯的所有日誌條目。",
-    response_model=list[fa_models.Log],
-    responses={
-        500: {"model": fa_models.HTTPError, "description": "Internal server error"},
-    },
+    "/log/{task_id}",
+    response_model=List[schemas.Log],
+    summary="Get Logs for a Specific Task",
+    response_description="A list of logs associated with the task.",
 )
-def get_task_logs(task_id: str, session: Session = Depends(get_session)):
+def get_logs_for_task(task_id: str, service: LogService = Depends(get_log_service)):
     """
-    取得任務日誌。
+    根據提供的任務 ID 檢索所有相關的日誌紀錄。
 
-    - **session**: 資料庫 session 依賴。
+    這個 API 端點允許客戶端查詢特定任務的執行歷史和詳細輸出。
+
+    回應內容:
+    - A JSON array of log objects, where each object contains:
+      - `id`: The unique identifier for the log entry.
+      - `task_id`: The ID of the task this log belongs to.
+      - `level`: The log level (e.g., INFO, ERROR).
+      - `message`: The log message.
+      - `created_at`: The timestamp when the log was created.
     """
-    try:
-        return LogRepository().get_task_log(session, task_id)
-    except Exception as e:
-        logger.error(e)
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Internal server error"},
-        )
+    return service.get_logs_for_task(task_id)
 
 
 @router.post(
-    "",
-    summary="建立新日誌",
-    description="根據提供的資料建立一個新的日誌條目。日誌條目包含任務 ID、操作類型、描述和時間戳。",
-    response_model=fa_models.Log,
+    "/log",
+    response_model=schemas.Log,
     status_code=status.HTTP_201_CREATED,
-    responses={
-        404: {"model": fa_models.HTTPError, "description": "Task not found"},
-        500: {"model": fa_models.HTTPError, "description": "Internal server error"},
-    },
+    summary="創建一個新的日誌項目",
+    response_description="成功創建的日誌項目",
+    # include_in_schema=False,
 )
-def create_log(log: fa_models.LogCreate, session: Session = Depends(get_session)):
+def create_log(log: schemas.LogCreate, service: LogService = Depends(get_log_service)):
     """
-    建立一個新的日誌條目。
+    在資料庫中創建一個新的日誌紀錄。
 
-    - **log**: 包含日誌詳細資訊的請求主體。
-    - **session**: 資料庫 session 依賴。
+    這個 API 通常由內部服務呼叫，用來記錄特定任務的執行情況。
+
+    回應內容:
+    - `id`: 新日誌的唯一識別碼
+    - `task_id`: 關聯任務的 ID
+    - `level`: 日誌等級 (例如: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
+    - `message`: 日誌訊息內容
+    - `created_at`: 日誌的建立時間
     """
-    db_log = db_models.Log(**log.model_dump())
-    try:
-        created_log = LogRepository().create(session, db_log)
-        return created_log
-    except IntegrityError:
-        session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task not found. The specified task_id does not exist.",
-        )
-    except Exception as e:
-        session.rollback()
-        logger.error(f"建立 log 發生錯誤: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred.",
-        )
-
-
-@router.delete(
-    "",
-    summary="刪除日誌",
-    description="根據日誌 ID 或日期刪除日誌。提供 log_id 以刪除單個日誌，或提供 before_date 以刪除該日期之前的所有日誌。",
-    status_code=status.HTTP_200_OK,
-    responses={
-        400: {"model": fa_models.HTTPError, "description": "Bad Request"},
-        404: {"model": fa_models.HTTPError, "description": "Log not found"},
-        500: {"model": fa_models.HTTPError, "description": "Internal server error"},
-    },
-)
-def delete_log(
-    log_id: Optional[int] = Query(None, description="要刪除的日誌 ID"),
-    before_date: Optional[date] = Query(
-        None, description="刪除此日期之前建立的日誌 (YYYY-MM-DD)"
-    ),
-    session: Session = Depends(get_session),
-):
-    """
-    刪除日誌條目。
-
-    - **log_id**: 要刪除的特定日誌的 ID。
-    - **before_date**: 刪除此日期之前的所有日誌。
-    - **session**: 資料庫 session 依賴。
-    """
-    if (log_id is None and before_date is None) or (
-        log_id is not None and before_date is not None
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="請提供 'log_id' 或 'before_date' 其中一個參數，但不能同時提供。",
-        )
-
-    try:
-        repo = LogRepository()
-        if log_id is not None:
-            deleted_count = repo.delete_log_by_id(session, log_id)
-            if deleted_count == 0:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"找不到 ID 為 {log_id} 的日誌。",
-                )
-            return {"message": f"成功刪除 ID 為 {log_id} 的日誌。"}
-
-        if before_date is not None:
-            deleted_count = repo.delete_logs_before_date(session, before_date)
-            return {
-                "message": f"成功刪除 {before_date} 之前的 {deleted_count} 筆日誌。"
-            }
-    except HTTPException:
-        session.rollback()
-        raise
-    except Exception as e:
-        session.rollback()
-        logger.error(f"刪除日誌時發生錯誤: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="刪除日誌時發生意外錯誤。",
-        )
-
-
-@router.get(
-    "/{task_id}",
-    summary="取得任務日誌",
-    description="根據任務 ID，檢索與該任務關聯的所有日誌條目。",
-    response_model=list[fa_models.Log],
-    deprecated=True,
-)
-def get_log_by_task_id(task_id: str, session: Session = Depends(get_session)):
-    """
-    取得任務日誌。
-
-    - **session**: 資料庫 session 依賴。
-    """
-    return LogRepository().get_by_task_id(session, task_id)
+    print(log)
+    return service.create_log(log)

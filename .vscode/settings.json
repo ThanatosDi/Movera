@@ -1,8 +1,7 @@
 {
     "cSpell.words": [
         "lucide",
-        "movera",
-        "reka"
+        "movera"
     ],
     "[javascript]": {
         "editor.tabSize": 2
@@ -16,4 +15,9 @@
     },
     "editor.detectIndentation": false,
     "html.format.wrapAttributes": "force-expand-multiline",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

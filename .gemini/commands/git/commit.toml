@@ -1,0 +1,34 @@
+# In: <project>/.gemini/commands/git/commit.toml
+# Invoked via: /git:commit
+
+description = "根據暫存的變更產生 Git 提交訊息。"
+
+# The prompt uses !{...} to execute the command and inject its output.
+prompt = """
+請根據以下 git diff 命令產生 commit 訊息:
+
+```diff
+!{git diff --staged}
+```
+
+commit 訊息必須包含兩行:
+
+1. 提交訊息的標題
+2. 提交訊息的說明
+
+commit 訊息的標題必須符合以下 Conventional Commit 規範:
+- feat: 新增/修改功能 (feature)。
+- fix: 修補 bug (bug fix)。
+- docs: 文件 (documentation)。
+- style: 格式 (不影響程式碼運行的變動 white-space, formatting, missing semi colons, etc)。
+- refactor: 重構 (既不是新增功能，也不是修補 bug 的程式碼變動)。
+- perf: 改善效能 (A code change that improves performance)。
+- test: 增加測試 (when adding missing tests)。
+- chore: 建構程序或輔助工具的變動 (maintain)。
+- revert: 撤銷回覆先前的 commit。
+- build: 改變build工具
+- ci: 與ci相關的設定
+- add: 增加一些跟功能無關的檔案
+
+使用 git commit 來提交 commit 訊息。
+"""
