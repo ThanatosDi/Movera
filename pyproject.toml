@@ -21,9 +21,16 @@ dependencies = [
 dev = [
     "pytest>=8.4.1",
     "pytest-mock>=3.14.1",
+    "taskipy>=1.14.1",
 ]
 
 [tool.pytest.ini_options]
 pythonpath = [
   "."
 ]
+
+
+[tool.taskipy.tasks]
+up-migration= "uv run alembic upgrade head"
+down-migration= "uv run alembic downgrade -1"
+base-migration= "uv run alembic downgrade base"
