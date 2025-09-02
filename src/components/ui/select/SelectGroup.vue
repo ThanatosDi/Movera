@@ -1,14 +1,15 @@
-<script setup>
-import { SelectGroup } from "reka-ui";
+<script setup lang="ts">
+import type { SelectGroupProps } from "reka-ui"
+import { SelectGroup } from "reka-ui"
 
-const props = defineProps({
-  asChild: { type: Boolean, required: false },
-  as: { type: null, required: false },
-});
+const props = defineProps<SelectGroupProps>()
 </script>
 
 <template>
-  <SelectGroup data-slot="select-group" v-bind="props">
+  <SelectGroup
+    data-slot="select-group"
+    v-bind="props"
+  >
     <slot />
   </SelectGroup>
 </template>

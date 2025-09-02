@@ -1,26 +1,26 @@
-<script setup>
-import { reactiveOmit } from "@vueuse/core";
-import { Toggle, useForwardPropsEmits } from "reka-ui";
-import { cn } from "@/lib/utils";
-import { toggleVariants } from ".";
+<script setup lang="ts">
+import type { ToggleEmits, ToggleProps } from "reka-ui"
+import type { HTMLAttributes } from "vue"
+import type { ToggleVariants } from "."
+import { reactiveOmit } from "@vueuse/core"
+import { Toggle, useForwardPropsEmits } from "reka-ui"
+import { cn } from "@/lib/utils"
+import { toggleVariants } from "."
 
-const props = defineProps({
-  defaultValue: { type: Boolean, required: false },
-  modelValue: { type: [Boolean, null], required: false },
-  disabled: { type: Boolean, required: false, default: false },
-  asChild: { type: Boolean, required: false },
-  as: { type: null, required: false },
-  name: { type: String, required: false },
-  required: { type: Boolean, required: false },
-  class: { type: null, required: false },
-  variant: { type: null, required: false, default: "default" },
-  size: { type: null, required: false, default: "default" },
-});
+const props = withDefaults(defineProps<ToggleProps & {
+  class?: HTMLAttributes["class"]
+  variant?: ToggleVariants["variant"]
+  size?: ToggleVariants["size"]
+}>(), {
+  variant: "default",
+  size: "default",
+  disabled: false,
+})
 
-const emits = defineEmits(["update:modelValue"]);
+const emits = defineEmits<ToggleEmits>()
 
-const delegatedProps = reactiveOmit(props, "class", "size", "variant");
-const forwarded = useForwardPropsEmits(delegatedProps, emits);
+const delegatedProps = reactiveOmit(props, "class", "size", "variant")
+const forwarded = useForwardPropsEmits(delegatedProps, emits)
 </script>
 
 <template>
