@@ -21,7 +21,7 @@ import { logService } from '@/services/logService'
 import { useTaskStore } from '@/stores/taskStore'
 import { Play, RefreshCw, Save, Square, Trash2 } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
-import { nextTick, ref, watch, type ComponentPublicInstance } from 'vue'
+import { computed, nextTick, ref, watch, type ComponentPublicInstance } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 // Composables
@@ -126,6 +126,10 @@ const btnActionToggleTaskStatus = async () => {
   task.value.enabled = !task.value.enabled
   await btnActionUpdateTask()
 }
+
+const isRenameRuleRequired = computed(() => {
+  return task.value && task.value.rename_rule !== null
+})
 </script>
 
 <template>
@@ -203,7 +207,10 @@ const btnActionToggleTaskStatus = async () => {
           <CardDescription>在這裡編輯任務的詳細設定。</CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
-          <TaskForm v-model="task" />
+          <TaskForm
+            v-model="task"
+            :isRenameRuleRequired="isRenameRuleRequired"
+          />
           <div class="flex justify-end">
             <Button
               @click="btnActionUpdateTask"
