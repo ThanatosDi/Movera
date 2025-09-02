@@ -31,10 +31,38 @@ const isRenameRuleRequired = computed(() => {
   return task.value.rename_rule !== null
 })
 
+const validFormData = (taskData: TaskCreate) => {
+  if (!taskData.name?.trim()) {
+    return '任務名稱為必填項。'
+  }
+  if (!taskData.include?.trim()) {
+    return '檔案名稱包含為必填項。'
+  }
+  if (!taskData.move_to?.trim()) {
+    return '移動至為必填項。'
+  }
+  const invalidPathChars = /[<>:"|?*\x00]/;
+  if (invalidPathChars.test(taskData.move_to)) {
+    return '移動至包含無效的路徑字元(< > : " | ? *)。'
+  }
+  if (taskData.rename_rule !== null && (!taskData.src_filename?.trim() || !taskData.dst_filename?.trim())) {
+    return `以啟用重新命名: ${taskData.rename_rule} 但未設定<br/> - 來源檔名規則<br/> - 目標檔名規則`
+  }
+  return null // No error
+}
+
 const createTask = async () => {
+  const errorMessage = validFormData(task.value)
+  if (errorMessage) {
+    useNotification.showError('建立任務失敗', errorMessage, { html: true, position: 'top-center', duration: 2000 })
+    return
+  }
+
   isSaving.value = true
   try {
-    await tasksStore.createTask(task.value)
+    const newTask = await tasksStore.createTask(task.value)
+    router.push({ name: 'taskDetail', params: { taskId: newTask.id } })
+    useNotification.showSuccess('任務已建立', `任務 "${newTask.name}" 已成功建立。`)
   } catch (e: any) {
     console.error('Failed to create task:', e)
     useNotification.showError('建立任務失敗', e.message)
@@ -46,7 +74,7 @@ const createTask = async () => {
 </script>
 
 <template>
-  <main :class="`flex-1 flex flex-col p-4 space-y-4 overflow-auto pb-6`">
+  <main class="`flex-1 flex flex-col p-4 space-y-4 overflow-auto pb-6`">
     <!-- 頁面標題 -->
     <div class="pt-2 pb-2">
       <h1 class="text-2xl font-bold">建立任務</h1>
