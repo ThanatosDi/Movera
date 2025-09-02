@@ -1,7 +1,7 @@
 <script setup="js">
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ROUTES } from '@/constants';
+import { Route } from '@/constants';
 import { Plus, Search } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -15,7 +15,7 @@ const props = defineProps({
   <!-- 新增任務按鈕 -->
   <div class="pt-2 pb-4 col-span-1 col-start-1">
     <RouterLink
-      :to="ROUTES.CREATE_TASK"
+      :to="Route.CREATE_TASK"
       class="text-gray-500 hover:text-gray-300 text-base"
     >
       <Button
@@ -30,8 +30,6 @@ const props = defineProps({
     <div class="relative">
       <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
       <Input
-        :model-value="searchQuery"
-        @update:model-value="updateSearchQuery"
         placeholder="搜尋任務..."
         class="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400"
       />
