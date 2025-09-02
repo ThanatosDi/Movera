@@ -12,6 +12,9 @@ class TaskService:
     def get_all_tasks(self):
         return self.repo.get_all()
 
+    def get_one_task(self, task_id: str):
+        return self.repo.get_by_id(task_id)
+
     def get_enabled_tasks(self):
         return self.repo.get_enabled_tasks()
 
