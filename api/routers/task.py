@@ -41,12 +41,41 @@ def get_all_tasks(service: TaskService = Depends(get_task_service)):
     回應內容:
     - `id`: 任務的唯一識別碼
     - `name`: 任務的名稱
-    - `status`: 任務目前的狀態 (e.g., "pending", "completed")
-    - `params`: 任務的參數
+    - `include`: 任務的檔案名稱關鍵字
+    - `move_to`: 任務的移動到位置
+    - `src_filename`: 檔案規則
+    - `dst_filename`: 重新命名規則
+    - `rename_rule`: 任務的重新命名規則 (regex | parse | None)
+    - `enabled`: 任務是否啟用
     - `created_at`: 任務的建立時間
-    - `updated_at`: 任務的最後更新時間
     """
     return service.get_all_tasks()
+
+
+@router.get(
+    "/task/{task_id}",
+    response_model=schemas.Task,
+    summary="獲取單一任務",
+    response_description="所有單一任務的資料",
+)
+def get_one_task(task_id: str, service: TaskService = Depends(get_task_service)):
+    """
+    獲取資料庫中指定任務的資料。
+
+    這個 API 用於查詢系統中存在的所有任務，並返回一個任務物件。
+
+    回應內容:
+    - `id`: 任務的唯一識別碼
+    - `name`: 任務的名稱
+    - `include`: 任務的檔案名稱關鍵字
+    - `move_to`: 任務的移動到位置
+    - `src_filename`: 檔案規則
+    - `dst_filename`: 重新命名規則
+    - `rename_rule`: 任務的重新命名規則 (regex | parse | None)
+    - `enabled`: 任務是否啟用
+    - `created_at`: 任務的建立時間
+    """
+    return service.get_one_task(task_id)
 
 
 @router.post(
@@ -65,12 +94,15 @@ def create_task(
     API 會驗證傳入的資料，並在資料庫中建立一個新的任務紀錄。
 
     回應內容:
-    - `id`: 新任務的唯一識別碼
+    - `id`: 任務的唯一識別碼
     - `name`: 任務的名稱
-    - `status`: 任務的初始狀態 (通常是 "pending")
-    - `params`: 任務的參數
+    - `include`: 任務的檔案名稱關鍵字
+    - `move_to`: 任務的移動到位置
+    - `src_filename`: 檔案規則
+    - `dst_filename`: 重新命名規則
+    - `rename_rule`: 任務的重新命名規則 (regex | parse | None)
+    - `enabled`: 任務是否啟用
     - `created_at`: 任務的建立時間
-    - `updated_at`: 任務的最後更新時間
     """
     return service.create_task(task)
 
@@ -92,12 +124,15 @@ def update_task(
     這個 API 允許使用者修改任務的特定欄位，例如狀態或參數。
 
     回應內容:
-    - `id`: 被更新任務的唯一識別碼
+    - `id`: 任務的唯一識別碼
     - `name`: 任務的名稱
-    - `status`: 更新後的任務狀態
-    - `params`: 更新後的任務參數
+    - `include`: 任務的檔案名稱關鍵字
+    - `move_to`: 任務的移動到位置
+    - `src_filename`: 檔案規則
+    - `dst_filename`: 重新命名規則
+    - `rename_rule`: 任務的重新命名規則 (regex | parse | None)
+    - `enabled`: 任務是否啟用
     - `created_at`: 任務的建立時間
-    - `updated_at`: 任務的最後更新時間
     """
     return service.update_task(task_id, task_update)
 
@@ -131,13 +166,9 @@ def get_task_stats(service: TaskService = Depends(get_task_service)):
     """
     檢索關於任務狀態的統計數據。
 
-    這包括各種狀態（如待處理、進行中、已完成）的任務數量。
 
     回應內容:
-    - `total`: The total number of tasks.
-    - `pending`: The number of tasks with 'pending' status.
-    - `in_progress`: The number of tasks with 'in_progress' status.
-    - `completed`: The number of tasks with 'completed' status.
-    - `failed`: The number of tasks with 'failed' status.
+    - `enabled`: 任務啟用的數量。
+    - `disabled`: 任務停用的數量。
     """
     return service.get_task_stats()
