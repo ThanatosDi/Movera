@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { useTaskStore } from '@/stores/taskStore'
+import { createRouter, createWebHistory, type NavigationGuardNext, type RouteLocationNormalized } from 'vue-router'
 // 懶加載組件
 const Layout = () => import('@/layout/Layout.vue')
 const DefaultView = () => import('@/views/DefaultView.vue')
@@ -23,6 +24,17 @@ const routes = [
           title: '首頁',
           description: '歡迎使用 Movera 自動化檔案管理系統',
         },
+        beforeEnter: async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+          const taskStore = useTaskStore()
+          try {
+            await taskStore.fetchTasks()
+
+          } catch (error) {
+            console.error("Failed to fetch tasks before entering route:", error)
+            // 你可以在這裡處理錯誤，例如導向到一個錯誤頁面
+          }
+          next()
+        }
       },
       {
         path: 'tasks/:taskId',
@@ -33,6 +45,17 @@ const routes = [
           title: '任務詳情',
           description: '查看和編輯任務詳細設定',
         },
+        beforeEnter: async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+          const taskStore = useTaskStore()
+          try {
+            await taskStore.fetchTasks()
+
+          } catch (error) {
+            console.error("Failed to fetch tasks before entering route:", error)
+            // 你可以在這裡處理錯誤，例如導向到一個錯誤頁面
+          }
+          next()
+        }
       },
       {
         path: 'create',
@@ -43,15 +66,6 @@ const routes = [
           description: '設定自動化檔案管理任務',
         },
       },
-      //   {
-      //     path: 'settings',
-      //     name: 'settings',
-      //     component: Settings,
-      //     meta: {
-      //       title: '設定',
-      //       description: '系統設定和偏好',
-      //     },
-      //   },
     ],
   },
   {
