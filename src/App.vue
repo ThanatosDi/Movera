@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Toaster } from '@/components/ui/sonner';
-import { toastPosition } from '@/stores/sonnerStore'; // 一個全域 ref
+import { toastPosition, toastDuration } from '@/stores/sonnerStore'; // 一個全域 ref
 import { RouterView } from 'vue-router';
 import 'vue-sonner/style.css';
 
@@ -9,7 +9,7 @@ import 'vue-sonner/style.css';
 <template>
   <RouterView />
   <Toaster
-    :duration="10000"
+    :duration="toastDuration"
     richColors
     :position="toastPosition"
   />

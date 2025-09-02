@@ -34,6 +34,7 @@ export interface HealthStatus {
 export interface NotificationOptions {
   html?: boolean;
   position?: string;
+  duration?: number;
 }
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'

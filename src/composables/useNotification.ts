@@ -15,6 +15,7 @@ function showToast(type: ToastType, message: string, description?: string, optio
     description: options?.html && description ? h('div', { innerHTML: description }) : description,
     // 直接使用每則 toast 的 position 覆蓋顯示位置
     position: options?.position,
+    duration: options?.duration || 3000,
   }
 
   // 根據類型呼叫對應的 toast 函式
