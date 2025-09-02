@@ -6,6 +6,7 @@ from core.utils.logger import logger as _logger
 
 logger = _logger.bind(app="web")
 
+
 def main():
     # 在背景執行緒啟動檔案監控服務
     # monitoring_service_thread = threading.Thread(target=start_monitoring_service, daemon=True)
@@ -43,7 +44,7 @@ def main():
         log.handlers = [InterceptHandler()]
         log.propagate = False
 
-    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, log_config=None)
+    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, log_config=None)
 
 
 if __name__ == "__main__":
