@@ -1,72 +1,48 @@
-<script setup lang="js">
-import RegexPreview from '@/components/RegexPreview.vue'
+<script setup lang="ts">
 import TaskForm from '@/components/TaskForm.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useNotification } from '@/composables/useNotification'
-import { useTasksStore } from '@/stores/tasks'
+import type { TaskCreate } from '@/schemas'
+import { useTaskStore } from '@/stores/taskStore'
 import { Save } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 // Composables
 const router = useRouter()
-const { notifyTaskCreated, notifySaveError } = useNotification()
 
 // Store
-const tasksStore = useTasksStore()
+const tasksStore = useTaskStore()
 
 // Local State
-const task = ref({
+const task = ref<TaskCreate>({
   name: '',
   include: '',
   move_to: '',
-  src_filename_regex: '',
-  dst_filename_regex: '',
+  rename_rule: null,
+  src_filename: null,
+  dst_filename: null,
   enabled: true,
 })
-const isSaving = ref(false)
+const isSaving = ref<boolean>(false)
 
-// Methods
-const validateForm = (taskData) => {
-  if (!taskData.name?.trim()) {
-    return '「任務名稱」為必填項。'
-  }
-  if (!taskData.include?.trim()) {
-    return '「檔案名稱包含」為必填項。'
-  }
-  if (!taskData.move_to?.trim()) {
-    return '「移動至」為必填項。'
-  }
-  // Regex to find characters that are invalid in paths on any common OS.
-  // This prevents characters like < > : " | ? * and the null character.
-  const invalidPathChars = /[<>:"|?*\x00]/;
-  if (invalidPathChars.test(taskData.move_to)) {
-    return '「移動至」包含無效的路徑字元(< > : " | ? *)。'
-  }
-  return null // No error
-}
+const isRenameRuleRequired = computed(() => {
+  return task.value.rename_rule !== null
+})
 
 const createTask = async () => {
-  const errorMessage = validateForm(task.value)
-  if (errorMessage) {
-    notifySaveError(errorMessage)
-    return // Stop execution if validation fails
-  }
-
   isSaving.value = true
   try {
-    const newTask = await tasksStore.createTask(task.value)
-    notifyTaskCreated()
-    // 建立成功後導向到新任務的詳細頁面
-    router.push({ name: 'taskDetail', params: { taskId: newTask.id } })
-  } catch (error) {
-    console.error('Failed to create task:', error)
-    notifySaveError(error instanceof Error ? error.message : '建立任務失敗')
+    await tasksStore.createTask(task.value)
+  } catch (e: any) {
+    console.error('Failed to create task:', e)
+    useNotification.showError('建立任務失敗', e.message)
   } finally {
     isSaving.value = false
   }
 }
+
 </script>
 
 <template>
@@ -84,7 +60,10 @@ const createTask = async () => {
         <CardDescription>在這裡編輯任務的詳細設定。</CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <TaskForm v-model="task" />
+        <TaskForm
+          v-model="task"
+          :isRenameRuleRequired="isRenameRuleRequired"
+        />
         <!-- 建立按鈕 -->
         <div class="flex justify-end">
           <Button
@@ -99,9 +78,9 @@ const createTask = async () => {
       </CardContent>
     </Card>
     <!-- 正規表達式預覽 -->
-    <RegexPreview
+    <!-- <RegexPreview
       v-model:src-regex="task.src_filename_regex"
       v-model:dst-regex="task.dst_filename_regex"
-    />
+    /> -->
   </main>
 </template>
