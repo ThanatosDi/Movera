@@ -1,26 +1,19 @@
-<script setup lang="js">
+<script setup lang="ts">
 import IconAdd from '@/components/icons/IconAdd.vue'
 import IconHome from '@/components/icons/IconHome.vue'
 import IconSettings from '@/components/icons/IconSettings.vue'
 import IconTasks from '@/components/icons/IconTasks.vue'
 import Header from '@/layout/Header.vue'
 import Sidebar from '@/layout/Sidebar.vue'
+import { useTaskStore } from '@/stores/taskStore'
+import { onMounted } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 
-import { useApiStore } from '@/stores/api'
-import { useTasksStore } from '@/stores/tasks'
-import { onMounted } from 'vue'
-
-// // 初始化 stores
-const apiStore = useApiStore()
-const tasksStore = useTasksStore()
+const taskStore = useTaskStore()
 
 onMounted(async () => {
-  // 初始化 API 配置
-  apiStore.initialize()
-
   // 載入初始數據
-  await tasksStore.initialize()
+  await taskStore.fetchTasks()
 })
 </script>
 

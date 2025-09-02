@@ -1,14 +1,14 @@
-<script setup lang="js">
+<script setup lang="ts">
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useTasksStore } from '@/stores/tasks';
+import { useTaskStore } from '@/stores/taskStore';
 import { CheckCircle, LoaderCircle, XCircle } from 'lucide-vue-next';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 
 
 // Store
-const tasksStore = useTasksStore()
-const { loading, enabledTasksCount, disabledTasksCount } = storeToRefs(tasksStore)
+const taskStore = useTaskStore()
+const { isLoading, enabledTasksCount, disabledTasksCount } = storeToRefs(taskStore)
 // 生命週期
 onMounted(async () => {
   // await getTaskStatus()
@@ -25,7 +25,7 @@ onMounted(async () => {
 
     <!-- 載入狀態 -->
     <div
-      v-if="loading"
+      v-if="isLoading"
       class="grid grid-cols-1 md:grid-cols-2 gap-4"
     >
       <!-- 已啟動任務 -->
@@ -64,7 +64,7 @@ onMounted(async () => {
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold text-green-400">{{ enabledTasksCount ?? 0 }}</div>
-          <p class="text-xs text-gray-400">個任務正在執行中</p>
+          <p class="text-xs text-gray-400">個任務已啟動</p>
         </CardContent>
       </Card>
 

@@ -1,17 +1,17 @@
-<script setup lang="js">
-import SidebarItem from '@/components/SidebarItem.vue'
-import SidebarToolbar from '@/components/SidebarToolbar.vue'
-import { useTasksStore } from '@/stores/tasks'
-import { Search } from 'lucide-vue-next'
-import { storeToRefs } from 'pinia'
+<script setup lang="ts">
+import SidebarItem from '@/components/SidebarItem.vue';
+import SidebarToolbar from '@/components/SidebarToolbar.vue';
+import { useTaskStore } from '@/stores/taskStore';
+import { Search } from 'lucide-vue-next';
+import { storeToRefs } from 'pinia';
 
-const tasksStore = useTasksStore()
-const { tasks } = storeToRefs(tasksStore)
+const taskStore = useTaskStore()
+const { tasks } = storeToRefs(taskStore)
 
 </script>
 
 <template>
-  <aside class="hidden sm:flex flex-col w-128 bg-gray-900 p-4 rounded-lg mr-4">
+  <aside class="hidden sm:flex flex-col w-90 bg-gray-900 p-4 rounded-lg mr-4">
     <SidebarToolbar />
     <!-- <nav class="flex flex-col space-y-2"> -->
     <nav class="flex-1 overflow-y-auto bg-gray-800 rounded-md">
@@ -25,14 +25,14 @@ const { tasks } = storeToRefs(tasksStore)
           <Search class="w-8 h-8 mx-auto opacity-50" />
         </div>
         <p class="text-sm">沒有找到符合條件的任務</p>
-        <button
+        <!-- <button
           v-if="hasActiveFilters"
           @click="$emit('clearAllFilters')"
           class="text-blue-400 hover:text-blue-300 text-xs mt-2 underline transition-colors"
           type="button"
         >
           清除所有過濾條件
-        </button>
+        </button> -->
       </div>
 
       <!-- 任務列表 -->
