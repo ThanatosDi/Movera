@@ -1,85 +1,41 @@
-<script setup lang="js">
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { useRegexPreview } from '@/composables/useRegexPreview'
-import { AlertCircle, CheckCircle, Lightbulb } from 'lucide-vue-next'
-import { computed, ref, watch } from 'vue'
+<script setup lang="ts">
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useRegexPreview } from '@/composables/useRegexPreview';
+import { RegexExamples } from '@/constants';
+import { AlertCircle, CheckCircle, Lightbulb } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
-// Props
-const props = defineProps({
-  srcRegex: String,
-  dstRegex: String,
-})
+// v-model 綁定，從父組件接收 src 和 dst 規則
+const srcFilename = defineModel<string | null>('srcFilename')
+const dstFilename = defineModel<string | null>('dstFilename')
 
-// Emits
-const emit = defineEmits(['update:srcRegex', 'update:dstRegex'])
+// 本地元件狀態，用於測試的檔案名稱
+const testFilename = ref<string>('')
 
-// 創建響應式 refs 來追蹤 props
-const srcRegexRef = ref(props.srcRegex || '')
-const dstRegexRef = ref(props.dstRegex || '')
+// 建立安全的 computed refs，確保傳遞給 composable 的值永遠是 string
+// 使用 ?? (nullish coalescing operator) 如果 model 是 null 或 undefined，就回傳空字串 ''
+const safeSrcFilename = computed(() => srcFilename.value ?? '')
+const safeDstFilename = computed(() => dstFilename.value ?? '')
+// --- ↑↑↑ 新增的程式碼 ↑↑↑ ---
 
-// 監聽 props 變化並同步到內部狀態
-watch(
-  () => props.srcRegex,
-  (newValue) => {
-    srcRegexRef.value = newValue || ''
-  },
-  { immediate: true },
-)
-
-watch(
-  () => props.dstRegex,
-  (newValue) => {
-    dstRegexRef.value = newValue || ''
-  },
-  { immediate: true },
-)
-
-// Composable - 傳入響應式 refs
-const {
+// 在元件內部響應式地使用 useRegexPreview
+// 當 testFilename, srcFilename, 或 dstFilename 變化時，結果會自動更新
+const { preview, highlightedParts, error, isValid, groups } = useRegexPreview(
   testFilename,
-  srcRegex,
-  dstRegex,
-  regexResult,
-  highlightedFilename,
-  testCases,
-  setTestFilename,
-  setSrcRegex,
-  setDstRegex,
-  loadTestCase,
-} = useRegexPreview(srcRegexRef, dstRegexRef)
+  safeSrcFilename,
+  safeDstFilename
+)
 
-// 方法
-const updateSrcRegex = (value) => {
-  srcRegexRef.value = value
-  setSrcRegex(value)
-  emit('update:srcRegex', value)
+// 載入測試案例的處理函式
+const handleLoadTestCase = (testCase: any) => {
+  testFilename.value = testCase.filename
+  // 直接更新 model，預覽結果會自動重新計算
+  srcFilename.value = testCase.src_filename
+  dstFilename.value = testCase.dst_filename
 }
-
-const updateDstRegex = (value) => {
-  dstRegexRef.value = value
-  setDstRegex(value)
-  emit('update:dstRegex', value)
-}
-
-const handleLoadTestCase = (caseKey) => {
-  loadTestCase(caseKey)
-  // 更新本地 refs
-  srcRegexRef.value = srcRegex.value
-  dstRegexRef.value = dstRegex.value
-  // 發送事件
-  emit('update:srcRegex', srcRegex.value)
-  emit('update:dstRegex', dstRegex.value)
-}
-
-// 計算屬性
-const testCaseButtons = computed(() => [
-  { key: 'anime1', label: '動漫案例1' },
-  { key: 'anime2', label: '動漫案例2' },
-  { key: 'anime3', label: '動漫案例3' },
-  { key: 'movie', label: '電影案例' },
-])
 </script>
 
 <template>
@@ -94,10 +50,13 @@ const testCaseButtons = computed(() => [
     <CardContent class="space-y-4">
       <!-- 測試檔案名稱輸入 -->
       <div>
-        <label class="block text-sm font-medium mb-2">測試檔案名稱：</label>
+        <Label
+          for="test-filename"
+          class="block text-sm font-medium mb-2"
+        >測試檔案名稱：</Label>
         <Input
-          :model-value="testFilename"
-          @update:model-value="(value) => { setTestFilename(String(value ?? '')) }"
+          id="test-filename"
+          v-model="testFilename"
           placeholder="輸入要測試的檔案名稱"
           class="bg-gray-700 border-gray-600"
         />
@@ -105,15 +64,15 @@ const testCaseButtons = computed(() => [
         <!-- 測試案例按鈕 -->
         <div class="mt-2 flex flex-wrap gap-2">
           <Button
-            v-for="testCase in testCaseButtons"
-            :key="testCase.key"
+            v-for="exampleCase in RegexExamples"
+            :key="exampleCase.key"
+            @click="handleLoadTestCase(exampleCase)"
             type="button"
-            @click="handleLoadTestCase(testCase.key)"
             size="sm"
             variant="outline"
             class="bg-blue-600 hover:bg-blue-700 border-blue-600"
           >
-            {{ testCase.label }}
+            {{ exampleCase.label }}
           </Button>
         </div>
       </div>
@@ -123,40 +82,45 @@ const testCaseButtons = computed(() => [
         <!-- 匹配狀態 -->
         <div class="flex items-center space-x-2">
           <CheckCircle
-            v-if="regexResult.isValid"
+            v-if="isValid"
             class="w-5 h-5 text-green-400"
           />
           <AlertCircle
             v-else
             class="w-5 h-5 text-red-400"
           />
-          <span :class="regexResult.isValid ? 'text-green-400' : 'text-red-400'">
-            {{ regexResult.isValid ? '匹配成功' : (regexResult.error || '無匹配') }}
+          <span :class="isValid ? 'text-green-400' : 'text-red-400'">
+            {{ isValid ? '匹配成功' : (error || '無匹配') }}
           </span>
         </div>
 
         <!-- 匹配結果高亮 -->
         <div
-          v-if="regexResult.isValid"
+          v-if="isValid"
           class="bg-gray-900 p-3 rounded-md border border-gray-600"
         >
-          <div class="text-sm text-gray-400 mb-2">匹配結果：</div>
-          <div class="font-mono text-sm break-all">
-            <span class="text-gray-300">{{ highlightedFilename.before }}</span>
-            <span class="bg-yellow-500 text-black px-1 rounded">{{ highlightedFilename.match }}</span>
-            <span class="text-gray-300">{{ highlightedFilename.after }}</span>
-          </div>
+          <Label class="text-sm text-gray-400 mb-2 block">匹配結果：</Label>
+          <p class="preview-text">
+            <span>{{ highlightedParts.before }}</span>
+            <span
+              v-if="highlightedParts.match"
+              class="bg-green-700 rounded p-0.5"
+            >
+              {{ highlightedParts.match }}
+            </span>
+            <span>{{ highlightedParts.after }}</span>
+          </p>
         </div>
 
         <!-- 捕獲群組 -->
         <div
-          v-if="regexResult.isValid && regexResult.groups.length > 0"
+          v-if="isValid && groups.length > 0"
           class="bg-gray-900 p-3 rounded-md border border-gray-600"
         >
-          <div class="text-sm text-gray-400 mb-2">捕獲群組：</div>
+          <Label class="text-sm text-gray-400 mb-2 block">捕獲群組：</Label>
           <div class="space-y-1">
             <div
-              v-for="(group, index) in regexResult.groups"
+              v-for="(group, index) in groups"
               :key="index"
               class="font-mono text-sm"
             >
@@ -168,15 +132,15 @@ const testCaseButtons = computed(() => [
 
         <!-- 重新命名結果 -->
         <div
-          v-if="regexResult.isValid && regexResult.renamedFilename"
+          v-if="isValid && preview"
           class="bg-gray-900 p-3 rounded-md border border-gray-600"
         >
-          <div class="text-sm text-gray-400 mb-2">重新命名後：</div>
+          <Label class="text-sm text-gray-400 mb-2 block">重新命名後：</Label>
           <div class="font-mono text-sm break-all">
-            <span :class="regexResult.renamedFilename.startsWith('重新命名格式錯誤')
+            <span :class="preview.startsWith('重新命名格式錯誤')
               ? 'text-red-400'
               : 'text-green-400'">
-              {{ regexResult.renamedFilename }}
+              {{ preview }}
             </span>
           </div>
         </div>

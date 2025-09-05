@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import RegexPreview from '@/components/RegexPreview.vue'
 import TaskForm from '@/components/TaskForm.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -106,9 +107,10 @@ const createTask = async () => {
       </CardContent>
     </Card>
     <!-- 正規表達式預覽 -->
-    <!-- <RegexPreview
-      v-model:src-regex="task.src_filename_regex"
-      v-model:dst-regex="task.dst_filename_regex"
-    /> -->
+    <RegexPreview
+      v-if="task.rename_rule === 'regex'"
+      v-model:src-filename="task.src_filename"
+      v-model:dst-filename="task.dst_filename"
+    />
   </main>
 </template>
