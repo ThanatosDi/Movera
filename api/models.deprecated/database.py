@@ -149,3 +149,10 @@ class Log(Base):
     )
 
     task = relationship("Task", back_populates="logs")
+
+
+class Setting(Base):
+    __tablename__ = "setting"
+    key = Column(String, primary_key=True)
+    value = Column(String)
+    description = Column(String)
