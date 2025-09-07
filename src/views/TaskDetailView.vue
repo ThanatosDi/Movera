@@ -209,7 +209,7 @@ const isRenameRuleRequired = computed(() => {
         <CardContent class="space-y-4">
           <TaskForm
             v-model="task"
-            :isRenameRuleRequired="isRenameRuleRequired"
+            :isRenameRuleRequired="isRenameRuleRequired ?? false"
           />
           <div class="flex justify-end">
             <Button
@@ -272,7 +272,7 @@ const isRenameRuleRequired = computed(() => {
             v-else
             class="text-center text-gray-400 py-4"
           >
-            <p>沒有可用的資料</p>
+            <p>目前尚無任務執行紀錄</p>
           </div>
         </CardContent>
       </Card>
