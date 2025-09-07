@@ -5,7 +5,8 @@ const Layout = () => import('@/layout/Layout.vue')
 const DefaultView = () => import('@/views/DefaultView.vue')
 const CreateTaskView = () => import('@/views/CreateTaskView.vue')
 const TaskDetailView = () => import('@/views/TaskDetailView.vue')
-// const Settings = () => import('@/views/Settings.vue')
+const SettingView = () => import('@/views/SettingView.vue')
+const TasksListView = () => import('@/views/TasksListView.vue')
 
 /**
  * 路由配置
@@ -66,6 +67,24 @@ const routes = [
           description: '設定自動化檔案管理任務',
         },
       },
+      {
+        path: 'setting',
+        name: 'setting',
+        component: SettingView,
+        meta: {
+          title: '設定',
+          description: '管理應用程式的全域設定',
+        },
+      },
+      {
+        path: 'tasks',
+        name: 'tasksList',
+        component: TasksListView,
+        meta: {
+          title: '任務清單',
+          description: '管理所有已建立的任務',
+        },
+      }
     ],
   },
   {
