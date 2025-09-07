@@ -1,8 +1,9 @@
 export const Route = {
   HOME: '/',
   CREATE_TASK: '/create',
+  TASKS: '/tasks',
   TASK_DETAIL: (taskId: string) => `/task/${taskId}`,
-  SETTINGS: '/settings',
+  SETTING: '/setting',
 }
 
 export const APIRoute = {
@@ -52,4 +53,19 @@ export const RegexExamples = [
     src_filename: '(.+)\\.(\\d{4})\\.1080p\\.BluRay\\.x264-(.+)\\.mkv',
     dst_filename: '\\1 (\\2) [1080p BluRay x264-\\3].mkv'
   },
+]
+
+export const ParseExamples = [
+  {
+    label: '動漫案例1', key: 'anime1',
+    filename: '公爵千金的家庭教師 - 01 [1080P][WEB-DL][AAC AVC][CHT].mp4',
+    src_filename: '{title} - {episode} {tags}.mp4',
+    dst_filename: '{title} - S01E{episode} {tags}.mp4'
+  },
+  {
+    label: '電影案例', key: 'movie',
+    filename: 'Movie.Title.2024.1080p.BluRay.x264-GROUP.mkv',
+    src_filename: '{title} ({year}) {tags}.mkv',
+    dst_filename: '{title} ({year}) [{tags}].mkv'
+  }
 ]
