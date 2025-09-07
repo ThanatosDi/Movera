@@ -10,7 +10,11 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Route } from '@/constants';
 import { CircleUser, GitBranch, Home } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
 </script>
 
 <template>
@@ -48,7 +52,7 @@ import { CircleUser, GitBranch, Home } from 'lucide-vue-next';
             <DropdownMenuLabel>Movera</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem @click="router.push(Route.SETTING)">
                 <span>設定</span>
                 <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
               </DropdownMenuItem>
