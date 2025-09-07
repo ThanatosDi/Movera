@@ -24,6 +24,16 @@ function evaluateRegexPreview(
 ) {
   // 1. 驗證並建立正規表示式物件
   let regex: RegExp
+  if (!pattern) {
+    return {
+      isValid: false,
+      matches: [],
+      groups: [],
+      renamedFilename: '',
+      fullMatch: null,
+      error: `正規表示式錯誤: 請輸入正規表示式`,
+    }
+  }
   try {
     regex = new RegExp(pattern, 'gi')
   }
