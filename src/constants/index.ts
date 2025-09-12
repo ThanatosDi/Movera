@@ -69,3 +69,9 @@ export const ParseExamples = [
     dst_filename: '{title} ({year}) [{tags}].mkv'
   }
 ]
+
+
+export const Locales = [
+  { value: 'en', label: 'English' },
+  { value: 'zh_TW', label: '繁體中文' },
+]
