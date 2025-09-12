@@ -1,0 +1,160 @@
+{
+  "common": {
+    "home": "Home",
+    "tasks": "Tasks",
+    "create": "Create",
+    "settings": "Settings",
+    "status": "Status",
+    "language": "Language",
+    "timezone": "Timezone",
+    "save": "Save Settings",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "delete": "Delete Task",
+    "loading": "Loading...",
+    "search": "Search...",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "error": "Error",
+    "success": "Success",
+    "noMatch": "No match",
+    "matchSuccess": "Match successful",
+    "about": "About",
+    "version": "Application Version"
+  },
+  "notifications": {
+    "saveSuccessTitle": "Settings Saved",
+    "saveSuccessDesc": "Your changes have been successfully applied.",
+    "saveErrorTitle": "Failed to Save Settings",
+    "taskCreateSuccessTitle": "Task Created",
+    "taskCreateSuccessDesc": "Task \"{taskName}\" has been created successfully.",
+    "taskCreateErrorTitle": "Failed to Create Task",
+    "taskUpdateSuccessTitle": "Task Updated",
+    "taskUpdateSuccessDesc": "Task \"{taskName}\" has been updated successfully.",
+    "taskUpdateErrorTitle": "Failed to Update Task",
+    "taskDeleteSuccessTitle": "Task Deleted",
+    "taskDeleteSuccessDesc": "Task \"{taskName}\" has been deleted successfully.",
+    "taskDeleteErrorTitle": "Failed to Delete Task",
+    "fetchTasksError": "Failed to fetch task list",
+    "fetchTaskError": "Failed to fetch task",
+    "fetchLogError": "Failed to fetch log data",
+    "formValidation": {
+      "taskNameRequired": "Task name is required.",
+      "includeRequired": "File name inclusion is required.",
+      "moveToRequired": "Move To is required.",
+      "invalidPath": "Move To contains invalid path characters (< > : \" | ? *).",
+      "renameRuleRequired": "Rename rule enabled: {rule} but missing<br/> - Source Filename Pattern<br/> - Destination Filename Pattern"
+    }
+  },
+  "views": {
+    "home": {
+      "title": "Home",
+      "description": "Welcome to Movera, the automated file management system",
+      "enabledTasks": "Enabled Tasks",
+      "disabledTasks": "Disabled Tasks",
+      "enabledTasksDesc": "tasks are enabled",
+      "disabledTasksDesc": "tasks are paused"
+    },
+    "createTask": {
+      "title": "Create Task",
+      "description": "Set up an automated file management task",
+      "cardTitle": "Task Settings",
+      "cardDescription": "Edit the detailed settings for the task here.",
+      "createButton": "Create Task",
+      "creatingButton": "Creating..."
+    },
+    "taskDetail": {
+      "title": "Task Details",
+      "description": "View and edit detailed task settings",
+      "taskId": "Task ID",
+      "enableButton": "Enable Task",
+      "disableButton": "Disable Task",
+      "deleteDialogTitle": "Are you sure you want to delete this task?",
+      "deleteDialogDesc": "This action cannot be undone. This will permanently delete the task \"{taskName}\" and remove its related data from the database.",
+      "cardTitle": "Task Settings",
+      "cardDescription": "Edit the detailed settings for the task here.",
+      "saveChanges": "Save Changes",
+      "logsTitle": "Log Records",
+      "logsDescription": "Recent task execution records.",
+      "reload": "Reload",
+      "loadingLogs": "Loading logs...",
+      "noLogs": "No task execution records yet",
+      "taskNotFound": "Task Not Found",
+      "checkTaskId": "Please check if the Task ID is correct",
+      "fetchError": "Error fetching task data"
+    },
+    "tasksList": {
+      "title": "Task List",
+      "description": "Manage all created tasks",
+      "noTasks": "No matching tasks found"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Manage global application settings",
+      "general": {
+        "title": "General Settings",
+        "description": "Adjust the application's appearance and notification behavior."
+      },
+      "connection": {
+        "title": "Connection Settings",
+        "description": "Set the connection address for the backend API server. Usually, no special configuration is needed.",
+        "serverAddress": "API Server Address",
+        "serverPlaceholder": "e.g., http://127.0.0.1:8000"
+      },
+      "timezonePlaceholder": "Select timezone...",
+      "timezoneLoading": "Loading timezones...",
+      "timezoneSearch": "Search timezone...",
+      "timezoneNotFound": "Timezone not found."
+    }
+  },
+  "components": {
+    "localeSelect": {
+      "placeholder": "Select Language"
+    },
+    "taskForm": {
+      "name": "Task Name",
+      "include": "Filename Includes",
+      "moveTo": "Move To",
+      "renameRule": "Rename Rule",
+      "options": {
+        "noRename": "Do not rename",
+        "regex": "Regular Expression (Regex)",
+        "parse": "Template Parsing (Parse)"
+      },
+      "srcFilename": "Source Filename Pattern",
+      "dstFilename": "Destination Filename Pattern"
+    },
+    "sidebar": {
+      "createTask": "New Task",
+      "searchTasks": "Search tasks..."
+    },
+    "preview": {
+      "testFilename": "Test Filename:",
+      "testFilenamePlaceholder": "Enter a filename to test",
+      "regexTitle": "Regex Preview",
+      "parseTitle": "Parse Template Preview",
+      "matchResult": "Match Result:",
+      "capturedGroups": "Captured Groups:",
+      "group": "Group",
+      "capturedFields": "Captured Fields:",
+      "renameResult": "Result after renaming:",
+      "renameFormatError": "Rename format error",
+      "parseFormatError": "Formatting error",
+      "instructions": "Instructions:",
+      "regexInstructions": [
+        "Use parentheses () in 'Filename Regex' to create capture groups.",
+        "Use \\1, \\2, \\3, etc., in 'Rename Regex' to reference corresponding groups.",
+        "E.g., (\\d{2}) captures two digits, referenced with \\1.",
+        "You can modify the test filename above to validate different cases.",
+        "Click the test case buttons above to load examples."
+      ],
+      "parseInstructions": [
+        "Use curly braces {} in 'Source Template' to create capture fields, e.g., {name}.",
+        "Use the same {name} in 'Destination Template' to reference the corresponding field.",
+        "You can specify types, e.g., {episode:d} will only match numbers.",
+        "Click the test case buttons above to load examples."
+      ]
+    }
+  }
+}

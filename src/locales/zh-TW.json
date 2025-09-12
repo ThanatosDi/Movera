@@ -1,0 +1,160 @@
+{
+  "common": {
+    "home": "首頁",
+    "tasks": "任務",
+    "create": "新增",
+    "settings": "設定",
+    "status": "狀態",
+    "language": "語言",
+    "timezone": "時區",
+    "save": "儲存設定",
+    "saving": "儲存中...",
+    "cancel": "取消",
+    "continue": "繼續",
+    "delete": "刪除任務",
+    "loading": "載入中...",
+    "search": "搜尋...",
+    "enabled": "已啟動",
+    "disabled": "未啟動",
+    "error": "錯誤",
+    "success": "成功",
+    "noMatch": "無匹配結果",
+    "matchSuccess": "匹配成功",
+    "about": "關於",
+    "version": "應用程式版本"
+  },
+  "notifications": {
+    "saveSuccessTitle": "設定已儲存",
+    "saveSuccessDesc": "您的變更已成功套用。",
+    "saveErrorTitle": "儲存設定失敗",
+    "taskCreateSuccessTitle": "任務已建立",
+    "taskCreateSuccessDesc": "任務 \"{taskName}\" 已成功建立。",
+    "taskCreateErrorTitle": "建立任務失敗",
+    "taskUpdateSuccessTitle": "任務已更新",
+    "taskUpdateSuccessDesc": "任務 \"{taskName}\" 已成功更新。",
+    "taskUpdateErrorTitle": "更新任務失敗",
+    "taskDeleteSuccessTitle": "任務已刪除",
+    "taskDeleteSuccessDesc": "任務 \"{taskName}\" 已成功刪除。",
+    "taskDeleteErrorTitle": "刪除任務失敗",
+    "fetchTasksError": "獲取任務列表失敗",
+    "fetchTaskError": "獲取任務失敗",
+    "fetchLogError": "取得日誌資料發生錯誤",
+    "formValidation": {
+      "taskNameRequired": "任務名稱為必填項。",
+      "includeRequired": "檔案名稱包含為必填項。",
+      "moveToRequired": "移動至為必填項。",
+      "invalidPath": "移動至包含無效的路徑字元(< > : \" | ? *)",
+      "renameRuleRequired": "已啟用重新命名: {rule} 但未設定<br/> - 來源檔名規則<br/> - 目標檔名規則"
+    }
+  },
+  "views": {
+    "home": {
+      "title": "首頁",
+      "description": "歡迎使用 Movera 自動化檔案管理系統",
+      "enabledTasks": "已啟動任務",
+      "disabledTasks": "已停用任務",
+      "enabledTasksDesc": "個任務已啟動",
+      "disabledTasksDesc": "個任務已暫停"
+    },
+    "createTask": {
+      "title": "建立任務",
+      "description": "設定自動化檔案管理任務",
+      "cardTitle": "任務設定",
+      "cardDescription": "在這裡編輯任務的詳細設定。",
+      "createButton": "建立任務",
+      "creatingButton": "建立中..."
+    },
+    "taskDetail": {
+      "title": "任務詳情",
+      "description": "查看和編輯任務詳細設定",
+      "taskId": "任務ID",
+      "enableButton": "啟用任務",
+      "disableButton": "停止任務",
+      "deleteDialogTitle": "您確定要刪除此任務嗎？",
+      "deleteDialogDesc": "此操作無法復原。這將永久刪除任務 \"{taskName}\" 並從資料庫中移除其相關資料。",
+      "cardTitle": "任務設定",
+      "cardDescription": "在這裡編輯任務的詳細設定。",
+      "saveChanges": "儲存變更",
+      "logsTitle": "日誌紀錄",
+      "logsDescription": "最近的任務執行紀錄。",
+      "reload": "重新載入",
+      "loadingLogs": "載入日誌中...",
+      "noLogs": "目前尚無任務執行紀錄",
+      "taskNotFound": "任務不存在",
+      "checkTaskId": "請檢查任務 ID 是否正確",
+      "fetchError": "取得任務資料發生錯誤"
+    },
+    "tasksList": {
+      "title": "任務清單",
+      "description": "管理所有已建立的任務",
+      "noTasks": "沒有找到符合條件的任務"
+    },
+    "settings": {
+      "title": "設定",
+      "description": "管理應用程式的全域設定",
+      "general": {
+        "title": "一般設定",
+        "description": "調整應用程式的外觀與通知行為。"
+      },
+      "connection": {
+        "title": "連線設定",
+        "description": "設定後端 API 伺服器的連線位址。一般狀況下無需特別設定，保持原樣即可。",
+        "serverAddress": "API 伺服器位址",
+        "serverPlaceholder": "例如：http://127.0.0.1:8000"
+      },
+      "timezonePlaceholder": "選擇時區...",
+      "timezoneLoading": "載入時區中...",
+      "timezoneSearch": "搜尋時區...",
+      "timezoneNotFound": "找不到時區。"
+    }
+  },
+  "components": {
+    "localeSelect": {
+      "placeholder": "選擇語言"
+    },
+    "taskForm": {
+      "name": "任務名稱",
+      "include": "檔案名稱包含",
+      "moveTo": "移動至 (Move To)",
+      "renameRule": "重新命名規則 (Rename Rule)",
+      "options": {
+        "noRename": "不重新命名",
+        "regex": "正規表示 Regex",
+        "parse": "模板解析 Parse"
+      },
+      "srcFilename": "來源檔名規則 (Src Filename)",
+      "dstFilename": "目標檔名規則 (Dst Filename)"
+    },
+    "sidebar": {
+      "createTask": "新增任務",
+      "searchTasks": "搜尋任務..."
+    },
+    "preview": {
+      "testFilename": "測試檔案名稱：",
+      "testFilenamePlaceholder": "輸入要測試的檔案名稱",
+      "regexTitle": "正規表達式預覽",
+      "parseTitle": "Parse 樣板預覽",
+      "matchResult": "匹配結果：",
+      "capturedGroups": "捕獲群組：",
+      "group": "群組",
+      "capturedFields": "捕獲欄位：",
+      "renameResult": "重新命名後：",
+      "renameFormatError": "重新命名格式錯誤",
+      "parseFormatError": "格式化錯誤",
+      "instructions": "使用說明：",
+      "regexInstructions": [
+        "在「檔案名稱正規表示法」中使用括號 () 來建立捕獲群組",
+        "在「重新命名正規表示法」中使用 \\1, \\2, \\3 等來引用對應的群組",
+        "例如：(\\d{2}) 會捕獲兩位數字，在重新命名時用 \\1 引用",
+        "可以在上方修改測試檔案名稱來驗證不同的情況",
+        "點擊上方的測試案例按鈕可以快速載入範例"
+      ],
+      "parseInstructions": [
+        "在「來源樣板」中使用大括號 {} 來建立捕獲欄位，例如 {name}。",
+        "在「目標樣板」中使用相同的 {name} 來引用對應的欄位。",
+        "可以指定類型，例如 {episode:d} 只會匹配數字。",
+        "點擊上方的測試案例按鈕可以快速載入範例。"
+      ]
+    }
+  }
+}
