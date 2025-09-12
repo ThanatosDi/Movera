@@ -8,4 +8,3 @@ class Setting(Base):
 
     key = Column(String, primary_key=True)
     value = Column(String)
-    description = Column(String)

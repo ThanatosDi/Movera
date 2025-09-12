@@ -10,7 +10,8 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.sql import table as sql_table, column as sql_column
+from sqlalchemy.sql import column as sql_column
+from sqlalchemy.sql import table as sql_table
 
 # revision identifiers, used by Alembic.
 revision: str = "d6630c6f431c"
@@ -39,18 +40,12 @@ def upgrade() -> None:
             nullable=False,
             comment="設定值",
         ),
-        sa.Column(
-            "description",
-            sa.String(),
-            nullable=False,
-            comment="設定說明",
-        ),
     )
 
     default_setting = [
-        {"key": "timezone", "value": "UTC", "description": "時區"},
-        {"key": "log_level", "value": "INFO", "description": "日誌等級"},
-        {"key": "locale", "value": "zh_TW", "description": "語言"},
+        {"key": "timezone", "value": "UTC"},
+        {"key": "locale", "value": "zh_TW"},
+        {"key": "server_address", "value": "http://127.0.0.1:8000"},
     ]
     # Insert default settings after table creation
     setting_table = sql_table(

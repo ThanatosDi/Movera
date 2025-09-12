@@ -41,9 +41,6 @@ def get_all_settings(service: SettingService = Depends(get_setting_service)):
     回應內容:
     - `key`: 設定的唯一鍵名
     - `value`: 設定的值
-    - `description`: 設定的描述
-    - `created_at`: 設定的建立時間
-    - `updated_at`: 設定的更新時間
     """
     return service.get_all_settings()
 
@@ -63,9 +60,6 @@ def get_setting(key: str, service: SettingService = Depends(get_setting_service)
     回應內容:
     - `key`: 設定的唯一鍵名
     - `value`: 設定的值
-    - `description`: 設定的描述
-    - `created_at`: 設定的建立時間
-    - `updated_at`: 設定的更新時間
     """
     return service.get_setting(key)
 
@@ -89,8 +83,20 @@ def update_setting(
     回應內容:
     - `key`: 設定的唯一鍵名
     - `value`: 設定的值
-    - `description`: 設定的描述
-    - `created_at`: 設定的建立時間
-    - `updated_at`: 設定的更新時間
     """
-    return service.update_setting(key, setting.value, setting.description)
+    return service.update_setting(key, setting.value)
+
+
+@router.put(
+    "/settings",
+    response_model=dict[str, str],
+    summary="更新多個設定",
+    response_description="成功更新後的設定資訊",
+)
+def update_settings(
+    settings: dict[str, str],
+    service: SettingService = Depends(get_setting_service),
+):
+    updated_settings = service.update_settings(settings)
+    # 將更新成功的 Setting 物件列表轉換為 key: value 的字典格式回傳
+    return {setting.key: setting.value for setting in updated_settings}
