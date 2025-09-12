@@ -11,7 +11,7 @@ from alembic.config import Config
 from fastapi import FastAPI
 
 from api.middlewares import setup_cors
-from api.routers import log, task, webhook
+from api.routers import log, setting, task, webhook
 from core.utils.logger import logger as _logger
 
 logger = _logger.bind(app="api")
@@ -51,6 +51,7 @@ setup_cors(app)
 app.include_router(task.router)
 app.include_router(log.router)
 app.include_router(webhook.router)
+app.include_router(setting.router)
 
 
 @app.get("/", tags=["Root"], status_code=200)
