@@ -1,3 +1,9 @@
+export interface TaskStats {
+  enabled: number;
+  disabled: number;
+  total: number;
+}
+
 export interface Task {
   id: string;
   name: string;
@@ -21,12 +27,6 @@ export interface Log {
   timestamp: string; // ISO 8601 date string
 }
 
-export interface TaskStats {
-  enabled: number;
-  disabled: number;
-  total: number;
-}
-
 export interface HealthStatus {
   status: 'ok';
 }
@@ -38,3 +38,9 @@ export interface NotificationOptions {
 }
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
+
+export interface Settings {
+  timezone: string;
+  locale: string;
+  server_address: string;
+}
