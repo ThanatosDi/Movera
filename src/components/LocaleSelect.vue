@@ -9,6 +9,9 @@ import {
 } from '@/components/ui/select'
 import { Locales } from '@/constants'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   locale: {
@@ -33,7 +36,7 @@ const selectedLocale = computed({
     class="bg-gray-700 border-gray-600"
   >
     <SelectTrigger class="w-[180px]">
-      <SelectValue placeholder="選擇語言" />
+      <SelectValue :placeholder="t('components.localeSelect.placeholder')" />
     </SelectTrigger>
     <SelectContent class="bg-gray-700 border-gray-600 text-white">
       <SelectGroup>

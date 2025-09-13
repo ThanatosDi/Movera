@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps({
   taskId: { type: String, required: true },
@@ -33,7 +36,7 @@ defineProps({
                   ? 'bg-green-600 hover:bg-green-600 text-white'
                   : 'bg-gray-600 hover:bg-gray-600 text-white'
                   ">
-                  {{ taskEnabled ? '已啟動' : '未啟動' }}
+                  {{ taskEnabled ? t('common.enabled') : t('common.disabled') }}
                 </Badge>
                 <h3 class="text-white font-medium truncate">{{ taskName }}</h3>
               </div>

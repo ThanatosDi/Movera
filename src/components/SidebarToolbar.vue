@@ -1,8 +1,11 @@
-<script setup="js">
+<script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Route } from '@/constants';
 import { Plus, Search } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
 
@@ -21,7 +24,7 @@ const props = defineProps({
       <Button
         class="bg-green-400 hover:bg-green-500 text-base text-black font-bold py-2 px-4 rounded-full w-full transition-colors"
       >
-        <Plus class="w-4 h-4 mr-2" />新增任務
+        <Plus class="w-4 h-4 mr-2" />{{ t('components.sidebar.createTask') }}
       </Button>
     </RouterLink>
   </div>
@@ -30,7 +33,7 @@ const props = defineProps({
     <div class="relative">
       <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
       <Input
-        placeholder="搜尋任務..."
+        :placeholder="t('components.sidebar.searchTasks')"
         class="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400"
       />
     </div>
