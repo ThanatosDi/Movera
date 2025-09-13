@@ -72,6 +72,6 @@ export const ParseExamples = [
 
 
 export const Locales = [
-  { value: 'en', label: 'English' },
-  { value: 'zh_TW', label: '繁體中文' },
+  { value: 'en-US', label: 'English' },
+  { value: 'zh-TW', label: '繁體中文' },
 ]
