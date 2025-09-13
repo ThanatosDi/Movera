@@ -1,8 +1,7 @@
 # tests/api/test_task_router.py
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
-import arrow
 import pytest
 from fastapi.testclient import TestClient
 
@@ -28,14 +27,14 @@ def test_get_all_tasks(mocker):
             name="Task 1",
             include="*.txt",
             move_to="/dest",
-            created_at=arrow.utcnow().datetime,
+            created_at=datetime.now(UTC),
         ),
         Task(
             id="2",
             name="Task 2",
             include="*.jpg",
             move_to="/dest2",
-            created_at=arrow.utcnow().datetime,
+            created_at=datetime.now(UTC),
         ),
     ]
 
@@ -56,7 +55,7 @@ def test_create_task(mocker):
     task_create_data = {"name": "New Task", "include": "*.csv", "move_to": "/new_dest"}
     task_create = TaskCreate(**task_create_data)
 
-    created_task = Task(id="3", **task_create_data, created_at=arrow.utcnow().datetime)
+    created_task = Task(id="3", **task_create_data, created_at=datetime.now(UTC))
     mock_service.create_task.return_value = created_task
 
     app.dependency_overrides[get_task_service] = lambda: mock_service
@@ -80,7 +79,7 @@ def test_update_task(mocker):
     }
     task_update = TaskUpdate(**task_update_data)
 
-    updated_task = Task(id="1", **task_update_data, created_at=arrow.utcnow().datetime)
+    updated_task = Task(id="1", **task_update_data, created_at=datetime.now(UTC))
     mock_service.update_task.return_value = updated_task
 
     app.dependency_overrides[get_task_service] = lambda: mock_service

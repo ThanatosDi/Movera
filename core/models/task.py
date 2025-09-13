@@ -1,7 +1,7 @@
 # core/models/task.py
 import uuid
+from datetime import UTC, datetime
 
-import arrow
 from sqlalchemy import Boolean, Column, DateTime, String, func
 from sqlalchemy.orm import relationship
 
@@ -60,7 +60,7 @@ class Task(Base):
     created_at = Column(
         DateTime,
         nullable=False,
-        default=arrow.utcnow().datetime,
+        default=datetime.now(UTC),
         comment="建立時間",
     )
 

@@ -7,9 +7,9 @@ Create Date: 2025-07-18 16:02:40.330933
 """
 
 import uuid
+from datetime import UTC, datetime
 from typing import Sequence, Union
 
-import arrow
 import sqlalchemy as sa
 from alembic import op
 
@@ -82,7 +82,7 @@ def upgrade() -> None:
             "created_at",
             sa.DateTime(),
             nullable=False,
-            default=arrow.utcnow().datetime,
+            default=datetime.now(UTC),
             comment="建立時間",
         ),
     )

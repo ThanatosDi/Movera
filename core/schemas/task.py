@@ -1,6 +1,6 @@
 # api/schemas/task.py
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
@@ -68,7 +68,7 @@ class TaskUpdate(TaskBase):
 
 class Task(TaskBase, TaskUUID):
     created_at: datetime = Field(
-        ...,
+        default_factory=lambda: datetime.now(UTC),
         description="任務的建立時間，表示任務何時被創建。",
         examples=["2023-10-01 12:00:00"],
     )

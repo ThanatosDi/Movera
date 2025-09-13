@@ -1,7 +1,6 @@
 from datetime import UTC, datetime
 from typing import Literal
 
-import arrow
 from pydantic import BaseModel, Field
 
 
@@ -22,7 +21,7 @@ class LogBase(BaseModel):
         examples=[""],
     )
     timestamp: datetime = Field(
-        default_factory=lambda: arrow.now(UTC).datetime,
+        default_factory=lambda: datetime.now(UTC),
         description="日誌的建立時間",
         examples=["2023-10-01 12:00:00"],
     )

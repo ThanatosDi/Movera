@@ -1,7 +1,7 @@
 # tests/api/test_log_router.py
+from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
-import arrow
 import pytest
 from fastapi.testclient import TestClient
 
@@ -27,14 +27,14 @@ def test_get_logs_for_task(mocker):
             task_id="test_task",
             level="INFO",
             message="Test log 1",
-            timestamp=arrow.utcnow().datetime,
+            timestamp=datetime.now(UTC),
         ),
         Log(
             id=2,
             task_id="test_task",
             level="INFO",
             message="Test log 2",
-            timestamp=arrow.utcnow().datetime,
+            timestamp=datetime.now(UTC),
         ),
     ]
 
@@ -55,7 +55,7 @@ def test_create_log(mocker):
     log_create_data = {"task_id": "new_task", "level": "INFO", "message": "New log"}
     log_create = LogCreate(**log_create_data)
 
-    created_log = Log(id=3, **log_create_data, timestamp=arrow.utcnow().datetime)
+    created_log = Log(id=3, **log_create_data, timestamp=datetime.now(UTC))
     mock_service.create_log.return_value = created_log
 
     app.dependency_overrides[get_log_service] = lambda: mock_service
