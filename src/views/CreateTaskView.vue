@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// import ParsePreview from '@/components/ParsePreview.vue'
 import RegexPreview from '@/components/RegexPreview.vue'
 import TaskForm from '@/components/TaskForm.vue'
 import { Button } from '@/components/ui/button'
@@ -8,7 +9,10 @@ import type { TaskCreate } from '@/schemas'
 import { useTaskStore } from '@/stores/taskStore'
 import { Save } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+
+const { t } = useI18n()
 
 // Composables
 const router = useRouter()
@@ -34,20 +38,20 @@ const isRenameRuleRequired = computed(() => {
 
 const validFormData = (taskData: TaskCreate) => {
   if (!taskData.name?.trim()) {
-    return '任務名稱為必填項。'
+    return t('notifications.formValidation.taskNameRequired')
   }
   if (!taskData.include?.trim()) {
-    return '檔案名稱包含為必填項。'
+    return t('notifications.formValidation.includeRequired')
   }
   if (!taskData.move_to?.trim()) {
-    return '移動至為必填項。'
+    return t('notifications.formValidation.moveToRequired')
   }
   const invalidPathChars = /[<>:"|?*\x00]/;
   if (invalidPathChars.test(taskData.move_to)) {
-    return '移動至包含無效的路徑字元(< > : " | ? *)。'
+    return t('notifications.formValidation.invalidPath')
   }
   if (taskData.rename_rule !== null && (!taskData.src_filename?.trim() || !taskData.dst_filename?.trim())) {
-    return `以啟用重新命名: ${taskData.rename_rule} 但未設定<br/> - 來源檔名規則<br/> - 目標檔名規則`
+    return t('notifications.formValidation.renameRuleRequired', { rule: taskData.rename_rule })
   }
   return null // No error
 }
@@ -55,7 +59,7 @@ const validFormData = (taskData: TaskCreate) => {
 const createTask = async () => {
   const errorMessage = validFormData(task.value)
   if (errorMessage) {
-    useNotification.showError('建立任務失敗', errorMessage, { html: true, position: 'top-center', duration: 2000 })
+    useNotification.showError(t('notifications.taskCreateErrorTitle'), errorMessage, { html: true, position: 'top-center', duration: 2000 })
     return
   }
 
@@ -63,10 +67,10 @@ const createTask = async () => {
   try {
     const newTask = await tasksStore.createTask(task.value)
     router.push({ name: 'taskDetail', params: { taskId: newTask.id } })
-    useNotification.showSuccess('任務已建立', `任務 "${newTask.name}" 已成功建立。`)
+    useNotification.showSuccess(t('notifications.taskCreateSuccessTitle'), t('notifications.taskCreateSuccessDesc', { taskName: newTask.name }))
   } catch (e: any) {
     console.error('Failed to create task:', e)
-    useNotification.showError('建立任務失敗', e.message)
+    useNotification.showError(t('notifications.taskCreateErrorTitle'), e.message)
   } finally {
     isSaving.value = false
   }
@@ -78,15 +82,15 @@ const createTask = async () => {
   <main class="`flex-1 flex flex-col p-4 space-y-4 overflow-auto pb-6`">
     <!-- 頁面標題 -->
     <div class="pt-2 pb-2">
-      <h1 class="text-2xl font-bold">建立任務</h1>
-      <p class="text-gray-400">設定自動化檔案管理任務</p>
+      <h1 class="text-2xl font-bold">{{ t('views.createTask.title') }}</h1>
+      <p class="text-gray-400">{{ t('views.createTask.description') }}</p>
     </div>
 
     <!-- 任務設定卡片 -->
     <Card class="bg-gray-800 border-gray-700 text-white">
       <CardHeader>
-        <CardTitle>任務設定</CardTitle>
-        <CardDescription>在這裡編輯任務的詳細設定。</CardDescription>
+        <CardTitle>{{ t('views.createTask.cardTitle') }}</CardTitle>
+        <CardDescription>{{ t('views.createTask.cardDescription') }}</CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <TaskForm
@@ -101,7 +105,7 @@ const createTask = async () => {
             class="bg-green-400 hover:bg-green-800 font-bold text-black"
           >
             <Save class="size-4 mr-2" />
-            {{ isSaving ? '建立中...' : '建立任務' }}
+            {{ isSaving ? t('views.createTask.creatingButton') : t('views.createTask.createButton') }}
           </Button>
         </div>
       </CardContent>
@@ -112,5 +116,11 @@ const createTask = async () => {
       v-model:src-filename="task.src_filename"
       v-model:dst-filename="task.dst_filename"
     />
+    <!-- 檔案名稱解析預覽 -->
+    <!-- <ParsePreview
+      v-if="task.rename_rule === 'parse'"
+      v-model:src-filename="task.src_filename"
+      v-model:dst-filename="task.dst_filename"
+    /> -->
   </main>
 </template>

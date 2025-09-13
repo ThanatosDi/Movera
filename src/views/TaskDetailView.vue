@@ -22,7 +22,10 @@ import { useTaskStore } from '@/stores/taskStore'
 import { Play, RefreshCw, Save, Square, Trash2 } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { computed, nextTick, ref, watch, type ComponentPublicInstance } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+
+const { t } = useI18n()
 
 // Composables
 const route = useRoute()
@@ -53,14 +56,14 @@ const fetchTaskData = async (taskId: string) => {
       task.value = JSON.parse(JSON.stringify(foundTask))
       logs.value = await logService.getByTaskId(taskId)
     } else {
-      throw new Error('找不到指定的任務')
+      throw new Error(t('views.taskDetail.taskNotFound'))
     }
   } catch (error: any) {
     console.error('Failed to fetch task:', error)
     task.value = null // 清空舊資料
     logs.value = []
     router.push({ name: 'Home' })
-    useNotification.showError('取得任務資料發生錯誤', `任務 ID: ${taskId}, 錯誤: ${error.message}`)
+    useNotification.showError(t('views.taskDetail.fetchError'), `${t('views.taskDetail.taskId')}: ${taskId}, ${t('common.error')}: ${error.message}`)
   }
 }
 
@@ -85,7 +88,7 @@ const btnActionFetchLogs = async () => {
     logs.value = await logService.getByTaskId(taskId as string)
   } catch (error: any) {
     console.error('Failed to fetch logs:', error)
-    useNotification.showError('取得日誌資料發生錯誤', `任務 ID: ${taskId}, 錯誤: ${error.message}`)
+    useNotification.showError(t('notifications.fetchLogError'), `${t('views.taskDetail.taskId')}: ${taskId}, ${t('common.error')}: ${error.message}`)
   } finally {
     isLoadingLogs.value = false
     await nextTick()
@@ -98,11 +101,11 @@ const btnActionDeleteTask = async () => {
   isSaving.value = true
   try {
     await taskStore.deleteTask(task.value.id)
-    useNotification.showSuccess('任務已刪除', `任務 "${task.value.name}" 已成功刪除。`)
+    useNotification.showSuccess(t('notifications.taskDeleteSuccessTitle'), t('notifications.taskDeleteSuccessDesc', { taskName: task.value.name }))
     router.push({ name: 'Home' })
   } catch (error: any) {
     console.error('Failed to delete task:', error)
-    useNotification.showError('刪除任務失敗', error.message)
+    useNotification.showError(t('notifications.taskDeleteErrorTitle'), error.message)
   } finally {
     isSaving.value = false
   }
@@ -113,10 +116,10 @@ const btnActionUpdateTask = async () => {
   const { id, created_at, ...taskData } = task.value
   try {
     await taskStore.updateTask(id, taskData)
-    useNotification.showSuccess('任務已更新', `任務 "${task.value.name}" 已成功更新。`)
+    useNotification.showSuccess(t('notifications.taskUpdateSuccessTitle'), t('notifications.taskUpdateSuccessDesc', { taskName: task.value.name }))
   } catch (e: any) {
     console.error('Failed to update task:', e)
-    useNotification.showError('更新任務失敗', e.message)
+    useNotification.showError(t('notifications.taskUpdateErrorTitle'), e.message)
   } finally {
     isSaving.value = false
   }
@@ -144,7 +147,7 @@ const isRenameRuleRequired = computed(() => {
     <div v-else-if="task">
       <div class="mb-4">
         <h1 class="text-2xl font-bold">{{ task.name }}</h1>
-        <p class="text-gray-400">任務ID: {{ task.id }}</p>
+        <p class="text-gray-400">{{ t('views.taskDetail.taskId') }}: {{ task.id }}</p>
       </div>
 
       <div class="flex justify-between items-center mb-4">
@@ -158,7 +161,7 @@ const isRenameRuleRequired = computed(() => {
             class="bg-green-500 hover:bg-green-600 text-black font-bold"
           >
             <Play class="size-4 mr-2" />
-            啟用任務
+            {{ t('views.taskDetail.enableButton') }}
           </Button>
           <Button
             v-if="task.enabled"
@@ -168,7 +171,7 @@ const isRenameRuleRequired = computed(() => {
             class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold"
           >
             <Square class="size-4 mr-2" />
-            停止任務
+            {{ t('views.taskDetail.disableButton') }}
           </Button>
           <!-- 刪除按鈕 -->
           <AlertDialog>
@@ -180,21 +183,19 @@ const isRenameRuleRequired = computed(() => {
                 class="bg-red-500 hover:bg-red-600 text-white font-bold"
               >
                 <Trash2 class="size-4 mr-2" />
-                刪除任務
+                {{ t('common.delete') }}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent class="bg-gray-800 border-gray-700 text-white">
               <AlertDialogHeader>
-                <AlertDialogTitle>您確定要刪除此任務嗎？</AlertDialogTitle>
+                <AlertDialogTitle>{{ t('views.taskDetail.deleteDialogTitle') }}</AlertDialogTitle>
                 <AlertDialogDescription class="text-current">
-                  此操作無法復原。這將永久刪除任務
-                  <span class="font-bold text-white">"{{ task.name }}"</span>
-                  並從資料庫中移除其相關資料。
+                  {{ t('views.taskDetail.deleteDialogDesc', { taskName: task.name }) }}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel class="text-black">取消</AlertDialogCancel>
-                <AlertDialogAction @click="btnActionDeleteTask">繼續</AlertDialogAction>
+                <AlertDialogCancel class="text-black">{{ t('common.cancel') }}</AlertDialogCancel>
+                <AlertDialogAction @click="btnActionDeleteTask">{{ t('common.continue') }}</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -203,8 +204,8 @@ const isRenameRuleRequired = computed(() => {
 
       <Card class="bg-gray-800 border-gray-700 text-white">
         <CardHeader>
-          <CardTitle>任務設定</CardTitle>
-          <CardDescription>在這裡編輯任務的詳細設定。</CardDescription>
+          <CardTitle>{{ t('views.taskDetail.cardTitle') }}</CardTitle>
+          <CardDescription>{{ t('views.taskDetail.cardDescription') }}</CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
           <TaskForm
@@ -218,7 +219,7 @@ const isRenameRuleRequired = computed(() => {
               class="bg-blue-500 hover:bg-blue-600 font-bold text-white"
             >
               <Save class="size-4 mr-2" />
-              {{ isSaving ? '儲存中...' : '儲存變更' }}
+              {{ isSaving ? t('common.saving') : t('views.taskDetail.saveChanges') }}
             </Button>
           </div>
         </CardContent>
@@ -230,8 +231,8 @@ const isRenameRuleRequired = computed(() => {
       >
         <CardHeader class="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>日誌紀錄</CardTitle>
-            <CardDescription>最近的任務執行紀錄。</CardDescription>
+            <CardTitle>{{ t('views.taskDetail.logsTitle') }}</CardTitle>
+            <CardDescription>{{ t('views.taskDetail.logsDescription') }}</CardDescription>
           </div>
           <Button
             @click="btnActionFetchLogs"
@@ -244,7 +245,7 @@ const isRenameRuleRequired = computed(() => {
               class="size-4 mr-2"
               :class="{ 'animate-spin': isLoadingLogs }"
             />
-            {{ isLoadingLogs ? '載入中...' : '重新載入' }}
+            {{ isLoadingLogs ? t('common.loading') : t('views.taskDetail.reload') }}
           </Button>
         </CardHeader>
         <CardContent class="space-y-2">
@@ -252,7 +253,7 @@ const isRenameRuleRequired = computed(() => {
             v-if="isLoadingLogs"
             class="text-center text-gray-400 py-4"
           >
-            <p>載入日誌中...</p>
+            <p>{{ t('views.taskDetail.loadingLogs') }}</p>
           </div>
           <div
             v-else-if="logs.length > 0"
@@ -272,7 +273,7 @@ const isRenameRuleRequired = computed(() => {
             v-else
             class="text-center text-gray-400 py-4"
           >
-            <p>目前尚無任務執行紀錄</p>
+            <p>{{ t('views.taskDetail.noLogs') }}</p>
           </div>
         </CardContent>
       </Card>
@@ -283,8 +284,8 @@ const isRenameRuleRequired = computed(() => {
       class="flex items-center justify-center h-full"
     >
       <div class="text-center text-gray-400">
-        <p class="text-lg mb-2">任務不存在</p>
-        <p class="text-sm">請檢查任務 ID 是否正確</p>
+        <p class="text-lg mb-2">{{ t('views.taskDetail.taskNotFound') }}</p>
+        <p class="text-sm">{{ t('views.taskDetail.checkTaskId') }}</p>
       </div>
     </div>
   </main>

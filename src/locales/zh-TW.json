@@ -132,29 +132,59 @@
     "preview": {
       "testFilename": "測試檔案名稱：",
       "testFilenamePlaceholder": "輸入要測試的檔案名稱",
-      "regexTitle": "正規表達式預覽",
-      "parseTitle": "Parse 樣板預覽",
       "matchResult": "匹配結果：",
-      "capturedGroups": "捕獲群組：",
-      "group": "群組",
-      "capturedFields": "捕獲欄位：",
       "renameResult": "重新命名後：",
-      "renameFormatError": "重新命名格式錯誤",
-      "parseFormatError": "格式化錯誤",
       "instructions": "使用說明：",
-      "regexInstructions": [
-        "在「檔案名稱正規表示法」中使用括號 () 來建立捕獲群組",
-        "在「重新命名正規表示法」中使用 \\1, \\2, \\3 等來引用對應的群組",
-        "例如：(\\d{2}) 會捕獲兩位數字，在重新命名時用 \\1 引用",
-        "可以在上方修改測試檔案名稱來驗證不同的情況",
-        "點擊上方的測試案例按鈕可以快速載入範例"
-      ],
-      "parseInstructions": [
-        "在「來源樣板」中使用大括號 {} 來建立捕獲欄位，例如 {name}。",
-        "在「目標樣板」中使用相同的 {name} 來引用對應的欄位。",
-        "可以指定類型，例如 {episode:d} 只會匹配數字。",
-        "點擊上方的測試案例按鈕可以快速載入範例。"
-      ]
+      "regex": {
+        "title": "正規表達式預覽",
+        "capturedGroups": "捕獲群組：",
+        "group": "群組",
+        "renameFormatError": "重新命名格式錯誤",
+        "instructions": [
+          "在「檔案名稱正規表示法」中使用括號 () 來建立捕獲群組",
+          "在「重新命名正規表示法」中使用 \\1, \\2, \\3 等來引用對應的群組",
+          "例如：(\\d{2}) 會捕獲兩位數字，在重新命名時用 \\1 引用",
+          "可以在上方修改測試檔案名稱來驗證不同的情況",
+          "點擊上方的測試案例按鈕可以快速載入範例"
+        ],
+        "exampleUsage": "群組引用範例：",
+        "usage1": "捕獲兩位數字",
+        "usage2": "捕獲任意字符",
+        "usage3": "捕獲四位數字，如年份",
+        "commonSymbols": "常用正規表達式符號：",
+        "symbols": {
+          "d": "數字 (0-9)",
+          "w": "字母數字",
+          "plus": "一個或多個",
+          "star": "零個或多個",
+          "qmark": "零個或一個",
+          "dot": "點號字面值"
+        }
+      },
+      "parse": {
+        "title": "Parse 樣板預覽",
+        "capturedFields": "捕獲欄位：",
+        "formatError": "格式化錯誤",
+        "instructions": [
+          "在「來源樣板」中使用大括號 {} 來建立捕獲欄位，例如 {name}。",
+          "在「目標樣板」中使用相同的 {name} 來引用對應的欄位。",
+          "可以指定類型，例如 {episode:d} 只會匹配數字。",
+          "點擊上方的測試案例按鈕可以快速載入範例。"
+        ],
+        "exampleUsage": "欄位引用範例：",
+        "usageTitle": "捕獲任意字符",
+        "usageSeason": "捕獲數字",
+        "usageYear": "捕獲數字作為年份",
+        "commonSpecifiers": "常用類型指定符：",
+        "specifiers": {
+          "d": "數字",
+          "w": "字母與數字",
+          "s": "空白字符",
+          "f": "浮點數",
+          "none_key": "無",
+          "none_value": "任意字符"
+        }
+      }
     }
   }
 }

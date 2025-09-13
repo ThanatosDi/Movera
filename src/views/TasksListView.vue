@@ -3,7 +3,9 @@ import SidebarItem from '@/components/SidebarItem.vue';
 import { useTaskStore } from '@/stores/taskStore';
 import { Search } from 'lucide-vue-next';
 import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const taskStore = useTaskStore()
 const { tasks } = storeToRefs(taskStore)
 </script>
@@ -12,8 +14,8 @@ const { tasks } = storeToRefs(taskStore)
   <main class="flex-1 flex flex-col p-4 space-y-4 overflow-auto pb-6">
     <!-- 頁面標題 -->
     <div class="pt-2 pb-2">
-      <h1 class="text-2xl font-bold">任務清單</h1>
-      <p class="text-gray-400">管理所有已建立的任務</p>
+      <h1 class="text-2xl font-bold">{{ t('views.tasksList.title') }}</h1>
+      <p class="text-gray-400">{{ t('views.tasksList.description') }}</p>
     </div>
 
     <!-- 任務列表容器 -->
@@ -26,7 +28,7 @@ const { tasks } = storeToRefs(taskStore)
         <div class="mb-2">
           <Search class="w-12 h-12 mx-auto opacity-50" />
         </div>
-        <p class="text-lg">沒有找到符合條件的任務</p>
+        <p class="text-lg">{{ t('views.tasksList.noTasks') }}</p>
       </div>
 
       <!-- 任務列表 -->

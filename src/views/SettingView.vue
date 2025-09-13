@@ -21,11 +21,22 @@ import { useSettingStore } from '@/stores/settingStore'
 import { getTimeZones } from '@vvo/tzdb'
 import { Check, ChevronsUpDown, HardDrive, Info, Save } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t, locale } = useI18n()
 
 // 1. 直接從 Pinia Store 獲取狀態並保持響應性
 const settingStore = useSettingStore()
 const { settings } = storeToRefs(settingStore)
+
+// 監聽 settings.locale 的變化，並更新 i18n 的 locale
+watch(() => settings.value.locale, (newLocale, oldLocale) => {
+  if (newLocale !== oldLocale) {
+    locale.value = newLocale
+    updateSettingsEvent()
+  }
+})
 
 // 2. 在組件掛載時，從 localStorage 載入設定
 onMounted(() => {
@@ -51,32 +62,21 @@ const loadTimezones = () => {
         label: `${tz.name} (${formattedOffset})`,
       }
     })
-  }, 500) // 延遲 500 毫秒
+  }, 0) // 延遲 500 毫秒
 }
 
 const appVersion = __APP_VERSION__
 const isSaving = ref(false)
 
-// 3. 修改儲存函式，直接呼叫 store 的 action 來持久化儲存
-// const save = () => {
-//   isSaving.value = true
-//   // 模擬一個非同步儲存操作
-//   setTimeout(() => {
-//     settingStore.saveSettings() // v-model 已經更新了 store 的狀態，這裡只需觸發保存
-//     isSaving.value = false
-//     useNotification.showSuccess('設定已儲存', '您的變更已成功套用。')
-//   }, 1000)
-// }
-
-const triggerSaveBtn = async () => {
+const updateSettingsEvent = async () => {
   try {
     isSaving.value = true
     await settingStore.updateSettings(settings.value)
     isSaving.value = false
-    useNotification.showSuccess('設定已儲存', '您的變更已成功套用。')
+    useNotification.showSuccess(t('notifications.saveSuccessTitle'), t('notifications.saveSuccessDesc'))
   } catch (error: any) {
     console.error('Failed to save settings:', error)
-    useNotification.showError('儲存設定失敗', error.message)
+    useNotification.showError(t('notifications.saveErrorTitle'), error.message)
   } finally {
     isSaving.value = false
   }
@@ -88,8 +88,8 @@ const triggerSaveBtn = async () => {
   <main class="flex-1 flex flex-col p-4 space-y-4 overflow-auto pb-6">
     <!-- 頁面標題 -->
     <div class="pt-2 pb-2">
-      <h1 class="text-2xl font-bold">設定</h1>
-      <p class="text-gray-400">管理應用程式的全域設定</p>
+      <h1 class="text-2xl font-bold">{{ t('views.settings.title') }}</h1>
+      <p class="text-gray-400">{{ t('views.settings.description') }}</p>
     </div>
 
     <!-- 一般設定卡片 -->
@@ -97,16 +97,16 @@ const triggerSaveBtn = async () => {
       <CardHeader>
         <CardTitle class="flex items-center gap-2">
           <Info class="size-5" />
-          一般設定
+          {{ t('views.settings.general.title') }}
         </CardTitle>
-        <CardDescription>調整應用程式的外觀與通知行為。</CardDescription>
+        <CardDescription>{{ t('views.settings.general.description') }}</CardDescription>
       </CardHeader>
       <CardContent class="space-y-6">
         <div class="flex flex-col space-y-2">
-          <Label>語言</Label>
+          <Label>{{ t('common.language') }}</Label>
           <LocaleSelect v-model:locale="settings.locale" />
 
-          <Label>時區</Label>
+          <Label>{{ t('common.timezone') }}</Label>
           <Combobox
             v-model="settings.timezone"
             class="w-full"
@@ -118,12 +118,12 @@ const triggerSaveBtn = async () => {
                   class="w-full justify-between bg-gray-700 border-gray-600 hover:bg-gray-600 hover:text-white"
                   :disabled="timezones.length === 0"
                 >
-                  <span v-if="timezones.length === 0">載入時區中...</span>
+                  <span v-if="timezones.length === 0">{{ t('views.settings.timezoneLoading') }}</span>
                   <span v-else>
                     {{
                       settings.timezone
                         ? timezones.find((tz) => tz.value === settings.timezone)?.label
-                        : '選擇時區...'
+                        : t('views.settings.timezonePlaceholder')
                     }}
                   </span>
                   <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -138,11 +138,11 @@ const triggerSaveBtn = async () => {
               <div class="relative w-full max-w-sm items-center p-1">
                 <ComboboxInput
                   class="pl-9 focus-visible:ring-0 border-0 rounded-none h-10 bg-transparent"
-                  placeholder="搜尋時區..."
+                  :placeholder="t('views.settings.timezoneSearch')"
                 />
               </div>
 
-              <ComboboxEmpty>找不到時區。</ComboboxEmpty>
+              <ComboboxEmpty>{{ t('views.settings.timezoneNotFound') }}</ComboboxEmpty>
 
               <ComboboxGroup class="max-h-64 overflow-y-auto">
                 <ComboboxItem
@@ -168,20 +168,20 @@ const triggerSaveBtn = async () => {
       <CardHeader>
         <CardTitle class="flex items-center gap-2">
           <HardDrive class="size-5" />
-          連線設定
+          {{ t('views.settings.connection.title') }}
         </CardTitle>
         <CardDescription>
-          設定後端 API 伺服器的連線位址。一般狀況下無需特別設定，保持原樣即可。
+          {{ t('views.settings.connection.description') }}
         </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <div>
-          <Label for="server-address">API 伺服器位址</Label>
+          <Label for="server-address">{{ t('views.settings.connection.serverAddress') }}</Label>
           <!-- 4. 將 v-model 直接綁定到 store 的狀態 -->
           <Input
             id="server-address"
             v-model="settings.server_address"
-            placeholder="例如：http://127.0.0.1:8000"
+            :placeholder="t('views.settings.connection.serverPlaceholder')"
             class="bg-gray-700 border-gray-600 mt-2"
           />
         </div>
@@ -191,10 +191,10 @@ const triggerSaveBtn = async () => {
     <!-- 關於卡片 -->
     <Card class="bg-gray-800 border-gray-700 text-white">
       <CardHeader>
-        <CardTitle>關於</CardTitle>
+        <CardTitle>{{ t('common.about') }}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p class="text-gray-400">應用程式版本: {{ appVersion }}</p>
+        <p class="text-gray-400">{{ t('common.version') }}: {{ appVersion }}</p>
       </CardContent>
     </Card>
 
@@ -202,11 +202,11 @@ const triggerSaveBtn = async () => {
     <div class="flex justify-end mt-4">
       <Button
         :disabled="isSaving"
-        @click="triggerSaveBtn"
+        @click="updateSettingsEvent"
         class="bg-green-400 hover:bg-green-800 font-bold text-black"
       >
         <Save class="size-4 mr-2" />
-        {{ isSaving ? '儲存中...' : '儲存設定' }}
+        {{ isSaving ? t('common.saving') : t('common.save') }}
       </Button>
     </div>
   </main>
