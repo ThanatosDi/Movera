@@ -25,7 +25,7 @@ const routes = [
           title: '首頁',
           description: '歡迎使用 Movera 自動化檔案管理系統',
         },
-        beforeEnter: async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+        beforeEnter: async (_to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
           const taskStore = useTaskStore()
           try {
             await taskStore.fetchTasks()
@@ -46,7 +46,7 @@ const routes = [
           title: '任務詳情',
           description: '查看和編輯任務詳細設定',
         },
-        beforeEnter: async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+        beforeEnter: async (_to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
           const taskStore = useTaskStore()
           try {
             await taskStore.fetchTasks()
@@ -100,7 +100,7 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  scrollBehavior(to, from, savedPosition) {
+  scrollBehavior(_to, _from, savedPosition) {
     if (savedPosition) {
       return savedPosition
     } else {
@@ -112,7 +112,7 @@ const router = createRouter({
 /**
  * 路由守衛
  */
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   // 設置頁面標題
   if (to.meta?.title) {
     document.title = `${to.meta.title} - Movera`

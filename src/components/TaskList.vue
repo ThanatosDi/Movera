@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import SidebarItem from '@/components/SidebarItem.vue';
+import { useTaskStore } from '@/stores/taskStore';
 import { Search } from 'lucide-vue-next';
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
+const taskStore = useTaskStore();
+const { tasks } = storeToRefs(taskStore);
 
 </script>
 
@@ -18,14 +22,14 @@ const { t } = useI18n();
         <Search class="w-8 h-8 mx-auto opacity-50" />
       </div>
       <p class="text-sm">{{ t('views.tasksList.noTasks') }}</p>
-      <button
+      <!-- <button
         v-if="hasActiveFilters"
         @click="$emit('clearAllFilters')"
         class="text-blue-400 hover:text-blue-300 text-xs mt-2 underline transition-colors"
         type="button"
       >
         清除所有過濾條件
-      </button>
+      </button> -->
     </div>
 
     <!-- 任務列表 -->
@@ -35,7 +39,6 @@ const { t } = useI18n();
       :taskId="task.id"
       :taskName="task.name"
       :taskEnabled="task.enabled"
-      :taskTags="task.tags"
     />
   </div>
 </template>
