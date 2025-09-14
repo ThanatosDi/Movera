@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
 from app.worker import process_completed_download
@@ -7,6 +9,28 @@ router = APIRouter(
     prefix="/webhook",
     tags=["Webhook"],
 )
+
+
+@router.get(
+    "/status",
+    summary="API 狀態",
+    description="檢查 API 的狀態，並列出可用的 Webhook 端點。",
+)
+def webhook_status():
+    """回傳 API 的當前狀態，並提供可用的 Webhook 路由資訊。"""
+    return {
+        "status": "ok",
+        "version": "2.0.0",  # 建議從統一的設定檔或 __version__ 變數中讀取
+        "timestamp": datetime.now(UTC).isoformat(),
+        "available_webhooks": [
+            {
+                "path": "/webhook/qbittorrent/on-complete",
+                "method": "POST",
+                "summary": "QBittorrent Download Completion Webhook",
+                "description": "接收 qBittorrent 下載完成的通知，並在背景觸發檔案處理任務。",
+            }
+        ],
+    }
 
 
 @router.post(
