@@ -4,9 +4,6 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from '@/components/ui/textarea'
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n();
 
 // Props
 const props = defineProps({
@@ -62,7 +59,7 @@ const renameRuleProxy = computed({
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- 名稱 -->
       <div class="space-y-2">
-        <Label for="name">{{ t('components.taskForm.name') }}<span class="text-red-500">*</span></Label>
+        <Label for="name">任務名稱<span class="text-red-500">*</span></Label>
         <Input
           id="name"
           v-model="task.name"
@@ -72,7 +69,7 @@ const renameRuleProxy = computed({
 
       <!-- 包含 -->
       <div class="space-y-2">
-        <Label for="include">{{ t('components.taskForm.include') }}<span class="text-red-500">*</span></Label>
+        <Label for="include">檔案名稱包含<span class="text-red-500">*</span></Label>
         <Input
           id="include"
           v-model="task.include"
@@ -83,7 +80,7 @@ const renameRuleProxy = computed({
 
     <!-- 移動至 -->
     <div class="space-y-2">
-      <Label for="move_to">{{ t('components.taskForm.moveTo') }}<span class="text-red-500">*</span></Label>
+      <Label for="move_to">移動至 (Move To)<span class="text-red-500">*</span></Label>
       <Input
         id="move_to"
         v-model="task.move_to"
@@ -92,7 +89,7 @@ const renameRuleProxy = computed({
     </div>
 
     <!-- 重新命名規則 -->
-    <Label for="rename_rule">{{ t('components.taskForm.renameRule') }}<span class="text-red-500">*</span></Label>
+    <Label for="rename_rule">重新命名規則 (Rename Rule)<span class="text-red-500">*</span></Label>
     <RadioGroup
       v-model="renameRuleProxy"
       :orientation="'vertical'"
@@ -103,7 +100,7 @@ const renameRuleProxy = computed({
           value="null"
           class="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-green-500"
         />
-        <Label for="r1">{{ t('components.taskForm.options.noRename') }}</Label>
+        <Label for="r1">不重新命名</Label>
       </div>
       <div class="flex items-center space-x-2">
         <RadioGroupItem
@@ -111,7 +108,7 @@ const renameRuleProxy = computed({
           value="regex"
           class="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-green-500"
         />
-        <Label for="r2">{{ t('components.taskForm.options.regex') }}</Label>
+        <Label for="r2">正規表示 Regex</Label>
       </div>
       <div class="flex items-center space-x-2">
         <RadioGroupItem
@@ -119,14 +116,14 @@ const renameRuleProxy = computed({
           value="parse"
           class="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-green-500"
         />
-        <Label for="r3">{{ t('components.taskForm.options.parse') }}</Label>
+        <Label for="r3">模板解析 Parse</Label>
       </div>
     </RadioGroup>
 
     <!-- 來源檔名規則 -->
     <div class="space-y-2">
       <Label for="src_filename">
-        {{ t('components.taskForm.srcFilename') }}
+        來源檔名規則 (Src Filename)
         <span
           v-if="isRenameRuleRequired"
           class="text-red-500"
@@ -142,7 +139,7 @@ const renameRuleProxy = computed({
     <!-- 目標檔名規則 -->
     <div class="space-y-2">
       <Label for="dst_filename">
-        {{ t('components.taskForm.dstFilename') }}
+        目標檔名規則 (Dst Filename)
         <span
           v-if="isRenameRuleRequired"
           class="text-red-500"

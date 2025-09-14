@@ -9,10 +9,7 @@ import type { TaskCreate } from '@/schemas'
 import { useTaskStore } from '@/stores/taskStore'
 import { Save } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-
-const { t } = useI18n()
 
 // Composables
 const router = useRouter()
@@ -38,20 +35,20 @@ const isRenameRuleRequired = computed(() => {
 
 const validFormData = (taskData: TaskCreate) => {
   if (!taskData.name?.trim()) {
-    return t('notifications.formValidation.taskNameRequired')
+    return '任務名稱為必填項。'
   }
   if (!taskData.include?.trim()) {
-    return t('notifications.formValidation.includeRequired')
+    return '檔案名稱包含為必填項。'
   }
   if (!taskData.move_to?.trim()) {
-    return t('notifications.formValidation.moveToRequired')
+    return '移動至為必填項。'
   }
   const invalidPathChars = /[<>:"|?*\x00]/;
   if (invalidPathChars.test(taskData.move_to)) {
-    return t('notifications.formValidation.invalidPath')
+    return '移動至包含無效的路徑字元(&lt; &gt; : " | ? *).'
   }
   if (taskData.rename_rule !== null && (!taskData.src_filename?.trim() || !taskData.dst_filename?.trim())) {
-    return t('notifications.formValidation.renameRuleRequired', { rule: taskData.rename_rule })
+    return `已啟用重新命名: ${taskData.rename_rule} 但未設定\n - 來源檔名規則\n - 目標檔名規則`
   }
   return null // No error
 }
@@ -59,7 +56,7 @@ const validFormData = (taskData: TaskCreate) => {
 const createTask = async () => {
   const errorMessage = validFormData(task.value)
   if (errorMessage) {
-    useNotification.showError(t('notifications.taskCreateErrorTitle'), errorMessage, { html: true, position: 'top-center', duration: 2000 })
+    useNotification.showError('建立任務失敗', errorMessage, { html: true, position: 'top-center', duration: 2000 })
     return
   }
 
@@ -67,10 +64,10 @@ const createTask = async () => {
   try {
     const newTask = await tasksStore.createTask(task.value)
     router.push({ name: 'taskDetail', params: { taskId: newTask.id } })
-    useNotification.showSuccess(t('notifications.taskCreateSuccessTitle'), t('notifications.taskCreateSuccessDesc', { taskName: newTask.name }))
+    useNotification.showSuccess('任務已建立', `任務 "${newTask.name}" 已成功建立。`)
   } catch (e: any) {
     console.error('Failed to create task:', e)
-    useNotification.showError(t('notifications.taskCreateErrorTitle'), e.message)
+    useNotification.showError('建立任務失敗', e.message)
   } finally {
     isSaving.value = false
   }
@@ -82,15 +79,15 @@ const createTask = async () => {
   <main class="`flex-1 flex flex-col p-4 space-y-4 overflow-auto pb-6`">
     <!-- 頁面標題 -->
     <div class="pt-2 pb-2">
-      <h1 class="text-2xl font-bold">{{ t('views.createTask.title') }}</h1>
-      <p class="text-gray-400">{{ t('views.createTask.description') }}</p>
+      <h1 class="text-2xl font-bold">建立任務</h1>
+      <p class="text-gray-400">設定自動化檔案管理任務</p>
     </div>
 
     <!-- 任務設定卡片 -->
     <Card class="bg-gray-800 border-gray-700 text-white">
       <CardHeader>
-        <CardTitle>{{ t('views.createTask.cardTitle') }}</CardTitle>
-        <CardDescription>{{ t('views.createTask.cardDescription') }}</CardDescription>
+        <CardTitle>任務設定</CardTitle>
+        <CardDescription>在這裡編輯任務的詳細設定。</CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <TaskForm
@@ -105,7 +102,7 @@ const createTask = async () => {
             class="bg-green-400 hover:bg-green-800 font-bold text-black"
           >
             <Save class="size-4 mr-2" />
-            {{ isSaving ? t('views.createTask.creatingButton') : t('views.createTask.createButton') }}
+            {{ isSaving ? '建立中...' : '建立任務' }}
           </Button>
         </div>
       </CardContent>

@@ -9,9 +9,7 @@ import Sidebar from '@/layout/Sidebar.vue'
 import { useTaskStore } from '@/stores/taskStore'
 import { onMounted } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
 const taskStore = useTaskStore()
 
 onMounted(async () => {
@@ -38,28 +36,28 @@ onMounted(async () => {
           class="flex flex-col items-center text-gray-400 hover:text-white"
         >
           <IconHome class="size-6" />
-          <span class="text-xs">{{ t('common.home') }}</span>
+          <span class="text-xs">首頁</span>
         </RouterLink>
         <RouterLink
           :to="Route.TASKS"
           class="flex flex-col items-center text-gray-400 hover:text-white"
         >
           <IconTasks class="size-6" />
-          <span class="text-xs">{{ t('common.tasks') }}</span>
+          <span class="text-xs">任務</span>
         </RouterLink>
         <RouterLink
           :to="Route.CREATE_TASK"
           class="flex flex-col items-center text-gray-400 hover:text-white"
         >
           <IconAdd class="size-6" />
-          <span class="text-xs">{{ t('common.create') }}</span>
+          <span class="text-xs">新增</span>
         </RouterLink>
         <RouterLink
           :to="Route.SETTING"
           class="flex flex-col items-center text-gray-400 hover:text-white"
         >
           <IconSettings class="size-6" />
-          <span class="text-xs">{{ t('common.settings') }}</span>
+          <span class="text-xs">設定</span>
         </RouterLink>
       </nav>
     </footer>

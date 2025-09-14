@@ -7,9 +7,6 @@ import { useRegexPreview } from '@/composables/useRegexPreview';
 import { RegexExamples } from '@/constants';
 import { AlertCircle, CheckCircle, Lightbulb } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-
-const { t, tm } = useI18n()
 
 // v-model 綁定，從父組件接收 src 和 dst 規則
 const srcFilename = defineModel<string | null>('srcFilename')
@@ -46,7 +43,7 @@ const handleLoadTestCase = (testCase: any) => {
     <CardHeader>
       <CardTitle class="flex items-center gap-2">
         <Lightbulb class="w-5 h-5 text-yellow-400" />
-        {{ t('components.preview.regex.title') }}
+        正規表達式預覽
       </CardTitle>
     </CardHeader>
 
@@ -56,11 +53,11 @@ const handleLoadTestCase = (testCase: any) => {
         <Label
           for="test-filename"
           class="block text-sm font-medium mb-2"
-        >{{ t('components.preview.testFilename') }}</Label>
+        >測試檔案名稱：</Label>
         <Input
           id="test-filename"
           v-model="testFilename"
-          :placeholder="t('components.preview.testFilenamePlaceholder')"
+          placeholder="輸入要測試的檔案名稱"
           class="bg-gray-700 border-gray-600"
         />
 
@@ -93,7 +90,7 @@ const handleLoadTestCase = (testCase: any) => {
             class="w-5 h-5 text-red-400"
           />
           <span :class="isValid ? 'text-green-400' : 'text-red-400'">
-            {{ isValid ? t('common.matchSuccess') : (error || t('common.noMatch')) }}
+            {{ isValid ? '匹配成功' : (error || '無匹配結果') }}
           </span>
         </div>
 
@@ -102,8 +99,7 @@ const handleLoadTestCase = (testCase: any) => {
           v-if="isValid"
           class="bg-gray-900 p-3 rounded-md border border-gray-600"
         >
-          <Label class="text-sm text-gray-400 mb-2 block">{{ t('components.preview.matchResult')
-            }}</Label>
+          <Label class="text-sm text-gray-400 mb-2 block">匹配結果：</Label>
           <p class="preview-text">
             <span>{{ highlightedParts.before }}</span>
             <span
@@ -121,16 +117,15 @@ const handleLoadTestCase = (testCase: any) => {
           v-if="isValid && groups.length > 0"
           class="bg-gray-900 p-3 rounded-md border border-gray-600"
         >
-          <Label class="text-sm text-gray-400 mb-2 block">{{
-            t('components.preview.regex.capturedGroups') }}</Label>
+          <Label class="text-sm text-gray-400 mb-2 block">捕獲群組：</Label>
           <div class="space-y-1">
             <div
               v-for="(group, index) in groups"
               :key="index"
               class="font-mono text-sm"
             >
-              <span class="text-blue-400">{{ t('components.preview.regex.group') }} {{ index + 1
-                }}:</span>
+              <span class="text-blue-400">群組 {{ index + 1
+              }}:</span>
               <span class="text-green-400 ml-2 bg-gray-700 px-2 py-1 rounded">{{ group }}</span>
             </div>
           </div>
@@ -141,10 +136,9 @@ const handleLoadTestCase = (testCase: any) => {
           v-if="isValid && preview"
           class="bg-gray-900 p-3 rounded-md border border-gray-600"
         >
-          <Label class="text-sm text-gray-400 mb-2 block">{{ t('components.preview.renameResult')
-            }}</Label>
+          <Label class="text-sm text-gray-400 mb-2 block">重新命名後：</Label>
           <div class="font-mono text-sm break-all">
-            <span :class="preview.startsWith(t('components.preview.regex.renameFormatError'))
+            <span :class="preview.startsWith('重新命名格式錯誤')
               ? 'text-red-400'
               : 'text-green-400'">
               {{ preview }}
@@ -153,37 +147,38 @@ const handleLoadTestCase = (testCase: any) => {
         </div>
 
         <div class="text-xs text-gray-500 bg-gray-800 p-3 rounded border">
-          <div class="mb-2"><strong>{{ t('components.preview.instructions') }}</strong></div>
+          <div class="mb-2"><strong>使用說明：</strong></div>
           <ul class="space-y-1 list-disc list-inside">
             <li
-              v-for="(instruction, index) in tm('components.preview.regex.instructions')"
+              v-for="(instruction, index) in [
+              '在「檔案名稱正規表示法」中使用括號 () 來建立捕獲群組',
+              '在「重新命名正規表示法」中使用 \\1, \\2, \\3 等來引用對應的群組',
+              '例如：(\\d{2}) 會捕獲兩位數字，在重新命名時用 \\1 引用',
+              '可以在上方修改測試檔案名稱來驗證不同的情況',
+              '點擊上方的測試案例按鈕可以快速載入範例'
+            ]"
               :key="index"
             >
               {{ instruction }}
             </li>
           </ul>
           <div class="mt-3 pt-2 border-t border-gray-600">
-            <div class="mb-1"><strong>{{ t('components.preview.regex.exampleUsage')
-                }}</strong></div>
+            <div class="mb-1"><strong>群組引用範例：</strong></div>
             <div class="text-xs space-y-1">
-              <div><code>(\d{2})</code> → <code>\1</code> ({{ t('components.preview.regex.usage1')
-                }})</div>
-              <div><code>(.+)</code> → <code>\1</code> ({{ t('components.preview.regex.usage2')
-                }})</div>
-              <div><code>(\d{4})</code> → <code>\1</code> ({{ t('components.preview.regex.usage3')
-                }})</div>
+              <div><code>(\d{2})</code> → <code>\1</code> (捕獲兩位數字)</div>
+              <div><code>(.+)</code> → <code>\1</code> (捕獲任意字符)</div>
+              <div><code>(\d{4})</code> → <code>\1</code> (捕獲四位數字，如年份)</div>
             </div>
           </div>
           <div class="mt-3 pt-2 border-t border-gray-600">
-            <div class="mb-1"><strong>{{ t('components.preview.regex.commonSymbols')
-                }}</strong></div>
+            <div class="mb-1"><strong>常用正規表達式符號：</strong></div>
             <div class="grid grid-cols-2 gap-2 text-xs">
-              <div><code>\d</code> - {{ t('components.preview.regex.symbols.d') }}</div>
-              <div><code>\w</code> - {{ t('components.preview.regex.symbols.w') }}</div>
-              <div><code>+</code> - {{ t('components.preview.regex.symbols.plus') }}</div>
-              <div><code>*</code> - {{ t('components.preview.regex.symbols.star') }}</div>
-              <div><code>?</code> - {{ t('components.preview.regex.symbols.qmark') }}</div>
-              <div><code>\.</code> - {{ t('components.preview.regex.symbols.dot') }}</div>
+              <div><code>\d</code> - 數字 (0-9)</div>
+              <div><code>\w</code> - 字母數字</div>
+              <div><code>+</code> - 一個或多個</div>
+              <div><code>*</code> - 零個或多個</div>
+              <div><code>?</code> - 零個或一個</div>
+              <div><code>\.</code> - 點號字面值</div>
             </div>
           </div>
         </div>

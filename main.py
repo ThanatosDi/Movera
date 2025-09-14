@@ -1,7 +1,12 @@
 import logging
+import os
 
 import uvicorn
+from fastapi import HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
+from api.main import app
 from core.utils.logger import logger as _logger
 
 logger = _logger.bind(app="web")

@@ -13,9 +13,7 @@ import {
 import { Route } from '@/constants';
 import { CircleUser, GitBranch, Home } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 const router = useRouter()
 </script>
 
@@ -38,7 +36,7 @@ const router = useRouter()
           class="text-gray-300 hover:text-white"
         >
           <GitBranch class="mr-2 h-4 w-4" />
-          {{ t('common.status') }}
+          狀態
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
@@ -55,7 +53,7 @@ const router = useRouter()
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem @click="router.push(Route.SETTING)">
-                <span>{{ t('common.settings') }}</span>
+                <span>設定</span>
                 <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
               </DropdownMenuItem>
             </DropdownMenuGroup>

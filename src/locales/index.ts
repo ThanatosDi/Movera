@@ -1,21 +1,21 @@
 import { createI18n } from 'vue-i18n'
-import enUS from './en-US.json'
-import zhTW from './zh-TW.json'
+// 這是最後的手段：將 JSON 作為原始文字導入，然後手動解析。
+// 這可以繞過所有 Vite/Rollup/TypeScript 的模組解析問題。
+import enUS from './en-US.json?raw'
+import zhTW from './zh-TW.json?raw'
 
-/**
- * 建立並設定 i18n 實例
- * @param locale - 初始語系
- * @returns i18n 實例
- */
-export function createI18nInstance(locale: string) {
-  return createI18n({
-    legacy: false, // 確保使用 Vue 3 Composition API 模式
-    locale, // 使用傳入的參數設定預設語系
-    fallbackLocale: 'en-US', // 設定備用語系
-    globalInjection: true,
-    messages: {
-      "en-US": enUS,
-      'zh-TW': zhTW,
-    },
-  })
+const messages = {
+  'en-US': JSON.parse(enUS),
+  'zh-TW': JSON.parse(zhTW),
 }
+
+// 直接建立並匯出 i18n 實例
+const i18n = createI18n({
+  legacy: false,
+  locale: 'en-US', // 先用一個預設/備用語系啟動
+  fallbackLocale: 'en-US',
+  globalInjection: true,
+  messages,
+})
+
+export default i18n

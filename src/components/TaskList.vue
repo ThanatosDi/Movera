@@ -3,9 +3,7 @@ import SidebarItem from '@/components/SidebarItem.vue';
 import { useTaskStore } from '@/stores/taskStore';
 import { Search } from 'lucide-vue-next';
 import { storeToRefs } from 'pinia';
-import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n();
 const taskStore = useTaskStore();
 const { tasks } = storeToRefs(taskStore);
 
@@ -21,7 +19,7 @@ const { tasks } = storeToRefs(taskStore);
       <div class="mb-2">
         <Search class="w-8 h-8 mx-auto opacity-50" />
       </div>
-      <p class="text-sm">{{ t('views.tasksList.noTasks') }}</p>
+      <p class="text-sm">沒有找到符合條件的任務</p>
       <!-- <button
         v-if="hasActiveFilters"
         @click="$emit('clearAllFilters')"
