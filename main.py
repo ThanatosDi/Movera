@@ -44,7 +44,7 @@ def main():
         log.handlers = [InterceptHandler()]
         log.propagate = False
 
-    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, log_config=None)
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, log_config=None)
 
 
 if __name__ == "__main__":

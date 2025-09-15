@@ -1,10 +1,5 @@
-.venv
-.qodo
-.vscode
-.git
-.dockerignore
-.python-version
-__pycache__
-config
-docker-compose.yml
+.*
+__*
+database
+node_modules
 tests
