@@ -1,10 +1,10 @@
+import App from '@/App.vue'
+import '@/assets/style.css'
+import { createI18nInstance } from '@/locales'
+import router from '@/router'
 import { useSettingStore } from '@/stores/settingStore'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
-import App from './App.vue'
-import './assets/style.css'
-import { createI18nInstance } from './locales'
-import router from './router'
 
 async function initializeApp() {
   const app = createApp(App)
