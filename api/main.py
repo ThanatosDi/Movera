@@ -71,7 +71,7 @@ async def serve_vue(full_path: str):
     if full_path.startswith("api/") or full_path.startswith("webhook/"):
         # 這裡丟 404 給 FastAPI 原生處理
         return {"detail": "Not Found"}
-    if full_path.endswith((".ico", ".svg")):
+    if full_path.endswith((".ico", ".svg", ".png", ".jpg", ".jpeg", ".webmanifest")):
         return FileResponse(os.path.join("dist", full_path))
     index_path = os.path.join("dist", "index.html")
     return FileResponse(index_path)
