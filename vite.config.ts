@@ -1,3 +1,4 @@
+import vueI18n from '@intlify/unplugin-vue-i18n/vite'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
 import fs from 'fs'
@@ -9,7 +10,16 @@ const packageJson = fs.readFileSync(path.resolve(__dirname, './package.json'), '
 const { version } = JSON.parse(packageJson)
 
 export default defineConfig({
-  plugins: [vue(), tailwindcss(), vueDevTools()],
+  plugins: [
+    vue(),
+    tailwindcss(),
+    vueDevTools(),
+    vueI18n({
+      compositionOnly: false,
+      runtimeOnly: false,
+      include: path.resolve(__dirname, './src/locales/*.json'),
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
