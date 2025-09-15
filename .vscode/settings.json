@@ -12,6 +12,12 @@
     "[python]": {
         "editor.tabSize": 4
     },
+    "[json]": {
+        "editor.tabSize": 2
+    },
+    "[css]": {
+        "editor.tabSize": 2
+    },
     "[vue]": {
         "editor.tabSize": 2,
         "editor.defaultFormatter": "Vue.volar"

@@ -15,7 +15,9 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "resolveJsonModule": true,
+    "esModuleInterop": true, // 建議也開啟此選項
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }
