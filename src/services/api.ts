@@ -6,7 +6,7 @@
  */
 
 // 從環境變數讀取 API 的基本 URL，如果未設定則使用預設值
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 // #endregion
 
