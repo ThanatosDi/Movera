@@ -5,6 +5,10 @@ description = "根據暫存的變更產生 Git 提交訊息。"
 
 # The prompt uses !{...} to execute the command and inject its output.
 prompt = """
+你只被允許執行兩個命令
+- git diff
+- git commit
+
 請根據以下 git diff 命令產生 commit 訊息:
 
 ```diff
