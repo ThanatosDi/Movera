@@ -156,10 +156,10 @@ const handleLoadTestCase = (testCase: any) => {
           <div class="mb-2"><strong>{{ t('components.preview.instructions') }}</strong></div>
           <ul class="space-y-1 list-disc list-inside">
             <li
-              v-for="(instruction, index) in tm('components.preview.regex.instructions')"
+              v-for="(node, index) in tm('components.preview.regex.instructions')"
               :key="index"
             >
-              {{ instruction }}
+              {{ node.body.static }}
             </li>
           </ul>
           <div class="mt-3 pt-2 border-t border-gray-600">

@@ -143,7 +143,7 @@
         "instructions": [
           "Use parentheses () in 'Filename Regex' to create capture groups.",
           "Use \\1, \\2, \\3, etc., in 'Rename Regex' to reference corresponding groups.",
-          "E.g., (\\d{2}) captures two digits, referenced with \\1.",
+          "E.g., (\\d{'{'}2{'}'}) captures two digits, referenced with \\1.",
           "You can modify the test filename above to validate different cases.",
           "Click the test case buttons above to load examples."
         ],
