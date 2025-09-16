@@ -1,45 +1,113 @@
-import os
-from queue import Queue
+from app.modules.move import move
+from app.modules.rename import Rename
+from core import schemas
+from core.database import SessionLocal
+from core.repositories.log import LogRepository
+from core.repositories.task import TaskRepository
+from core.schemas.task import Task
+from core.services.log import LogService
+from core.services.task import TaskService
+from core.utils.logger import logger as _logger
 
-from loguru import logger
+db = SessionLocal()
+task_service = TaskService(TaskRepository(db))
+log_service = LogService(LogRepository(db))
+logger = _logger.bind(app="worker")
 
-from app.model import Config
-from app.utils import match_job, move, read_config, rename
+
+def match_task(tasks: list[Task], task_includes: list, filepath: str) -> Task | None:
+    """將路徑 filepath 與 task_includes 列表進行比對，找到第一個符合的任務
+    Args:
+        tasks (list): 任務列表
+        task_includes (list): 任務列表的 include
+        filepath (str): 檔案的絕對路徑
+    Returns:
+        Task: 符合的任務
+        None: 沒有符合的任務
+    """
+    for index, include in enumerate(task_includes, start=0):
+        if include in filepath:
+            task = tasks[index]
+            log_service.create_log(
+                schemas.LogCreate(
+                    task_id=task.id,
+                    level="INFO",
+                    message=f"檔案 \"{filepath}\" 匹配到任務 '{task.name}'",
+                )
+            )
+            return task
+    return None
 
 
-class Worker:
-    def __init__(self, queue: Queue):
-        self.queue = queue
+def perform_rename_operation(task: Task, filepath: str):
+    """
+    將檔案重新命名，並返回重新命名後的路徑
 
-    def file_processing_worker(self):
-        MOVERA_CONFIG = os.getenv("MOVERA_CONFIG")
-        while True:
-            src_path = self.queue.get()
-            config = read_config(MOVERA_CONFIG)
-            logger.info(f"處理檔案: {src_path}")
-            try:
-                self.__job_flow(src_path, config)
-            except Exception as e:
-                logger.error(f"處理檔案時發生錯誤: {str(e)}")
-            finally:
-                self.queue.task_done()
+    Args:
+        task (Task): 任務
+        filepath (str): 檔案的絕對路徑
 
-    def __job_flow(self, src_path: str, config: Config):
-        job = match_job(src_path, config)
-        # 沒有 job 符合
-        if job is None:
-            logger.info(f"沒有符合的 job: {src_path}")
-            return
-        # 當 dst_filename_regex 和 src_filename_regex 都不為空
-        # 代表使用者需要將檔案重新命名
-        if job.dst_filename_regex is not None and job.src_filename_regex is not None:
-            src_path = rename(src_path, job)
-        move(src_path, job)
+    Returns:
+        str: 重新命名後的檔案路徑
+    """
 
-    def monitor_thread(self, observer):
-        import time
-        while True:
-            if not observer.is_alive():
-                logger.error("Watchdog observer thread stopped unexpectedly!")
-                break
-            time.sleep(10)
+    try:
+        dst_filepath = Rename(
+            filepath=filepath,
+            src=task.src_filename,
+            dst=task.dst_filename,
+            rule=task.rename_rule,
+        ).execute_rename()
+        return dst_filepath
+    except Exception as e:
+        log_service.create_log(
+            schemas.LogCreate(
+                task_id=task.id,
+                level="ERROR",
+                message=f'檔案 "{filepath}" 重新命名失敗，錯誤訊息: {str(e)}',
+            )
+        )
+
+
+def perform_move_operation(task: Task, filepath: str):
+    """
+    將檔案移動到指定的目錄
+
+    Args:
+        task (Task): 任務
+        filepath (str): 檔案的絕對路徑
+    """
+    try:
+        move(filepath, task.move_to)
+    except Exception as e:
+        log_service.create_log(
+            schemas.LogCreate(
+                task_id=task.id,
+                level="ERROR",
+                message=f'檔案 "{filepath}" 移動至 "{task.move_to}" 失敗，錯誤訊息: {str(e)}',
+            )
+        )
+
+
+def process_completed_download(filepath: str):
+    """
+    處理已完成的下載任務
+
+    這個方法會根據已完成的下載檔案名稱，尋找相符的任務。
+
+    如果找到相符的任務，則會執行重新命名和移動檔案。
+
+    Args:
+        filepath (str): 檔案的絕對路徑
+
+    Returns:
+        None
+    """
+    tasks = task_service.get_enabled_tasks()
+    task_includes = [task.include for task in tasks]
+
+    task = match_task(tasks, task_includes, filepath)
+    if task is None:
+        return  # 沒有匹配的任務，直接返回
+    dst_filepath = perform_rename_operation(task, filepath)
+    perform_move_operation(task, dst_filepath)

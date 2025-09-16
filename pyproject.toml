@@ -5,7 +5,33 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.16.4",
+    "fastapi[standard]>=0.116.1",
     "loguru>=0.7.3",
+    "parse>=1.20.2",
     "pyyaml>=6.0.2",
-    "watchdog>=6.0.0",
+    "requests>=2.32.5",
+    "sqlalchemy>=2.0.43",
+    "tzdata>=2025.2",
+    "uvicorn[standard]>=0.35.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-mock>=3.14.1",
+    "taskipy>=1.14.1",
+    "pytest-cov>=7.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
+
+
+[tool.taskipy.tasks]
+up-migration= "uv run alembic upgrade head"
+down-migration= "uv run alembic downgrade -1"
+base-migration= "uv run alembic downgrade base"

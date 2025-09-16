@@ -1,62 +1,50 @@
-import os
-import sys
-import threading
-import time
-from pathlib import Path
-from queue import Queue
+import logging
 
-from loguru import logger
-from watchdog.observers.polling import PollingObserver
+import uvicorn
 
-from app.event import FileMonitorHandler
-from app.utils import read_config
-from app.worker import Worker
+from core.utils.logger import logger as _logger
 
-MOVERA_CONFIG = os.getenv("MOVERA_CONFIG", "./config/movera.yaml")
-
-if not Path(MOVERA_CONFIG).exists():
-    raise FileNotFoundError("請設定 MOVERA_CONFIG 環境變數")
+logger = _logger.bind(app="web")
 
 
 def main():
-    config = read_config(MOVERA_CONFIG)
-    queue = Queue()
-    worker = Worker(queue)
-    observer = PollingObserver()
-    event_handler = FileMonitorHandler(queue)
+    # 在背景執行緒啟動檔案監控服務
+    # monitoring_service_thread = threading.Thread(target=start_monitoring_service, daemon=True)
+    # monitoring_service_thread.start()
 
-    handlers = [
-        {"sink": sys.stdout, "level": config.log.level, "colorize": True},
-        {
-            "sink": "./storages/logs/app_{time:YYYY-MM-DD}.log",
-            "level": config.log.level,
-            "format": "{time} | {level: <8} | {name}:{function}:{line} - {message} | {extra}",
-            "rotation": "00:00",
-            "enqueue": True,
-            "colorize": True,
-        },
-    ]
+    # 在主執行緒啟動 FastAPI 伺服器
+    logger.info("Starting Movera API server...")
 
-    logger.configure(handlers=handlers)
+    # 將 Uvicorn / FastAPI 的標準 logging 導入 Loguru，並保留 stdlib extra
+    class InterceptHandler(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            from loguru import logger as __logger
 
-    t = threading.Thread(target=worker.file_processing_worker, daemon=True)
-    t.start()
+            try:
+                level = __logger.level(record.levelname).name
+            except ValueError:
+                level = record.levelno
 
-    monitor = threading.Thread(target=worker.monitor_thread, args=(observer,), daemon=True)
-    monitor.start()
+            # 維持正確的呼叫堆疊深度（避免顯示為 logging 自身）
+            frame, depth = logging.currentframe(), 2
+            while frame and frame.f_code.co_filename == logging.__file__:
+                frame = frame.f_back
+                depth += 1
 
-    for watch_dir in config.watches:
-        observer.schedule(event_handler, watch_dir, recursive=False)
-    observer.start()
-    logger.info(f"開始監控資料夾: {config.watches}")
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    t.join()
-    monitor.join()
-    observer.join()
+            logger.opt(
+                depth=depth,
+                exception=record.exc_info,
+            ).log(level, record.getMessage())
+
+    # root_logger = logging.getLogger()
+    # root_logger.handlers = [InterceptHandler()]
+    # root_logger.setLevel(logging.NOTSET)
+    for name in ("uvicorn", "uvicorn.error", "uvicorn.access", "fastapi"):
+        log = logging.getLogger(name)
+        log.handlers = [InterceptHandler()]
+        log.propagate = False
+
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, log_config=None)
 
 
 if __name__ == "__main__":

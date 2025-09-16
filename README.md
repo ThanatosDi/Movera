@@ -1,99 +1,155 @@
-# Movera
-拉丁文 mover(移動) + era(時代)
+# Movera v2.0.0
 
-> [!WARNING]  
-> 請注意: 目前僅在 Synology NAS 上進行不完全測試，未在其他平台上進行充足的測試
+Movera 是一個專為影音收藏家設計的智慧檔案管理工具，旨在自動化您的媒體檔案整理流程。透過與多個下載器的無縫整合，Movera 能夠在下載完成後，根據您自訂的規則，自動將檔案移動到指定資料夾並進行標準化重新命名。
 
+它結合了 Vue 3 打造的現代化 Web UI、由 FastAPI 驅動的高效能後端 API，以及穩定的背景任務處理系統，提供了一個完整且易於使用的解決方案。
 
-使用 YAML 設定任務清單，並監控資料夾下的檔案，將符合條件的檔案重新命名與移動到指定資料夾
+## ✨ 核心功能
 
-# 使用方法
-有提供 [Docker image](https://hub.docker.com/r/thanatosdi/movera) 供快速啟動
+- **自動化任務管理**: 建立、讀取、更新和刪除 (CRUD) 檔案移動與重新命名任務。
+- **智慧重新命名**: 支援使用正則表達式 (Regex) 或字串解析 (Parse) 兩種模式來定義複雜的重新命名規則。
+- **qBittorrent 整合**: 透過 Webhook 監聽 qBittorrent 的下載完成事件，觸發自動化處理流程。
+- **Web UI 操作介面**: 提供一個現代化、響應式的網頁介面，讓您輕鬆管理所有任務和設定。
+- **系統設定**: 可透過 UI 調整系統層級的設定。
+- **任務統計**: 快速查看已啟用和已停用任務的數量。
+- **詳細日誌**: 追蹤每個任務的執行情況，方便除錯與監控。
 
-`docker-compose.yaml`
-```yaml
-services:
-  movera:
-    image: thanatosdi/movera:latest
-    container_name: movera
-    environment:
-      - MOVERA_CONFIG=/config/movera.yaml
-    volumes:
-      - ./config:/config
-      - ./downloads:/watches/downloads
-      - /Anime:/Anime
-```
-在 docker-compose.yaml 同層級目錄下建立 config 資料夾，在其中建立 movera.yaml 檔案
+## 🛠️ 技術架構
 
-`movera.yaml`
-```yaml
-log:
-  level: info
-watches:
-  - /watch/downloads
-jobs:
-  公爵千金的家庭教師:
-    include: '公爵千金的家庭教師'
-    move_to: '/Anime/公爵千金的家庭教師'
-    src_filename_regex: '公爵千金的家庭教師 - (\d{2})(v2)? .+.mp4'
-    dst_filename_regex: '公爵千金的家庭教師 - S01E\1 [1080P][WEB-DL][AAC AVC][CHT].mp4'
-  膽大黨:
-    include: 'Dan Da Dan'
-    move_to: '/Anime/膽大黨/S02'
-    src_filename_regex: '.+ Dan Da Dan \(2025\) \[(\d{2})\]\[AVC-8bit 1080p AAC\]\[CHT\].mp4'
-    dst_filename_regex: '[Sakurato] Dan Da Dan (2025) [S02E\1][AVC-8bit 1080p AAC][CHT].mp4'
-  example:
-    include: 'example'
-    move_to: '/Anime/example'
-```
+- **後端**: Python 3.12+, [FastAPI](https://fastapi.tiangolo.com/), SQLAlchemy (搭配 SQLite), Alembic
+- **前端**: Node.js 22+, [Vue.js 3](https://vuejs.org/), [Vite](https://vitejs.dev/), [Tailwind CSS](https://tailwindcss.com/), [Pinia](https://pinia.vuejs.org/), shadcn-vue
+- **容器化**: Docker, Docker Compose
 
-當有檔案放入到 `./downloads` 目錄下時會觸發 watchdog on_created 事件，會將檔案的絕對路徑放入 queue  
-worker 會從 queue 取出檔案絕對路徑並進行處理
+## 🚀 快速啟動 (使用 Docker)
 
-- 範例1: 
-  ```
-  檔案名稱為: 公爵千金的家庭教師 - 01 [1080P][WEB-DL][AAC AVC][CHT].mp4
-  符合 job => 公爵千金的家庭教師
-  有設定 src_filename_regex 和 dst_filename_regex => 會執行重新命名
-  檔案名稱格式符合 src_filename_regex 正規表示法取得 Group 1 => 01
-  將檔案名稱重新命名為: 公爵千金的家庭教師 - S01E01 [1080P][WEB-DL][AAC AVC][CHT].mp4
-  將檔案移動到 move_to 資料夾
-  ```
-- 範例2:
-  ```
-  檔案名稱為: [Sakurato] Dan Da Dan (2025) [13][AVC-8bit 1080p AAC][CHT].mp4
-  符合 job => 膽大黨
-  有設定 src_filename_regex 和 dst_filename_regex => 會執行重新命名
-  檔案名稱格式符合 src_filename_regex 正規表示法取得 Group 1 => 13
-  將檔案名稱重新命名為: [Sakurato] Dan Da Dan (2025) [S02E13][AVC-8bit 1080p AAC][CHT].mp4
-  將檔案移動到 move_to 資料夾
-  ```
-- 範例3:
-  ```
-  檔案名稱為: example.mp4
-  符合 job => example
-  "沒有"設定 src_filename_regex 和 dst_filename_regex => 不會執行重新命名
-  將檔案移動到 move_to 資料夾
-  ```
+對於熟悉容器化操作的使用者，使用 Docker 是最快且最推薦的啟動方式。
 
-# 設定檔說明
+1.  **拉取映像 (Pull Image)**:
 
-`movera.yaml` 的說明
+    從 Docker Hub 拉取最新的 Movera 映像。
 
-- log:
-  - level: log 的等級
-- watches:
-  - watch_path: 要監控的資料夾路徑
-- jobs:
-  - job_name:
-    - include: 檔案名稱包含此字串
-    - move_to: 要將檔案移動到的目的地資料夾
-    - src_filename_regex: 檔案名稱格式符合的正規表示法
-    - dst_filename_regex: 將檔案名稱重新命名的正規表示法
+    ```bash
+    docker pull thanatosdi/movera:latest
+    ```
 
+2.  **準備資料夾**:
 
+    在您選擇的位置建立兩個資料夾，用於存放 Movera 的資料庫和儲存檔案。
 
-詳細正規表示法規則可以使用 [regex101.com](https://regex101.com/) 進行測試👍  
-![image](https://github.com/user-attachments/assets/abc3b30d-a18e-4078-a530-7e621c4d3854)
+    ```bash
+    mkdir -p ./database
+    mkdir -p ./storages
+    ```
 
-dst_filename_regex 的重新命名規則使用可以使用 src_filename_regex 的 group，使用方式為直接在字串中使用 \1 \2 \3 來代表 group1 group2 group3
+3.  **執行容器 (Run Container)**:
+
+    執行以下指令來啟動 Movera 容器。請根據您的需求修改 `<HOST_PORT>`。
+
+    ```bash
+    docker run -d \
+      -p <HOST_PORT>:8000 \
+      -v $(pwd)/database:/movera/database \
+      -v $(pwd)/storages:/movera/storages \
+      -v <downloader_path>:/download \
+      -v <storages_path>:/storages \
+      --name movera \
+      thanatosdi/movera:latest
+    ```
+
+    - `-d`: 在背景執行容器。
+    - `-p <HOST_PORT>:8000`: 將您主機的 `<HOST_PORT>` 連接埠映射到容器固定的 `8000` 連接埠。例如，使用 `-p 8888:8000`，您就可以透過 `http://localhost:8888` 訪問 Movera。
+    - `-v $(pwd)/database:/movera/database`: **(必要)** 將主機上存放資料庫檔案的 `database` 資料夾掛載到容器中。
+    - `-v $(pwd)/storages:/movera/storages`: **(必要)** 將主機上用於存儲的 `storages` 資料夾掛載到容器中。
+    - `-v <downloader_path>:/download`: **(必要)** 將主機上用於下載檔案的資料夾掛載到容器中。
+    - `-v <storages_path>:/storages`: **(必要)** 將主機上用於存儲檔案的資料夾掛載到容器中。
+
+    或使用 compose.yaml 來啟動容器
+    ```yaml
+    services:
+      movera:
+        image: thanatosdi/movera:latest
+        container_name: movera
+        ports:
+          - "<HOST_PORT>:8000"
+        volumes:
+          - ./database:/movera/database
+          - ./storages:/movera/storages
+        restart: unless-stopped
+    ```
+    - `ports` 區塊建議完整寫清楚主機內網 IP 位址，例如 `127.0.0.1:8000:8000` 與 `192.168.1.10:8000:8000` 之類的；如果只填寫 `8000:8000` 表示任何來源的主機都可以繞過防火牆 `8000` 埠進行訪問。
+
+4.  **訪問 Movera**:
+
+    容器啟動後，您可以透過瀏覽器訪問 `http://localhost:<HOST_PORT>` 來開啟 Movera 的 Web UI。
+
+5.  **qBittorrent 設定**:
+
+    登入您的 qBittorrent Web UI，進入 `選項` -> `下載` -> `下載完成時執行外部程式`，並填入以下指令：
+
+    ```
+    curl -X POST http://<MOVERA_HOST_IP>:<HOST_PORT>/webhook/qbittorrent/on-complete -H "Content-Type: application/json" -d '{"filepath": "%F"}'
+    ```
+
+    請將 `<MOVERA_HOST_IP>` 替換為執行 Movera 容器的主機的 IP 位址，並將 `<HOST_PORT>` 替換為您在 `docker run` 指令中設定的連接埠。
+
+## 📚 API 端點
+
+Movera 提供了一套完整的 RESTful API 來管理系統。您可以在應用程式啟動後，訪問 `http://localhost:8000/docs` 來查看詳細的 OpenAPI (Swagger) 文件。
+
+- `GET /api/v1/tasks`: 獲取所有任務。
+- `POST /api/v1/task`: 建立一個新任務。
+- `GET /api/v1/task/{task_id}`: 獲取單一任務的詳細資訊。
+- `PUT /api/v1/task/{task_id}`: 更新一個現有任務。
+- `DELETE /api/v1/task/{task_id}`: 刪除一個任務。
+- `GET /api/v1/settings`: 獲取所有設定。
+- `PUT /api/v1/settings`: 更新多個設定。
+- `POST /webhook/qbittorrent/on-complete`: qBittorrent 的 Webhook 接收端點。
+
+## 💻 開發指南
+
+如果您想為 Movera 貢獻程式碼或進行二次開發，請遵循以下步驟設定您的本機開發環境。
+
+### 後端 (FastAPI)
+
+1.  **安裝 Python**: 確保您已安裝 Python 3.12 或更高版本。
+2.  **安裝 uv**: 本專案使用 `uv` 作為套件管理器。請參考 [uv 官方文件](https://github.com/astral-sh/uv) 進行安裝。
+3.  **建立虛擬環境並安裝依賴**: 
+
+    ```bash
+    # 建立虛擬環境
+    uv venv
+
+    # 安裝依賴
+    uv sync --locked
+    ```
+
+4.  **啟動後端伺服器**:
+
+    ```bash
+    uv run uvicorn api.main:app --reload
+    ```
+
+### 前端 (Vue)
+
+1.  **安裝 Node.js**: 確保您已安裝 Node.js 22.x 或更高版本。
+2.  **安裝依賴**: 
+
+    ```bash
+    npm install
+    ```
+
+3.  **啟動前端開發伺服器**:
+
+    ```bash
+    npm run dev
+    ```
+
+4.  **設定環境變數**:
+
+    在前端開發伺服器中，您可以設定環境變數 `VITE_API_BASE_URL` 來指定後端 API 的基本 URL。例如：
+
+    ```bash
+    VITE_API_BASE_URL="http://localhost:8000"
+    ```
+
+設定完成後，後端 API 將運行在 `http://localhost:8000`，前端開發伺服器將運行在 `http://localhost:5173` (或 Vite 指定的其他連接埠)。
