@@ -4,7 +4,7 @@ from pathlib import Path
 
 from loguru import logger
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 LOG_DIR = PROJECT_ROOT.joinpath("storages", "logs")
 LOG_DIR.mkdir(parents=True, exist_ok=True)

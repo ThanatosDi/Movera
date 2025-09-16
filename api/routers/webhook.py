@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
 from app.worker import process_completed_download
+from core import __version__
 from core.schemas.webhook import QBittorrentPayload
 
 router = APIRouter(
@@ -20,7 +21,7 @@ def webhook_status():
     """回傳 API 的當前狀態，並提供可用的 Webhook 路由資訊。"""
     return {
         "status": "ok",
-        "version": "2.0.0",  # 建議從統一的設定檔或 __version__ 變數中讀取
+        "version": __version__,  # 建議從統一的設定檔或 __version__ 變數中讀取
         "timestamp": datetime.now(UTC).isoformat(),
         "available_webhooks": [
             {
