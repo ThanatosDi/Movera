@@ -58,6 +58,13 @@ def perform_rename_operation(task: Task, filepath: str):
             dst=task.dst_filename,
             rule=task.rename_rule,
         ).execute_rename()
+        log_service.create_log(
+            schemas.LogCreate(
+                task_id=task.id,
+                level="INFO",
+                message=f'檔案 "{filepath}" 重新命名為 "{dst_filepath}" 成功',
+            )
+        )
         return dst_filepath
     except Exception as e:
         log_service.create_log(
@@ -79,6 +86,13 @@ def perform_move_operation(task: Task, filepath: str):
     """
     try:
         move(filepath, task.move_to)
+        log_service.create_log(
+            schemas.LogCreate(
+                task_id=task.id,
+                level="INFO",
+                message=f'檔案 "{filepath}" 移動至 "{task.move_to}" 成功',
+            )
+        )
     except Exception as e:
         log_service.create_log(
             schemas.LogCreate(
