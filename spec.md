@@ -1,165 +1,149 @@
-# Movera 專案規格
+# Movera 技術規格文件
 
-## 1. 專案架構
+## 1. 專案總覽
 
-Movera 是一個自動化檔案處理工具，核心功能是接收 qBittorrent 下載完成時發送的 Webhook 通知，並根據使用者定義的規則，對下載完成的檔案進行重新命名和移動。
+Movera 是一個自動化檔案管理系統。其核心功能是允許使用者定義一系列「任務 (Task)」。每個任務包含一組規則，用於監控特定目錄、篩選檔案，並根據預設規則將這些檔案移動到指定位置，可選擇性地進行重新命名。
 
-### 1.1. 整體架構圖
+此系統由一個 Vue.js 前端單頁應用 (SPA) 和一個 FastAPI 後端 API 組成，透過 RESTful API 進行通訊。
+
+## 2. 技術棧 (Tech Stack)
+
+### 2.1. 前端 (Frontend)
+
+- **語言:** TypeScript
+- **框架:** Vue 3
+- **建置工具:** Vite
+- **路由:** Vue Router
+- **狀態管理:** Pinia
+- **UI/樣式:** Tailwind CSS
+- **表單驗證:** VeeValidate + Zod
+- **國際化:** vue-i18n
+
+### 2.2. 後端 (Backend)
+
+- **語言:** Python 3.12+
+- **框架:** FastAPI
+- **非同步伺服器:** Uvicorn
+- **ORM:** SQLAlchemy
+- **資料庫:** SQLite
+- **資料庫遷移:** Alembic
+- **套件管理:** uv
+- **日誌:** Loguru
+
+### 2.3. 部署 (Deployment)
+
+- **容器化:** Docker (多階段建置)
+
+## 3. 系統架構
+
+系統採用經典的客戶端-伺服器 (Client-Server) 架構。前端是一個獨立的單頁應用，負責使用者介面和互動。後端提供 API 服務，處理所有業務邏輯和資料庫操作。
+
+### 高階架構圖
 
 ```mermaid
 graph TD
-    subgraph User Interface
-        A[FastAPI Web UI] --> B{API Endpoints};
+    A[使用者] -->|瀏覽器| B(Vue.js SPA);
+    B -->|RESTful API （JSON）| C{FastAPI Backend};
+    C -->|SQLAlchemy| D[(SQLite 資料庫)];
+
+    subgraph "前端 (Browser)"
+        B
     end
 
-    subgraph Core Logic
-        B -- Triggers --> E[Worker via BackgroundTasks];
-        E --> F[Task Matching];
-        F -- Matched --> G[Rename Operation];
-        G --> H[Move Operation];
+    subgraph "後端 (Server)"
+        C
+        D
     end
-
-    subgraph Data Persistence
-        B --> I[SQLAlchemy ORM];
-        E --> I;
-        I --> J[SQLite Database];
-    end
-
-    subgraph External Integration
-        K[qBittorrent] -- Webhook --> B;
-    end
-
-    A -- Manages Tasks --> B;
 ```
 
-### 1.2. 目錄結構
+## 4. 後端設計
 
-```
-.
-├── api/                  # FastAPI 應用程式
-│   ├── middlewares/      # 中介軟體
-│   └── routers/          # API 路由
-├── app/                  # 核心商業邏輯
-│   ├── modules/          # 功能模組 (move, rename)
-│   └── worker.py         # 檔案處理背景工作
-├── core/                 # 核心元件
-│   ├── database.py       # 資料庫連線與設定
-│   ├── models/           # SQLAlchemy ORM 模型
-│   ├── repositories/     # 資料庫操作封裝
-│   ├── schemas/          # Pydantic 資料驗證模型
-│   └── services/         # 商業邏輯服務
-├── migration/            # Alembic 資料庫遷移
-└── tests/                # 測試程式碼
-```
+後端採用分層架構，主要分為路由層、服務層、倉儲層和模型層。
 
-### 1.3. 技術堆疊
+- **`api/routers/`**: 定義 API 端點，處理 HTTP 請求和響應。
+- **`core/services/`**: 封裝核心業務邏輯，由路由層呼叫。
+- **`core/repositories/`**: 抽象資料庫操作，提供給服務層使用 (註：此層程式碼未直接讀取，但從服務層推斷存在)。
+- **`core/models/`**: 定義 SQLAlchemy 資料庫模型。
 
-| 類別 | 技術 | 用途 |
-| --- | --- | --- |
-| Web 框架 | FastAPI | 提供 RESTful API |
-| 資料庫 | SQLite | 儲存任務與日誌 |
-| ORM | SQLAlchemy | 資料庫操作 |
-| 資料驗證 | Pydantic | API 請求/回應的資料驗證與序列化 |
-| 背景任務 | FastAPI BackgroundTasks | 處理非同步的檔案操作 |
-| API 文件 | Swagger UI / ReDoc | 自動產生 API 文件 |
-| 資料庫遷移 | Alembic | 管理資料庫結構變更 |
+### 4.1. 資料模型
 
-## 2. 撰寫風格
+- **`Task`**: 核心模型，定義一個檔案處理任務。
+  - `id` (String, UUID): 主鍵。
+  - `name` (String): 任務名稱，唯一。
+  - `include` (String): 要包含的檔案/目錄規則。
+  - `move_to` (String): 目標目錄。
+  - `rename_rule` (String, nullable): 重新命名規則。
+  - `enabled` (Boolean): 是否啟用。
+- **`Log`**: 記錄任務執行日誌。
+  - `id` (Integer): 主鍵。
+  - `task_id` (String): 關聯的 Task ID。
+  - `level` (String): 日誌等級 (e.g., INFO, ERROR)。
+  - `message` (String): 日誌訊息。
+- **`Setting`**: 鍵值對設定表。
+  - `key` (String): 設定鍵名，主鍵。
+  - `value` (String): 設定值。
 
-- **Python**:
-    - 遵循 [PEP 8](https://www.python.org/dev/peps/pep-0008/) 風格指南。
-    - 使用 Type Hint 進行型別註記，提升程式碼可讀性與可維護性。
-    - 函式與類別皆有 Docstring 說明其用途、參數與回傳值。
-- **API**:
-    - 遵循 RESTful 設計原則。
-    - 使用 Pydantic 進行嚴格的資料驗證。
-    - API 端點提供詳細的 `summary` 和 `response_description`，以利自動產生文件。
+### 4.2. API 端點
 
-## 3. API 架構
+根據 `api/main.py` 的路由設定，主要端點分佈在以下模組：
 
-### 3.1. API 設計原則
+- `/api/v1/tasks`: 處理任務的 CRUD 操作。
+- `/api/v1/logs`: 獲取指定任務的日誌。
+- `/api/v1/settings`: 處理應用程式設定的讀取和更新。
+- `/api/v1/health`: 健康檢查端點。
+- `/webhook`: 接收外部觸發的 Webhook (推測用途)。
 
-- **資源導向**: API 以資源 (Tasks, Logs) 為中心進行設計。
-- **標準 HTTP 方法**:
-    - `GET`: 讀取資源。
-    - `POST`: 建立新資源。
-    - `PUT`: 更新現有資源。
-    - `DELETE`: 刪除資源。
-- **清晰的 URL 結構**: `/api/v1/{resource}/{resource_id}`
-- **一致的回應格式**:
-    - 成功: `200 OK`, `201 Created`, `204 No Content`。
-    - 失敗: `400 Bad Request`, `404 Not Found`, `500 Internal Server Error`，並附帶詳細的錯誤訊息。
+### 請求生命週期圖
 
-### 3.2. API 端點
-
-#### Tasks API (`/api/v1/tasks`)
-
-- `GET /tasks`: 獲取所有任務。
-- `POST /task`: 建立一個新任務。
-- `PUT /task/{task_id}`: 更新指定任務。
-- `DELETE /task/{task_id}`: 刪除指定任務。
-- `GET /tasks/stats`: 獲取任務統計數據。
-
-#### Logs API (`/api/v1/log`)
-
-- `GET /log/{task_id}`: 獲取指定任務的所有日誌。
-- `POST /log`: 建立一個新的日誌項目。
-
-#### Webhook API (`/webhook`)
-
-- `POST /qbittorrent/on-complete`: 接收 qBittorrent 下載完成的 Webhook 通知。
-
-### 3.3. 資料模型 (Pydantic Schemas)
-
-- **Task**:
-    - `id`: UUID (string)
-    - `name`: string
-    - `include`: string
-    - `move_to`: string
-    - `src_filename`: Optional[string]
-    - `dst_filename`: Optional[string]
-    - `rename_rule`: Optional[Literal["regex", "parse"]]
-    - `enabled`: bool
-    - `created_at`: datetime
-- **Log**:
-    - `id`: integer
-    - `task_id`: string
-    - `level`: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-    - `message`: string
-    - `timestamp`: datetime
-- **QBittorrentPayload**:
-    - `filepath`: string
-    - `category`: Optional[string]
-    - `tags`: Optional[string]
-
-## 4. 核心處理流程
+以下是一個建立新任務的典型請求流程：
 
 ```mermaid
 sequenceDiagram
-    participant qBittorrent
-    participant WebhookAPI
-    participant BackgroundTasks
-    participant Worker
-    participant TaskService
-    participant LogService
-    participant RenameModule
-    participant MoveModule
+    participant User as 使用者
+    participant FE as Vue.js 前端
+    participant API as FastAPI 後端
+    participant Service as TaskService
+    participant DB as 資料庫
 
-    qBittorrent->>WebhookAPI: 發送下載完成通知 (POST /webhook/qbittorrent/on-complete)
-    WebhookAPI->>BackgroundTasks: 將檔案處理任務加入背景執行
-    WebhookAPI-->>qBittorrent: 回應 200 OK
-    BackgroundTasks->>Worker: 執行 `process_completed_download`
-    Worker->>TaskService: 取得所有已啟用的任務
-    TaskService-->>Worker: 回傳任務列表
-    Worker->>Worker: 根據檔案路徑匹配任務
-    alt 成功匹配
-        Worker->>LogService: 記錄匹配成功日誌
-        Worker->>RenameModule: 執行重新命名操作
-        RenameModule-->>Worker: 回傳新檔案路徑
-        Worker->>MoveModule: 執行移動操作
-        MoveModule-->>Worker: 移動完成
-        Worker->>LogService: 記錄處理完成日誌
-    else 未匹配
-        Worker->>LogService: 記錄未匹配日誌
-    end
+    User->>FE: 填寫任務表單並點擊「儲存」
+    FE->>API: POST /api/v1/tasks (body: TaskCreate schema)
+    API->>Service: create_task(task_data)
+    Service->>DB: 檢查任務名稱是否已存在
+    DB-->>Service: (名稱不存在)
+    Service->>DB: 插入新的 Task 記錄
+    DB-->>Service: (返回新建立的 Task)
+    Service-->>API: (返回新建立的 Task)
+    API-->>FE: HTTP 201 Created (body: Task)
+    FE->>User: 顯示成功訊息並更新 UI
 ```
+
+## 5. 前端設計
+
+前端是一個基於 Vite 和 Vue 3 的單頁應用程式 (SPA)。
+
+- **啟動流程 (`main.ts`):** 應用啟動時，會先初始化 Pinia，接著從後端拉取全域設定，然後根據設定初始化 i18n，最後才掛載路由和 Vue 應用。
+- **路由 (`router/index.ts`):** 使用 `vue-router` 進行頁面導航，所有主要頁面都使用一個共用的 `Layout.vue`。路由採用懶加載以提升效能。
+- **狀態管理 (`stores/`):** 使用 Pinia 進行狀態管理，主要有 `useTaskStore` 和 `useSettingStore`，分別管理任務相關資料和應用程式設定，與後端 API 緊密對應。
+- **視圖 (`views/`):** 包含 `TasksListView`、`TaskDetailView`、`CreateTaskView` 等主要頁面元件。
+
+## 6. 資料庫設計
+
+- **資料庫類型:** SQLite。
+- **ORM:** SQLAlchemy。
+- **遷移管理:** Alembic。遷移腳本位於 `migration/versions/`。開發者應使用 `alembic` 命令來管理資料庫結構的變更。
+
+## 7. 開發與部署
+
+### 7.1. 開發環境
+
+- **後端:** 透過 `uv sync --locked` 安裝依賴，使用 `uv run main.py` 啟動後端伺服器。
+- **前端:** 透過 `npm install` 安裝依賴，使用 `npm run dev` 啟動 Vite 開發伺服器。
+
+### 7.2. 部署
+
+專案透過一個多階段 `Dockerfile` 進行容器化部署。
+
+1.  **Builder 階段:** 使用 Node.js 環境建置前端靜態檔案。
+2.  **Final 階段:** 使用輕量級的 Python 環境，複製後端程式碼和第一階段產出的前端靜態檔案，安裝 Python 依賴，並啟動 FastAPI 伺服器。
+
+最終容器會將前端靜態檔案與後端 API 整合在一起提供服務。
