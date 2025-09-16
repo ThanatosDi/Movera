@@ -8,7 +8,7 @@ class LogBase(BaseModel):
     task_id: str = Field(
         ...,
         description="任務的 ID",
-        examples=["123e4567-e89b-12d3-a456-426614174000"],
+        json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"},
     )
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
         ...,
