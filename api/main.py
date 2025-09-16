@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from api.middlewares import setup_cors
+from api.middlewares import setup_cors, setup_gzip
 from api.routers import log, setting, task, webhook
 from core.utils.logger import logger as _logger
 
@@ -46,8 +46,9 @@ app = FastAPI(
     version="2.0.0",
 )
 
-# Setup CORS
+# Middlewares
 setup_cors(app)
+setup_gzip(app)
 
 # Include routers
 app.include_router(task.router)
