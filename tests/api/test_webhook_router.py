@@ -1,6 +1,4 @@
 # tests/api/test_webhook_router.py
-from unittest.mock import MagicMock
-
 from fastapi.testclient import TestClient
 from pytest_mock import MockerFixture
 
