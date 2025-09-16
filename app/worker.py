@@ -90,6 +90,19 @@ def perform_move_operation(task: Task, filepath: str):
 
 
 def process_completed_download(filepath: str):
+    """
+    處理已完成的下載任務
+
+    這個方法會根據已完成的下載檔案名稱，尋找相符的任務。
+
+    如果找到相符的任務，則會執行重新命名和移動檔案。
+
+    Args:
+        filepath (str): 檔案的絕對路徑
+
+    Returns:
+        None
+    """
     tasks = task_service.get_enabled_tasks()
     task_includes = [task.include for task in tasks]
 
