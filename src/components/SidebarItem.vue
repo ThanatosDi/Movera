@@ -38,7 +38,7 @@ defineProps({
                   ">
                   {{ taskEnabled ? t('common.enabled') : t('common.disabled') }}
                 </Badge>
-                <h3 class="text-white font-medium truncate">{{ taskName }}</h3>
+                <h3 class="text-white font-medium truncate" :title="taskName">{{ taskName }}</h3>
               </div>
             </div>
           </div>
