@@ -1,4 +1,5 @@
 # tests/api/test_task_router.py
+import uuid
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
@@ -23,16 +24,16 @@ def test_get_all_tasks(mocker):
     mock_service = MagicMock(spec=TaskService)
     mock_service.get_all_tasks.return_value = [
         Task(
-            id="1",
+            id=uuid.uuid4(),
             name="Task 1",
-            include="*.txt",
+            include="task1_include",
             move_to="/dest",
             created_at=datetime.now(UTC),
         ),
         Task(
-            id="2",
+            id=uuid.uuid4(),
             name="Task 2",
-            include="*.jpg",
+            include="task2_include",
             move_to="/dest2",
             created_at=datetime.now(UTC),
         ),
@@ -55,7 +56,7 @@ def test_create_task(mocker):
     task_create_data = {"name": "New Task", "include": "*.csv", "move_to": "/new_dest"}
     task_create = TaskCreate(**task_create_data)
 
-    created_task = Task(id="3", **task_create_data, created_at=datetime.now(UTC))
+    created_task = Task(id=uuid.uuid4(), **task_create_data, created_at=datetime.now(UTC))
     mock_service.create_task.return_value = created_task
 
     app.dependency_overrides[get_task_service] = lambda: mock_service
@@ -79,7 +80,7 @@ def test_update_task(mocker):
     }
     task_update = TaskUpdate(**task_update_data)
 
-    updated_task = Task(id="1", **task_update_data, created_at=datetime.now(UTC))
+    updated_task = Task(id=uuid.uuid4(), **task_update_data, created_at=datetime.now(UTC))
     mock_service.update_task.return_value = updated_task
 
     app.dependency_overrides[get_task_service] = lambda: mock_service
@@ -119,5 +120,30 @@ def test_get_task_stats(mocker):
     assert response.status_code == 200
     assert response.json() == {"enabled": 5, "disabled": 2}
     mock_service.get_task_stats.assert_called_once()
+
+    app.dependency_overrides = {}
+
+
+def test_get_one_task(mocker):
+    mock_service = MagicMock(spec=TaskService)
+    task_id = str(uuid.uuid4())
+    mock_task = Task(
+        id=task_id,
+        name="Test Task",
+        include="*.txt",
+        move_to="/dev/null",
+        created_at=datetime.now(UTC),
+    )
+    mock_service.get_one_task.return_value = mock_task
+
+    app.dependency_overrides[get_task_service] = lambda: mock_service
+
+    response = client.get(f"/api/v1/task/{task_id}")
+
+    assert response.status_code == 200
+    response_data = response.json()
+    assert response_data["name"] == "Test Task"
+    assert response_data["id"] == task_id
+    mock_service.get_one_task.assert_called_once_with(task_id)
 
     app.dependency_overrides = {}
