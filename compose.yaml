@@ -1,0 +1,16 @@
+services:
+  movera:
+    # 構建當前目錄下的 Dockerfile
+    build: .
+    image: movera-app # 構建後鏡像的名稱
+    container_name: movera
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+    volumes:
+      - ./storages:/movera/storages
+      - ./database:/movera/database
+    ports:
+      - "8000:8000"
+    command: ["uv", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

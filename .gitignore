@@ -363,3 +363,4 @@ vite.config.ts.timestamp-*
 
 .gemini/
 gha-creds-*.json
+.DS_Store
