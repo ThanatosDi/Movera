@@ -53,7 +53,11 @@ def match_task(tasks: list[Task], task_includes: list, filepath: str) -> Task | 
     for index, include in enumerate(task_includes, start=0):
         if include in filepath:
             task = tasks[index]
-            web_logger(filepath, task)
+            web_logger(
+                task_id=task.id,
+                level="INFO",
+                message=f'檔案 "{filepath}" 與任務 "{task.name}" 匹配成功',
+            )
             return task
     return None
 
