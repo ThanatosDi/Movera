@@ -9,7 +9,7 @@ import { AlertCircle, CheckCircle, Lightbulb } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const { t, tm } = useI18n()
+const { t, tm, rt } = useI18n()
 
 // v-model 綁定，從父組件接收 src 和 dst 規則
 const srcFilename = defineModel<string | null>('srcFilename')
@@ -159,7 +159,7 @@ const handleLoadTestCase = (testCase: any) => {
               v-for="(node, index) in tm('components.preview.regex.instructions')"
               :key="index"
             >
-              {{ node.body.static }}
+              {{ rt(node) }}
             </li>
           </ul>
           <div class="mt-3 pt-2 border-t border-gray-600">
