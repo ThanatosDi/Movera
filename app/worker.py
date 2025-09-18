@@ -1,3 +1,5 @@
+from typing import Literal
+
 from app.modules.move import move
 from app.modules.rename import Rename
 from core import schemas
@@ -15,6 +17,29 @@ log_service = LogService(LogRepository(db))
 logger = _logger.bind(app="worker")
 
 
+def web_logger(
+    task_id: str,
+    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+    message: str,
+) -> None:
+    """
+    Webhook logger
+
+    將 Webhook 事件記錄到日誌中
+
+    :param task_id: 任務的 ID
+    :param level: 日誌等級
+    :param message: 日誌訊息
+    """
+    log_service.create_log(
+        schemas.LogCreate(
+            task_id=task_id,
+            level=level.upper(),
+            message=message,
+        )
+    )
+
+
 def match_task(tasks: list[Task], task_includes: list, filepath: str) -> Task | None:
     """將路徑 filepath 與 task_includes 列表進行比對，找到第一個符合的任務
     Args:
@@ -28,13 +53,7 @@ def match_task(tasks: list[Task], task_includes: list, filepath: str) -> Task | 
     for index, include in enumerate(task_includes, start=0):
         if include in filepath:
             task = tasks[index]
-            log_service.create_log(
-                schemas.LogCreate(
-                    task_id=task.id,
-                    level="INFO",
-                    message=f"檔案 \"{filepath}\" 匹配到任務 '{task.name}'",
-                )
-            )
+            web_logger(filepath, task)
             return task
     return None
 
@@ -52,27 +71,26 @@ def perform_rename_operation(task: Task, filepath: str):
     """
 
     try:
+        if task.rename_rule is None:
+            return filepath
         dst_filepath = Rename(
             filepath=filepath,
             src=task.src_filename,
             dst=task.dst_filename,
             rule=task.rename_rule,
         ).execute_rename()
-        log_service.create_log(
-            schemas.LogCreate(
-                task_id=task.id,
-                level="INFO",
-                message=f'檔案 "{filepath}" 重新命名為 "{dst_filepath}" 成功',
-            )
+
+        web_logger(
+            task_id=task.id,
+            level="INFO",
+            message=f'檔案 "{filepath}" 重新命名為 "{dst_filepath}" 成功',
         )
         return dst_filepath
     except Exception as e:
-        log_service.create_log(
-            schemas.LogCreate(
-                task_id=task.id,
-                level="ERROR",
-                message=f'檔案 "{filepath}" 重新命名失敗，錯誤訊息: {str(e)}',
-            )
+        web_logger(
+            task_id=task.id,
+            level="ERROR",
+            message=f'檔案 "{filepath}" 重新命名失敗，錯誤訊息: {str(e)}',
         )
 
 
@@ -86,20 +104,16 @@ def perform_move_operation(task: Task, filepath: str):
     """
     try:
         move(filepath, task.move_to)
-        log_service.create_log(
-            schemas.LogCreate(
-                task_id=task.id,
-                level="INFO",
-                message=f'檔案 "{filepath}" 移動至 "{task.move_to}" 成功',
-            )
+        web_logger(
+            task_id=task.id,
+            level="INFO",
+            message=f'檔案 "{filepath}" 移動至 "{task.move_to}" 成功',
         )
     except Exception as e:
-        log_service.create_log(
-            schemas.LogCreate(
-                task_id=task.id,
-                level="ERROR",
-                message=f'檔案 "{filepath}" 移動至 "{task.move_to}" 失敗，錯誤訊息: {str(e)}',
-            )
+        web_logger(
+            task_id=task.id,
+            level="ERROR",
+            message=f'檔案 "{filepath}" 移動至 "{task.move_to}" 失敗，錯誤訊息: {str(e)}',
         )
 
 
