@@ -45,6 +45,9 @@ Movera 是一個專為影音收藏家設計的智慧檔案管理工具，旨在�
 
     執行以下指令來啟動 Movera 容器。請根據您的需求修改 `<HOST_PORT>`。
 
+    <details>
+    <summary>docker</summary>
+        
     ```bash
     docker run -d \
       -p <HOST_PORT>:8000 \
@@ -62,8 +65,11 @@ Movera 是一個專為影音收藏家設計的智慧檔案管理工具，旨在�
     - `-v $(pwd)/storages:/movera/storages`: **(必要)** 將主機上用於存儲的 `storages` 資料夾掛載到容器中。
     - `-v <downloader_path>:/download`: **(必要)** 將主機上用於下載檔案的資料夾掛載到容器中。
     - `-v <storages_path>:/storages`: **(必要)** 將主機上用於存儲檔案的資料夾掛載到容器中。
-
-    或使用 compose.yaml 來啟動容器
+    </details>
+    
+    <details>
+    <summary>docker compose</summary>
+        
     ```yaml
     services:
       movera:
@@ -77,12 +83,13 @@ Movera 是一個專為影音收藏家設計的智慧檔案管理工具，旨在�
         restart: unless-stopped
     ```
     - `ports` 區塊建議完整寫清楚主機內網 IP 位址，例如 `127.0.0.1:8000:8000` 與 `192.168.1.10:8000:8000` 之類的；如果只填寫 `8000:8000` 表示任何來源的主機都可以繞過防火牆 `8000` 埠進行訪問。
+    </details>
 
-4.  **訪問 Movera**:
+5.  **訪問 Movera**:
 
     容器啟動後，您可以透過瀏覽器訪問 `http://localhost:<HOST_PORT>` 來開啟 Movera 的 Web UI。
 
-5.  **qBittorrent 設定**:
+6.  **qBittorrent 設定**:
 
     登入您的 qBittorrent Web UI，進入 `選項` -> `下載` -> `下載完成時執行外部程式`，並填入以下指令：
 
