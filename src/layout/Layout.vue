@@ -25,13 +25,13 @@ onMounted(async () => {
     <Header />
     <div class="flex flex-1 overflow-hidden">
       <Sidebar />
-      <main class="flex-1 p-4 overflow-y-auto">
+      <main class="flex-1 p-4 overflow-y-auto pb-20 sm:pb-4">
         <RouterView />
       </main>
     </div>
 
     <!-- Mobile Bottom Navigation -->
-    <footer class="sm:hidden bg-gray-800 p-2">
+    <footer class="sm:hidden bg-gray-800 p-2 fixed bottom-0 w-full">
       <nav class="flex justify-around">
         <RouterLink
           :to="Route.HOME"
