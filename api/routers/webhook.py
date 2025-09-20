@@ -5,6 +5,9 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException
 from app.worker import process_completed_download
 from core import __version__
 from core.schemas.webhook import QBittorrentPayload
+from core.utils.logger import logger as _logger
+
+logger = _logger.bind(app="webhook")
 
 router = APIRouter(
     prefix="/webhook",
@@ -57,6 +60,9 @@ async def qbittorrent_on_complete(
     """
     try:
         background_tasks.add_task(process_completed_download, payload.filepath)
+        logger.info(
+            f"Received qBittorrent webhook for file: {payload.filepath}, scheduled background processing."
+        )
         return {
             "status": "ok",
             "code": 200,
