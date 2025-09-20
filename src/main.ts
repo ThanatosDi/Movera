@@ -15,8 +15,12 @@ async function initializeApp() {
   // 必須在 app.use(pinia) 之後才能使用 useSettingStore
   const settingStore = useSettingStore()
 
-  // 等待設定從後端載入完成
-  await settingStore.fetchSettings()
+  // 嘗試從後端載入設定，但即使失敗也要繼續初始化
+  try {
+    await settingStore.fetchSettings()
+  } catch (error) {
+    console.error('無法在啟動時載入設定，將使用預設值:', error)
+  }
 
   // 使用載入的 locale 來建立 i18n 實例
   const i18n = createI18nInstance(settingStore.settings.locale)
