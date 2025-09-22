@@ -89,16 +89,22 @@ Movera 是一個專為影音收藏家設計的智慧檔案管理工具，旨在�
 
     容器啟動後，您可以透過瀏覽器訪問 `http://localhost:<HOST_PORT>` 來開啟 Movera 的 Web UI。
 
-6.  **qBittorrent 設定**:
-
+6.  **下載器設定**:
+    <details>
+    <summary>qBittorrent</summary>
+    
+    將 [`scripts`](https://github.com/ThanatosDi/Movera/blob/main/scripts/qbittorrent/in-complete) 放置到 qBittorrent 中，並賦予執行權限  
+    ```bash
+    chmod +x in-complete
+    ```
     登入您的 qBittorrent Web UI，進入 `選項` -> `下載` -> `下載完成時執行外部程式`，並填入以下指令：
 
     ```
-    curl -X POST http://<MOVERA_HOST_IP>:<HOST_PORT>/webhook/qbittorrent/on-complete -H "Content-Type: application/json" -d '{"filepath": "%F"}'
+    /config/scripts/in-complete http://<MOVERA_HOST_IP>/webhook/qbittorrent/on-complete "%F" "%L"
     ```
 
     請將 `<MOVERA_HOST_IP>` 替換為執行 Movera 容器的主機的 IP 位址，並將 `<HOST_PORT>` 替換為您在 `docker run` 指令中設定的連接埠。
-
+    <details>
 ## 📚 API 端點
 
 Movera 提供了一套完整的 RESTful API 來管理系統。您可以在應用程式啟動後，訪問 `http://localhost:8000/docs` 來查看詳細的 OpenAPI (Swagger) 文件。
