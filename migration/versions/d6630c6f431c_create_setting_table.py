@@ -45,14 +45,12 @@ def upgrade() -> None:
     default_setting = [
         {"key": "timezone", "value": "UTC"},
         {"key": "locale", "value": "zh_TW"},
-        {"key": "server_address", "value": "http://127.0.0.1:8000"},
     ]
     # Insert default settings after table creation
     setting_table = sql_table(
         table,
         sql_column("key", sa.String()),
         sql_column("value", sa.String()),
-        sql_column("description", sa.String()),
     )
     op.bulk_insert(setting_table, default_setting)
 
