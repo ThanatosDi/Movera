@@ -124,7 +124,10 @@ const renameRuleProxy = computed({
     </RadioGroup>
 
     <!-- 來源檔名規則 -->
-    <div class="space-y-2">
+    <div
+      v-if="isRenameRuleRequired"
+      class="space-y-2"
+    >
       <Label for="src_filename">
         {{ t('components.taskForm.srcFilename') }}
         <span
@@ -140,7 +143,10 @@ const renameRuleProxy = computed({
     </div>
 
     <!-- 目標檔名規則 -->
-    <div class="space-y-2">
+    <div
+      v-if="isRenameRuleRequired"
+      class="space-y-2"
+    >
       <Label for="dst_filename">
         {{ t('components.taskForm.dstFilename') }}
         <span
