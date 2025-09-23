@@ -42,5 +42,4 @@ export type ToastType = 'success' | 'error' | 'info' | 'warning'
 export interface Settings {
   timezone: string;
   locale: string;
-  server_address: string;
 }

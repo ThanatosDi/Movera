@@ -7,7 +7,6 @@ export const useSettingStore = defineStore('settingStore', () => {
   const settings = ref<Settings>({
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     locale: navigator.language || 'en-US',
-    server_address: 'http://127.0.0.1:8000',
   })
 
   // --- Actions ---

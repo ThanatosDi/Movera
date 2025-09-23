@@ -13,13 +13,12 @@ import {
   ComboboxList,
   ComboboxTrigger,
 } from '@/components/ui/combobox'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useNotification } from '@/composables/useNotification'
 import { cn } from '@/lib/utils'
 import { useSettingStore } from '@/stores/settingStore'
 import { getTimeZones } from '@vvo/tzdb'
-import { Check, ChevronsUpDown, HardDrive, Info, Save } from 'lucide-vue-next'
+import { Check, ChevronsUpDown, Info, Save } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -159,31 +158,6 @@ const updateSettingsEvent = async () => {
               </ComboboxGroup>
             </ComboboxList>
           </Combobox>
-        </div>
-      </CardContent>
-    </Card>
-
-    <!-- 連線設定卡片 -->
-    <Card class="bg-gray-800 border-gray-700 text-white">
-      <CardHeader>
-        <CardTitle class="flex items-center gap-2">
-          <HardDrive class="size-5" />
-          {{ t('views.settings.connection.title') }}
-        </CardTitle>
-        <CardDescription>
-          {{ t('views.settings.connection.description') }}
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="space-y-4">
-        <div>
-          <Label for="server-address">{{ t('views.settings.connection.serverAddress') }}</Label>
-          <!-- 4. 將 v-model 直接綁定到 store 的狀態 -->
-          <Input
-            id="server-address"
-            v-model="settings.server_address"
-            :placeholder="t('views.settings.connection.serverPlaceholder')"
-            class="bg-gray-700 border-gray-600 mt-2"
-          />
         </div>
       </CardContent>
     </Card>
