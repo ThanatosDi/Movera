@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// import ParsePreview from '@/components/ParsePreview.vue'
+import ParseReference from '@/components/ParseReference.vue'
 import RegexPreview from '@/components/RegexPreview.vue'
 import TaskForm from '@/components/TaskForm.vue'
 import { Button } from '@/components/ui/button'
@@ -117,10 +117,8 @@ const createTask = async () => {
       v-model:dst-filename="task.dst_filename"
     />
     <!-- 檔案名稱解析預覽 -->
-    <!-- <ParsePreview
-      v-if="task.rename_rule === 'parse'"
-      v-model:src-filename="task.src_filename"
-      v-model:dst-filename="task.dst_filename"
-    /> -->
+    <ParseReference v-if="task.rename_rule === 'parse'" />
+    <!-- Parse 操作說明 -->
+
   </main>
 </template>

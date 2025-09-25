@@ -160,29 +160,34 @@
           "qmark": "zero or one",
           "dot": "literal dot"
         }
+      }
+    },
+    "parseReference": {
+      "title": "Parse Operation Instructions",
+      "description": "This document provides instructions on how to use Python's parse expressions for file renaming. For more detailed syntax, please refer to the",
+      "documentationLink": "Official Documentation",
+      "example1": {
+        "title": "Example 1: Basic Renaming",
+        "description": "Renaming a TV show episode file from a dot-separated format to a space-separated format.",
+        "step1": {
+          "src": "Source Format: {'{'}title{'}'}.S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
+          "description": "matches"
+        },
+        "step2": {
+          "dst": "Destination Format: {'{'}title{'}'} S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
+          "description": "renames to"
+        }
       },
-      "parse": {
-        "title": "Parse Template Preview",
-        "capturedFields": "Captured Fields:",
-        "formatError": "Formatting error",
-        "instructions": [
-          "Use curly braces '{'{}'}' in 'Source Template' to create capture fields, e.g., '{'{name}'}'.",
-          "Use the same '{'{name}'}' in 'Destination Template' to reference the corresponding field.",
-          "You can specify types, e.g., '{'{episode:d}'}' will only match numbers.",
-          "Click the test case buttons above to load examples."
-        ],
-        "exampleUsage": "Field Reference Examples:",
-        "usageTitle": "captures any characters",
-        "usageSeason": "captures numbers",
-        "usageYear": "captures numbers as year",
-        "commonSpecifiers": "Common Type Specifiers:",
-        "specifiers": {
-          "d": "digit",
-          "w": "word character",
-          "s": "whitespace",
-          "f": "float",
-          "none_key": "none",
-          "none_value": "any character"
+      "example2": {
+        "title": "Example 2: Complex Anime File Renaming",
+        "description": "Extracting the title and episode number from a complex anime file name and converting it to a standard season/episode format.",
+        "step1": {
+          "src": "[{'{'}source{'}'}] {'{'}title{'}'} - {'{'}episode:d{'}'} ({'{'}quality{'}'}) [{'{'}hash{'}'}].{'{'}extension{'}'}",
+          "description": "matches"
+        },
+        "step2": {
+          "dst": "Destination Format: {'{'}title{'}'} - S01E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
+          "description": "renames to"
         }
       }
     }

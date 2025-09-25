@@ -160,29 +160,34 @@
           "qmark": "零個或一個",
           "dot": "點號字面值"
         }
+      }
+    },
+    "parseReference": {
+      "title": "Parse 操作說明",
+      "description": "本文件提供如何使用 Python 的 parse 運算式來重新命名檔案的說明。更詳細的語法請參考",
+      "documentationLink": "官方文件",
+      "example1": {
+        "title": "範例 1：基本重新命名",
+        "description": "將一個電視劇集檔案從點分隔格式重新命名為空格分隔格式。",
+        "step1": {
+          "src": "來源格式：{'{'}title{'}'}.S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
+          "description": "匹配"
+        },
+        "step2": {
+          "dst": "目標格式：{'{'}title{'}'} S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
+          "description": "重新命名為"
+        }
       },
-      "parse": {
-        "title": "Parse 樣板預覽",
-        "capturedFields": "捕獲欄位：",
-        "formatError": "格式化錯誤",
-        "instructions": [
-          "在「來源樣板」中使用大括號 '{'{}'}' 來建立捕獲欄位，例如 '{'{name}'}'。",
-          "在「目標樣板」中使用相同的 '{'{name}'}' 來引用對應的欄位。",
-          "可以指定類型，例如 '{'{episode:d}'}' 只會匹配數字。",
-          "點擊上方的測試案例按鈕可以快速載入範例。"
-        ],
-        "exampleUsage": "欄位引用範例：",
-        "usageTitle": "捕獲任意字符",
-        "usageSeason": "捕獲數字",
-        "usageYear": "捕獲數字作為年份",
-        "commonSpecifiers": "常用類型指定符：",
-        "specifiers": {
-          "d": "數字",
-          "w": "字母與數字",
-          "s": "空白字符",
-          "f": "浮點數",
-          "none_key": "無",
-          "none_value": "任意字符"
+      "example2": {
+        "title": "範例 2：複雜動漫檔案重新命名",
+        "description": "從一個複雜的動漫檔案名稱中提取標題和集數，並將其轉換為標準的季集格式。",
+        "step1": {
+          "src": "來源格式：[{'{'}source{'}'}] {'{'}title{'}'} - {'{'}episode:d{'}'} ({'{'}quality{'}'}) [{'{'}hash{'}'}].{'{'}extension{'}'}",
+          "description": "匹配"
+        },
+        "step2": {
+          "dst": "目標格式：{'{'}title{'}'} - S01E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
+          "description": "重新命名為"
         }
       }
     }
