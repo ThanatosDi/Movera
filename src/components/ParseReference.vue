@@ -36,7 +36,7 @@ const { t } = useI18n()
           <li>
             <code class="bg-gray-700 p-1 rounded">{{ t('components.parseReference.example1.step2.dst') }}</code>
             <span>{{ t('components.parseReference.example1.step2.description') }}</span>
-            <code class="bg-gray-700 p-1 rounded">The Big Bang Theory S01E01.mkv</code>
+            <code class="bg-gray-700 p-1 rounded">The.Big.Bang.Theory S01E01.mkv</code>
           </li>
         </ul>
       </div>

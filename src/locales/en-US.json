@@ -170,11 +170,11 @@
         "title": "Example 1: Basic Renaming",
         "description": "Renaming a TV show episode file from a dot-separated format to a space-separated format.",
         "step1": {
-          "src": "Source Format: {'{'}title{'}'}.S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
+          "src": "Source Filename Pattern: {'{'}title{'}'}.S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
           "description": "matches"
         },
         "step2": {
-          "dst": "Destination Format: {'{'}title{'}'} S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
+          "dst": "Destination Filename Pattern: {'{'}title{'}'} S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
           "description": "renames to"
         }
       },
@@ -182,11 +182,11 @@
         "title": "Example 2: Complex Anime File Renaming",
         "description": "Extracting the title and episode number from a complex anime file name and converting it to a standard season/episode format.",
         "step1": {
-          "src": "[{'{'}source{'}'}] {'{'}title{'}'} - {'{'}episode:d{'}'} ({'{'}quality{'}'}) [{'{'}hash{'}'}].{'{'}extension{'}'}",
+          "src": "Source Filename Pattern: [{'{'}source{'}'}] {'{'}title{'}'} - {'{'}episode:d{'}'} ({'{'}quality{'}'}) [{'{'}hash{'}'}].{'{'}extension{'}'}",
           "description": "matches"
         },
         "step2": {
-          "dst": "Destination Format: {'{'}title{'}'} - S01E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
+          "dst": "Destination Filename Pattern: {'{'}title{'}'} - S01E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
           "description": "renames to"
         }
       }
