@@ -1,3 +1,4 @@
+import datetime
 from parse import parse
 
 
@@ -15,7 +16,13 @@ class ParsePreviewService:
         result = parse(pattern, text)
         if not result:
             return None
-        return result.named
+
+        groups = result.named
+        for key, value in groups.items():
+            if isinstance(value, datetime.datetime):
+                groups[key] = str(value)
+
+        return groups
 
     def __format(self, format_str: str, groups: dict) -> str:
         """使用指定的格式化字串和分組資料產生新的字串。

@@ -29,7 +29,7 @@ class ParsePreviewRequest(BaseModel):
 
 
 class ParsePreviewResponse(ParsePreviewRequest):
-    groups: dict[str, str] = Field(
+    groups: dict[str, str | int | float] = Field(
         ...,
         description="解析後的分組結果",
         json_schema_extra={
