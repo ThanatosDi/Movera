@@ -5,7 +5,7 @@ from parse import parse
 
 class ParsePreviewService:
     @staticmethod
-    def __match(pattern: str, text: str) -> dict | None:
+    def _match(pattern: str, text: str) -> dict | None:
         """根據指定的模式解析文字，並回傳解析結果。
 
         參數:
@@ -27,7 +27,7 @@ class ParsePreviewService:
         return groups
 
     @staticmethod
-    def __format(format_str: str, groups: dict) -> str:
+    def _format(format_str: str, groups: dict) -> str:
         """使用指定的格式化字串和分組資料產生新的字串。
 
         參數:
@@ -55,7 +55,7 @@ class ParsePreviewService:
         回傳:
             dict: 包含解析後的分組 (groups) 與格式化後字串 (formatted) 的字典。
         """
-        groups = ParsePreviewService.__match(src_pattern, text)
+        groups = ParsePreviewService._match(src_pattern, text)
 
         response = {
             "src_pattern": src_pattern,
@@ -66,6 +66,6 @@ class ParsePreviewService:
         if groups is None:
             return {**response, "groups": {}, "formatted": ""}
 
-        formatted = ParsePreviewService.__format(dst_pattern, groups)
+        formatted = ParsePreviewService._format(dst_pattern, groups)
 
         return {**response, "groups": groups, "formatted": formatted}
