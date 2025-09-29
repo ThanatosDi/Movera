@@ -39,6 +39,7 @@
     "fetchTasksError": "Failed to fetch task list",
     "fetchTaskError": "Failed to fetch task",
     "fetchLogError": "Failed to fetch log data",
+    "unknownError": "An unknown error occurred.",
     "formValidation": {
       "taskNameRequired": "Task name is required.",
       "includeRequired": "File name inclusion is required.",

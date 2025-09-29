@@ -159,7 +159,8 @@ const autoGrow = (event: Event) => {
         class="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-md"
       >
         <p class="font-bold">{{ t('common.error') }}</p>
-        <p>{{ error }}</p>
+        <p v-if="error === '來源規則與檔案名稱不匹配。'">{{ t('notifications.formValidation.parseNoMatch') }}</p>
+        <p v-if="error === '發生未知錯誤。'">{{ t('notifications.unknownError') }}</p>
       </div>
 
       <!-- Results -->

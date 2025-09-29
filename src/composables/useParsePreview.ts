@@ -1,8 +1,5 @@
 import { parsePreviewService, type ParsePreviewPayload } from '@/services/parsePreviewService';
 import { ref, watch, type Ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n()
 
 // 定義解析後的欄位結構
 interface ParsedFields {
@@ -69,7 +66,7 @@ export function useParsePreview(
 
       // 如果後端沒有回傳任何群組，可能表示不匹配
       if (Object.keys(response.groups).length === 0 && !response.formatted) {
-        error.value = t('notifications.formValidation.parseNoMatch');
+        error.value = '來源規則與檔案名稱不匹配。';
       }
 
     } catch (e: any) {
