@@ -44,7 +44,8 @@
       "includeRequired": "檔案名稱包含為必填項。",
       "moveToRequired": "移動至為必填項。",
       "invalidPath": "移動至包含無效的路徑字元(&lt; &gt; : \" | ? *)",
-      "renameRuleRequired": "已啟用重新命名: '{'{rule}'}' 但未設定\n - 來源檔名規則\n - 目標檔名規則"
+      "renameRuleRequired": "已啟用重新命名: '{'{rule}'}' 但未設定\n - 來源檔名規則\n - 目標檔名規則",
+      "parseNoMatch": "來源規則與檔案名稱不匹配。"
     }
   },
   "views": {

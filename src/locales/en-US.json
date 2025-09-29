@@ -44,7 +44,8 @@
       "includeRequired": "File name inclusion is required.",
       "moveToRequired": "Move To is required.",
       "invalidPath": "Move To contains invalid path characters (&lt; &gt; : \" | ? *).",
-      "renameRuleRequired": "Rename rule enabled: '{'{rule}'}' but missing\n - Source Filename Pattern\n - Destination Filename Pattern"
+      "renameRuleRequired": "Rename rule enabled: '{'{rule}'}' but missing\n - Source Filename Pattern\n - Destination Filename Pattern",
+      "parseNoMatch": "The source rule does not match the archive name."
     }
   },
   "views": {

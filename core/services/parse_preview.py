@@ -1,8 +1,10 @@
 import datetime
+
 from parse import parse
 
 
 class ParsePreviewService:
+    @staticmethod
     def __match(self, pattern: str, text: str) -> dict | None:
         """根據指定的模式解析文字，並回傳解析結果。
 
@@ -24,6 +26,7 @@ class ParsePreviewService:
 
         return groups
 
+    @staticmethod
     def __format(self, format_str: str, groups: dict) -> str:
         """使用指定的格式化字串和分組資料產生新的字串。
 
@@ -52,8 +55,7 @@ class ParsePreviewService:
         回傳:
             dict: 包含解析後的分組 (groups) 與格式化後字串 (formatted) 的字典。
         """
-        service = ParsePreviewService()
-        groups = service.__match(src_pattern, text)
+        groups = ParsePreviewService.__match(src_pattern, text)
 
         response = {
             "src_pattern": src_pattern,
@@ -64,6 +66,6 @@ class ParsePreviewService:
         if groups is None:
             return {**response, "groups": {}, "formatted": ""}
 
-        formatted = service.__format(dst_pattern, groups)
+        formatted = ParsePreviewService.__format(dst_pattern, groups)
 
         return {**response, "groups": groups, "formatted": formatted}

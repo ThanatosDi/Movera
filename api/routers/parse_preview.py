@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api/v1", tags=["ParsePreview"])
     summary="解析樣式和文字，回傳解析結果和格式化後的預覽",
     response_description="包含解析結果和格式化後的預覽。",
 )
-def get_parse_preview(request: ParsePreviewRequest) -> ParsePreviewResponse:
+def handle_parse_preview(request: ParsePreviewRequest) -> ParsePreviewResponse:
     """
     接收解析樣式和文字，回傳解析結果和格式化後的預覽。
     """
