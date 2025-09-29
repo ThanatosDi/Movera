@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useRegexPreview } from '@/composables/useRegexPreview';
 import { RegexExamples } from '@/constants';
 import { AlertCircle, CheckCircle, Lightbulb } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t, tm, rt } = useI18n()
