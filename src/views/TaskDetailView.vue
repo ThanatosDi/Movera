@@ -194,8 +194,8 @@ const isRenameRuleRequired = computed(() => {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel class="text-black">{{ t('common.cancel') }}</AlertDialogCancel>
-                <AlertDialogAction @click="btnActionDeleteTask">{{ t('common.continue') }}</AlertDialogAction>
+                <AlertDialogCancel class="hover:bg-stone-400 text-black">{{ t('common.cancel') }}</AlertDialogCancel>
+                <AlertDialogAction class="bg-green-400 hover:bg-green-800 text-black" @click="btnActionDeleteTask">{{ t('common.continue') }}</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
