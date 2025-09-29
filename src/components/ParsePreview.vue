@@ -159,7 +159,7 @@ const autoGrow = (event: Event) => {
         class="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-md"
       >
         <p class="font-bold">{{ t('common.error') }}</p>
-        <p>{{ error }}</p>
+        <p>{{ t(error) }}</p>
       </div>
 
       <!-- Results -->

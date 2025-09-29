@@ -39,6 +39,7 @@
     "fetchTasksError": "獲取任務列表失敗",
     "fetchTaskError": "獲取任務失敗",
     "fetchLogError": "取得日誌資料發生錯誤",
+    "unknownError": "發生未知錯誤。",
     "formValidation": {
       "taskNameRequired": "任務名稱為必填項。",
       "includeRequired": "檔案名稱包含為必填項。",
