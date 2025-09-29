@@ -16,7 +16,11 @@ async function initializeApp() {
   const settingStore = useSettingStore()
 
   // 等待設定從後端載入完成
-  await settingStore.fetchSettings()
+  try {
+    await settingStore.fetchSettings()
+  } catch (error) {
+    console.error('無法從後端獲取設定:', error)
+  }
 
   // 使用載入的 locale 來建立 i18n 實例
   const i18n = createI18nInstance(settingStore.settings.locale)

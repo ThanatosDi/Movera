@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// import ParsePreview from '@/components/ParsePreview.vue'
+import ParsePreview from '@/components/ParsePreview.vue'
 import RegexPreview from '@/components/RegexPreview.vue'
 import TaskForm from '@/components/TaskForm.vue'
 import { Button } from '@/components/ui/button'
@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useNotification } from '@/composables/useNotification'
 import type { TaskCreate } from '@/schemas'
 import { useTaskStore } from '@/stores/taskStore'
-import { Save } from 'lucide-vue-next'
+import { Save, X } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -35,6 +35,11 @@ const isSaving = ref<boolean>(false)
 const isRenameRuleRequired = computed(() => {
   return task.value.rename_rule !== null
 })
+
+const clearRenameRules = () => {
+  task.value.src_filename = null
+  task.value.dst_filename = null
+}
 
 const validFormData = (taskData: TaskCreate) => {
   if (!taskData.name?.trim()) {
@@ -97,8 +102,21 @@ const createTask = async () => {
           v-model="task"
           :isRenameRuleRequired="isRenameRuleRequired"
         />
-        <!-- 建立按鈕 -->
-        <div class="flex justify-end">
+        <!-- 按鈕區域 -->
+        <div class="flex justify-between items-center">
+          <!-- 清除規則按鈕 -->
+          <Button
+            v-if="isRenameRuleRequired"
+            @click="clearRenameRules"
+            type="button"
+            variant="destructive"
+          >
+            <X class="size-4 mr-2" />
+            {{ t('views.createTask.clearRulesButton') }}
+          </Button>
+          <!-- 佔位符，確保建立按鈕在右邊 -->
+          <div v-else></div>
+          <!-- 建立按鈕 -->
           <Button
             @click="createTask"
             :disabled="isSaving"
@@ -117,10 +135,11 @@ const createTask = async () => {
       v-model:dst-filename="task.dst_filename"
     />
     <!-- 檔案名稱解析預覽 -->
-    <!-- <ParsePreview
+    <ParsePreview
       v-if="task.rename_rule === 'parse'"
       v-model:src-filename="task.src_filename"
       v-model:dst-filename="task.dst_filename"
-    /> -->
+    />
+
   </main>
 </template>

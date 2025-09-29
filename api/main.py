@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from api.middlewares import setup_cors, setup_gzip
-from api.routers import log, setting, task, webhook
+from api.routers import log, parse_preview, setting, task, webhook
 from core.utils.logger import logger as _logger
 
 logger = _logger.bind(app="api")
@@ -55,6 +55,7 @@ app.include_router(task.router)
 app.include_router(log.router)
 app.include_router(webhook.router)
 app.include_router(setting.router)
+app.include_router(parse_preview.router)
 
 
 @app.get("/api/v1/health", tags=["Health"], status_code=200)

@@ -44,7 +44,8 @@
       "includeRequired": "檔案名稱包含為必填項。",
       "moveToRequired": "移動至為必填項。",
       "invalidPath": "移動至包含無效的路徑字元(&lt; &gt; : \" | ? *)",
-      "renameRuleRequired": "已啟用重新命名: '{'{rule}'}' 但未設定\n - 來源檔名規則\n - 目標檔名規則"
+      "renameRuleRequired": "已啟用重新命名: '{'{rule}'}' 但未設定\n - 來源檔名規則\n - 目標檔名規則",
+      "parseNoMatch": "來源規則與檔案名稱不匹配。"
     }
   },
   "views": {
@@ -62,7 +63,8 @@
       "cardTitle": "任務設定",
       "cardDescription": "在這裡編輯任務的詳細設定。",
       "createButton": "建立任務",
-      "creatingButton": "建立中..."
+      "creatingButton": "建立中...",
+      "clearRulesButton": "清除所有規則"
     },
     "taskDetail": {
       "title": "任務詳情",
@@ -162,27 +164,35 @@
         }
       },
       "parse": {
-        "title": "Parse 樣板預覽",
-        "capturedFields": "捕獲欄位：",
-        "formatError": "格式化錯誤",
-        "instructions": [
-          "在「來源樣板」中使用大括號 '{'{}'}' 來建立捕獲欄位，例如 '{'{name}'}'。",
-          "在「目標樣板」中使用相同的 '{'{name}'}' 來引用對應的欄位。",
-          "可以指定類型，例如 '{'{episode:d}'}' 只會匹配數字。",
-          "點擊上方的測試案例按鈕可以快速載入範例。"
-        ],
-        "exampleUsage": "欄位引用範例：",
-        "usageTitle": "捕獲任意字符",
-        "usageSeason": "捕獲數字",
-        "usageYear": "捕獲數字作為年份",
-        "commonSpecifiers": "常用類型指定符：",
-        "specifiers": {
-          "d": "數字",
-          "w": "字母與數字",
-          "s": "空白字符",
-          "f": "浮點數",
-          "none_key": "無",
-          "none_value": "任意字符"
+        "title": "Parse 預覽",
+        "description": "即時預覽檔案名稱解析的結果。",
+        "testFilename": "測試檔案名稱",
+        "sourceRule": "來源規則",
+        "targetRule": "目標規則",
+        "parsedFields": "已解析欄位",
+        "noFieldsParsed": "尚無解析任何欄位。",
+        "result": "結果",
+        "noResult": "尚未產生結果。",
+        "instructions": {
+          "title": "使用說明",
+          "lines": [
+            "使用大括號 {'{'}{'}'} 來定義要捕獲的欄位。",
+            "在冒號後添加類型指定符，例如 {'{'}episode:d{'}'} 來捕獲數字。",
+            "目標規則可以使用格式指定符，例如 {'{'}episode:02d{'}'} 來補零。",
+            "點擊上方的範例按鈕以載入範例。"
+          ],
+          "commonTypesTitle": "常用類型指定符：",
+          "types": {
+            "default": "預設 (字串)",
+            "integer": "整數",
+            "float": "浮點數",
+            "string": "字串",
+            "lowercase": "小寫字串",
+            "uppercase": "大寫字串",
+            "timestamp": "時間戳"
+          },
+          "docsLink": "更詳細的語法，請參考 {link}。",
+          "officialDocs": "官方文件"
         }
       }
     }

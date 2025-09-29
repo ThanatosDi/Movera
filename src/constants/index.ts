@@ -65,8 +65,8 @@ export const ParseExamples = [
   {
     label: '電影案例', key: 'movie',
     filename: 'Movie.Title.2024.1080p.BluRay.x264-GROUP.mkv',
-    src_filename: '{title} ({year}) {tags}.mkv',
-    dst_filename: '{title} ({year}) [{tags}].mkv'
+    src_filename: '{title:11}.{year}.{resolution}.BluRay.{codec}-GROUP.mkv',
+    dst_filename: '{title} ({year}) [{resolution}][{codec}].mkv'
   }
 ]
 
