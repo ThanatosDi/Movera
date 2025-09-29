@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from '@/components/ui/textarea'
@@ -55,6 +54,12 @@ const renameRuleProxy = computed({
     task.value.rename_rule = value === 'null' ? null : value
   }
 })
+
+const autoGrow = (event: Event) => {
+  const target = event.target as HTMLTextAreaElement
+  target.style.height = 'auto'
+  target.style.height = `${target.scrollHeight}px`
+}
 </script>
 
 <template>
@@ -63,20 +68,26 @@ const renameRuleProxy = computed({
       <!-- 名稱 -->
       <div class="space-y-2">
         <Label for="name">{{ t('components.taskForm.name') }}<span class="text-red-500">*</span></Label>
-        <Input
+        <Textarea
           id="name"
           v-model="task.name"
-          class="bg-gray-700 border-gray-600"
+          class="bg-gray-700 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+          rows="1"
+          @input="autoGrow"
+          @keydown.enter.prevent
         />
       </div>
 
       <!-- 包含 -->
       <div class="space-y-2">
         <Label for="include">{{ t('components.taskForm.include') }}<span class="text-red-500">*</span></Label>
-        <Input
+        <Textarea
           id="include"
           v-model="task.include"
-          class="bg-gray-700 border-gray-600"
+          class="bg-gray-700 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+          rows="1"
+          @input="autoGrow"
+          @keydown.enter.prevent
         />
       </div>
     </div>
@@ -84,10 +95,13 @@ const renameRuleProxy = computed({
     <!-- 移動至 -->
     <div class="space-y-2">
       <Label for="move_to">{{ t('components.taskForm.moveTo') }}<span class="text-red-500">*</span></Label>
-      <Input
+      <Textarea
         id="move_to"
         v-model="task.move_to"
-        class="bg-gray-700 border-gray-600"
+        class="bg-gray-700 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+        rows="1"
+        @input="autoGrow"
+        @keydown.enter.prevent
       />
     </div>
 
@@ -135,10 +149,13 @@ const renameRuleProxy = computed({
           class="text-red-500"
         >*</span>
       </Label>
-      <Input
+      <Textarea
         id="src_filename"
         v-model="task.src_filename"
-        class="bg-gray-700 border-gray-600"
+        class="bg-gray-700 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+        rows="1"
+        @input="autoGrow"
+        @keydown.enter.prevent
       />
     </div>
 
@@ -157,7 +174,10 @@ const renameRuleProxy = computed({
       <Textarea
         id="dst_filename"
         v-model="task.dst_filename"
-        class="bg-gray-700 border-gray-600"
+        class="bg-gray-700 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+        rows="1"
+        @input="autoGrow"
+        @keydown.enter.prevent
       />
     </div>
   </div>

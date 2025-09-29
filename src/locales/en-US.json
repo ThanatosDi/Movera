@@ -62,7 +62,8 @@
       "cardTitle": "Task Settings",
       "cardDescription": "Edit the detailed settings for the task here.",
       "createButton": "Create Task",
-      "creatingButton": "Creating..."
+      "creatingButton": "Creating...",
+      "clearRulesButton": "Clear All Rules"
     },
     "taskDetail": {
       "title": "Task Details",
@@ -160,34 +161,37 @@
           "qmark": "zero or one",
           "dot": "literal dot"
         }
-      }
-    },
-    "parseReference": {
-      "title": "Parse Operation Instructions",
-      "description": "This document provides instructions on how to use Python's parse expressions for file renaming. For more detailed syntax, please refer to the",
-      "documentationLink": "Official Documentation",
-      "example1": {
-        "title": "Example 1: Basic Renaming",
-        "description": "Renaming a TV show episode file from a dot-separated format to a space-separated format.",
-        "step1": {
-          "src": "Source Filename Pattern: {'{'}title{'}'}.S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
-          "description": "matches"
-        },
-        "step2": {
-          "dst": "Destination Filename Pattern: {'{'}title{'}'} S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
-          "description": "renames to"
-        }
       },
-      "example2": {
-        "title": "Example 2: Complex Anime File Renaming",
-        "description": "Extracting the title and episode number from a complex anime file name and converting it to a standard season/episode format.",
-        "step1": {
-          "src": "Source Filename Pattern: [{'{'}source{'}'}] {'{'}title{'}'} - {'{'}episode:d{'}'} ({'{'}quality{'}'}) [{'{'}hash{'}'}].{'{'}extension{'}'}",
-          "description": "matches"
-        },
-        "step2": {
-          "dst": "Destination Filename Pattern: {'{'}title{'}'} - S01E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
-          "description": "renames to"
+      "parse": {
+        "title": "Parse Preview",
+        "description": "Preview the result of filename parsing in real-time.",
+        "testFilename": "Test Filename",
+        "sourceRule": "Source Rule",
+        "targetRule": "Target Rule",
+        "parsedFields": "Parsed Fields",
+        "noFieldsParsed": "No fields parsed yet.",
+        "result": "Result",
+        "noResult": "No result generated yet.",
+        "instructions": {
+          "title": "Usage Instructions",
+          "lines": [
+            "Use curly braces {'{'}{'}'} to define a field to capture.",
+            "Add a type specifier after a colon, e.g., {'{'}episode:d{'}'} to capture a number.",
+            "The destination rule can use format specifiers, e.g., {'{'}episode:02d{'}'} to pad with zeros.",
+            "Click the example buttons above to load examples."
+          ],
+          "commonTypesTitle": "Common Type Specifiers:",
+          "types": {
+            "default": "Default (string)",
+            "integer": "Integer",
+            "float": "Float",
+            "string": "String",
+            "lowercase": "Lowercase string",
+            "uppercase": "Uppercase string",
+            "timestamp": "Timestamp"
+          },
+          "docsLink": "For more detailed syntax, please refer to the {link}.",
+          "officialDocs": "Official Documentation"
         }
       }
     }

@@ -62,7 +62,8 @@
       "cardTitle": "任務設定",
       "cardDescription": "在這裡編輯任務的詳細設定。",
       "createButton": "建立任務",
-      "creatingButton": "建立中..."
+      "creatingButton": "建立中...",
+      "clearRulesButton": "清除所有規則"
     },
     "taskDetail": {
       "title": "任務詳情",
@@ -160,34 +161,37 @@
           "qmark": "零個或一個",
           "dot": "點號字面值"
         }
-      }
-    },
-    "parseReference": {
-      "title": "Parse 操作說明",
-      "description": "本文件提供如何使用 Python 的 parse 運算式來重新命名檔案的說明。更詳細的語法請參考",
-      "documentationLink": "官方文件",
-      "example1": {
-        "title": "範例 1：基本重新命名",
-        "description": "將一個電視劇集檔案從點分隔格式重新命名為空格分隔格式。",
-        "step1": {
-          "src": "來源格式：{'{'}title{'}'}.S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
-          "description": "匹配"
-        },
-        "step2": {
-          "dst": "目標格式：{'{'}title{'}'} S{'{'}season:02d{'}'}E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
-          "description": "重新命名為"
-        }
       },
-      "example2": {
-        "title": "範例 2：複雜動漫檔案重新命名",
-        "description": "從一個複雜的動漫檔案名稱中提取標題和集數，並將其轉換為標準的季集格式。",
-        "step1": {
-          "src": "來源格式：[{'{'}source{'}'}] {'{'}title{'}'} - {'{'}episode:d{'}'} ({'{'}quality{'}'}) [{'{'}hash{'}'}].{'{'}extension{'}'}",
-          "description": "匹配"
-        },
-        "step2": {
-          "dst": "目標格式：{'{'}title{'}'} - S01E{'{'}episode:02d{'}'}.{'{'}extension{'}'}",
-          "description": "重新命名為"
+      "parse": {
+        "title": "Parse 預覽",
+        "description": "即時預覽檔案名稱解析的結果。",
+        "testFilename": "測試檔案名稱",
+        "sourceRule": "來源規則",
+        "targetRule": "目標規則",
+        "parsedFields": "已解析欄位",
+        "noFieldsParsed": "尚無解析任何欄位。",
+        "result": "結果",
+        "noResult": "尚未產生結果。",
+        "instructions": {
+          "title": "使用說明",
+          "lines": [
+            "使用大括號 {'{'}{'}'} 來定義要捕獲的欄位。",
+            "在冒號後添加類型指定符，例如 {'{'}episode:d{'}'} 來捕獲數字。",
+            "目標規則可以使用格式指定符，例如 {'{'}episode:02d{'}'} 來補零。",
+            "點擊上方的範例按鈕以載入範例。"
+          ],
+          "commonTypesTitle": "常用類型指定符：",
+          "types": {
+            "default": "預設 (字串)",
+            "integer": "整數",
+            "float": "浮點數",
+            "string": "字串",
+            "lowercase": "小寫字串",
+            "uppercase": "大寫字串",
+            "timestamp": "時間戳"
+          },
+          "docsLink": "更詳細的語法，請參考 {link}。",
+          "officialDocs": "官方文件"
         }
       }
     }
