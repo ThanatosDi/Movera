@@ -1,4 +1,4 @@
-FROM node:22-bookworm-slim AS builder
+FROM node:22-trixie-slim AS builder
 
 WORKDIR /src
 
@@ -10,7 +10,7 @@ RUN npm install
 RUN npm run build
 
 
-FROM python:3.13-slim-bookworm
+FROM python:3.13-slim-trixie
 
 EXPOSE 8000
 WORKDIR /movera
