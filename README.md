@@ -1,45 +1,63 @@
-# Movera
+# Movera - 技術分析與開發指南
 
-Movera 是一個專為影音收藏家設計的智慧檔案管理工具，旨在自動化您的媒體檔案整理流程。透過與多個下載器的無縫整合，Movera 能夠在下載完成後，根據您自訂的規則，自動將檔案移動到指定資料夾並進行標準化重新命名。
+## 簡介
 
-它結合了 Vue 3 打造的現代化 Web UI、由 FastAPI 驅動的高效能後端 API，以及穩定的背景任務處理系統，提供了一個完整且易於使用的解決方案。
+Movera 是一個由任務驅動的檔案管理與自動化平台。其主要設計目的是監控如下載工具（例如 qBittorrent）的完成事件，並根據使用者預先定義的規則，自動對檔案進行重新命名和移動。
+
+專案提供了一個現代化的 Web 使用者介面，讓使用者可以輕鬆建立、管理和監控這些自動化任務。
 
 ## ✨ 核心功能
 
-- **自動化任務管理**: 建立、讀取、更新和刪除 (CRUD) 檔案移動與重新命名任務。
-- **智慧重新命名**: 支援使用正則表達式 (Regex) 或字串解析 (Parse) 兩種模式來定義複雜的重新命名規則。
-- **qBittorrent 整合**: 透過 Webhook 監聽 qBittorrent 的下載完成事件，觸發自動化處理流程。
-- **Web UI 操作介面**: 提供一個現代化、響應式的網頁介面，讓您輕鬆管理所有任務和設定。
-- **系統設定**: 可透過 UI 調整系統層級的設定。
-- **任務統計**: 快速查看已啟用和已停用任務的數量。
-- **詳細日誌**: 追蹤每個任務的執行情況，方便除錯與監控。
+- **任務化管理**: 以「任務」為核心，每個任務定義了一套完整的檔案處理流程。
+- **智慧重新命名**: 支援兩種重新命名模式：
+    1.  **Parse**: 透過簡單的樣板語法（如 `{name}.{ext}`）進行匹配和格式化。
+    2.  **Regex**: 使用功能強大的正規表示式進行複雜的檔名匹配和替換。
+- **Webhook 整合**: 內建 Webhook 端點，可直接與 qBittorrent 等下載軟體整合，實現下載完成後的無縫自動化處理。
+- **視覺化預覽**: 在建立命名規則時，提供即時的預覽功能，確保規則的正確性。
+- **日誌與監控**: 每個任務的執行過程和結果都會被詳細記錄，方便追蹤與除錯。
+- **Web UI 管理**: 提供一個基於 Vue.js 的單頁應用程式（SPA），用於管理所有任務、設定和查看日誌。
 
 ## 🛠️ 技術架構
 
-- **後端**: Python 3.12+, [FastAPI](https://fastapi.tiangolo.com/), SQLAlchemy (搭配 SQLite), Alembic
-- **前端**: Node.js 22+, [Vue.js 3](https://vuejs.org/), [Vite](https://vitejs.dev/), [Tailwind CSS](https://tailwindcss.com/), [Pinia](https://pinia.vuejs.org/), shadcn-vue
-- **容器化**: Docker, Docker Compose
+Movera 採用前後端分離的現代 Web 應用架構，並透過 Docker 進行容器化部署。
+
+- **後端 (Backend)**
+    - **框架**: [FastAPI](https://fastapi.tiangolo.com/) (Python)
+    - **資料庫 ORM**: [SQLAlchemy](https://www.sqlalchemy.org/)
+    - **資料庫遷移**: [Alembic](https://alembic.sqlalchemy.org/)
+    - **Web 伺服器**: [Uvicorn](https://www.uvicorn.org/)
+    - **套件管理**: [uv](https://github.com/astral-sh/uv)
+
+- **前端 (Frontend)**
+    - **框架**: [Vue.js 3](https://vuejs.org/) (使用 Composition API)
+    - **語言**: [TypeScript](https://www.typescriptlang.org/)
+    - **建置工具**: [Vite](https://vitejs.dev/)
+    - **狀態管理**: [Pinia](https://pinia.vuejs.org/)
+    - **UI 元件庫**: [Tailwind CSS](https://tailwindcss.com/) 搭配 class-variance-authority (類似 Shadcn UI 的風格)
+    - **路由**: [Vue Router](https://router.vuejs.org/)
+    - **國際化**: [Vue I18n](https://vue-i18n.intlify.dev/)
+
+- **資料庫**
+    - 預設使用 **SQLite**，資料庫檔案儲存於 `database/` 目錄下，方便輕量部署。
+
+- **容器化**
+    - **Docker** 與 **Docker Compose**，簡化了部署和環境一致性。
 
 ## 🚀 快速啟動 (使用 Docker)
 
-對於熟悉容器化操作的使用者，使用 Docker 是最快且最推薦的啟動方式。
+1.  **前置需求**:
+    - [Docker](https://www.docker.com/get-started)
+    - [Docker Compose](https://docs.docker.com/compose/install/)
 
-1.  **拉取映像 (Pull Image)**:
-
-    從 Docker Hub 拉取最新的 Movera 映像。
-
-    ```bash
-    docker pull thanatosdi/movera:latest
-    ```
-
-2.  **準備資料夾**:
-
-    在您選擇的位置建立兩個資料夾，用於存放 Movera 的資料庫和儲存檔案。
+2.  **設定環境變數**:
+    專案使用 `PUID` 和 `PGID` 來設定容器內檔案的擁有者。在專案根目錄建立 `.env` 檔案：
 
     ```bash
-    mkdir -p ./database
-    mkdir -p ./storages
+    # .env
+    PUID=1000
+    PGID=1000
     ```
+    *你可以透過在終端執行 `id` 命令來取得你目前的 PUID 和 PGID。*
 
 3.  **執行容器 (Run Container)**:
 
@@ -54,7 +72,6 @@ Movera 是一個專為影音收藏家設計的智慧檔案管理工具，旨在�
       -v $(pwd)/database:/movera/database \
       -v $(pwd)/storages:/movera/storages \
       -v <downloader_path>:/download \
-      -v <storages_path>:/storages \
       --name movera \
       thanatosdi/movera:latest
     ```
@@ -64,7 +81,6 @@ Movera 是一個專為影音收藏家設計的智慧檔案管理工具，旨在�
     - `-v $(pwd)/database:/movera/database`: **(必要)** 將主機上存放資料庫檔案的 `database` 資料夾掛載到容器中。
     - `-v $(pwd)/storages:/movera/storages`: **(必要)** 將主機上用於存儲的 `storages` 資料夾掛載到容器中。
     - `-v <downloader_path>:/download`: **(必要)** 將主機上用於下載檔案的資料夾掛載到容器中。
-    - `-v <storages_path>:/storages`: **(必要)** 將主機上用於存儲檔案的資料夾掛載到容器中。
     </details>
     
     <details>
@@ -80,89 +96,103 @@ Movera 是一個專為影音收藏家設計的智慧檔案管理工具，旨在�
         volumes:
           - ./database:/movera/database
           - ./storages:/movera/storages
+          - <downloader_path>:/download
         restart: unless-stopped
     ```
     - `ports` 區塊建議完整寫清楚主機內網 IP 位址，例如 `127.0.0.1:8000:8000` 與 `192.168.1.10:8000:8000` 之類的；如果只填寫 `8000:8000` 表示任何來源的主機都可以繞過防火牆 `8000` 埠進行訪問。
     </details>
 
-5.  **訪問 Movera**:
+4.  **存取應用**:
+    服務啟動後，你可以透過瀏覽器存取 `http://localhost:8000` 來使用 Movera。
 
-    容器啟動後，您可以透過瀏覽器訪問 `http://localhost:<HOST_PORT>` 來開啟 Movera 的 Web UI。
-
-6.  **下載器設定**:
-    <details>
-    <summary>qBittorrent</summary>
-    
-    將 [`scripts`](https://github.com/ThanatosDi/Movera/blob/main/scripts/qbittorrent/in-complete) 放置到 qBittorrent 中，並賦予執行權限  
-    ```bash
-    chmod +x in-complete
-    ```
-    登入您的 qBittorrent Web UI，進入 `選項` -> `下載` -> `下載完成時執行外部程式`，並填入以下指令：
-
-    ```
-    /config/scripts/in-complete http://<MOVERA_HOST_IP>/webhook/qbittorrent/on-complete "%F" "%L"
-    ```
-
-    請將 `<MOVERA_HOST_IP>` 替換為執行 Movera 容器的主機的 IP 位址，並將 `<HOST_PORT>` 替換為您在 `docker run` 指令中設定的連接埠。
-    <details>
 ## 📚 API 端點
 
-Movera 提供了一套完整的 RESTful API 來管理系統。您可以在應用程式啟動後，訪問 `http://localhost:8000/docs` 來查看詳細的 OpenAPI (Swagger) 文件。
+所有 API 端點皆以 `/api/v1` 為前綴。
 
-- `GET /api/v1/tasks`: 獲取所有任務。
-- `POST /api/v1/task`: 建立一個新任務。
-- `GET /api/v1/task/{task_id}`: 獲取單一任務的詳細資訊。
-- `PUT /api/v1/task/{task_id}`: 更新一個現有任務。
-- `DELETE /api/v1/task/{task_id}`: 刪除一個任務。
-- `GET /api/v1/settings`: 獲取所有設定。
-- `PUT /api/v1/settings`: 更新多個設定。
-- `POST /webhook/qbittorrent/on-complete`: qBittorrent 的 Webhook 接收端點。
+#### `/tasks` - 任務管理
+
+- `GET /tasks`: 獲取所有任務列表。
+- `GET /task/{task_id}`: 獲取指定 ID 的任務詳情。
+- `POST /task`: 建立一個新任務。
+- `PUT /task/{task_id}`: 更新指定 ID 的任務。
+- `DELETE /task/{task_id}`: 刪除指定 ID 的任務。
+- `GET /tasks/stats`: 獲取任務統計數據（啟用/停用數量）。
+
+#### `/log` - 日誌管理
+
+- `GET /log/{task_id}`: 獲取指定任務的所有日誌。
+
+#### `/settings` - 設定管理
+
+- `GET /settings`: 獲取所有設定。
+- `GET /setting/{key}`: 獲取指定鍵名的設定。
+- `PUT /settings`: 更新多個設定。
+- `PUT /setting/{key}`: 更新指定鍵名的設定。
+
+#### `/parse-preview` - 規則預覽
+
+- `POST /parse-preview`: 提供來源文字、匹配規則和目標格式，回傳預覽結果。
+
+#### `/webhook` - Webhook 整合
+
+- `GET /webhook/status`: 檢查 Webhook 服務狀態。
+- `POST /webhook/qbittorrent/on-complete`: 接收 qBittorrent 下載完成的通知。
+
+#### `/health` - 健康檢查
+
+- `GET /api/v1/health`: 檢查 API 服務是否正常運行。
 
 ## 💻 開發指南
 
-如果您想為 Movera 貢獻程式碼或進行二次開發，請遵循以下步驟設定您的本機開發環境。
+### 前置需求
 
-### 後端 (FastAPI)
+- Python 3.12+
+- [uv](https://github.com/astral-sh/uv) (建議的 Python 套件管理器)
+- Node.js 20+
+- [npm](https://www.npmjs.com/) 或相容的套件管理器
 
-1.  **安裝 Python**: 確保您已安裝 Python 3.12 或更高版本。
-2.  **安裝 uv**: 本專案使用 `uv` 作為套件管理器。請參考 [uv 官方文件](https://github.com/astral-sh/uv) 進行安裝。
-3.  **建立虛擬環境並安裝依賴**: 
+### 後端開發
 
+1.  **安裝依賴**:
     ```bash
-    # 建立虛擬環境
-    uv venv
-
-    # 安裝依賴
-    uv sync --locked
+    uv sync
     ```
 
-4.  **啟動後端伺服器**:
-
+2.  **執行資料庫遷移**:
     ```bash
-    uv run uvicorn api.main:app --reload
+    uv run alembic upgrade head
     ```
 
-### 前端 (Vue)
+3.  **啟動開發伺服器**:
+    ```bash
+    uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+    ```
+    伺服器將在 `http://localhost:8000` 上運行，並在程式碼變更時自動重載。
 
-1.  **安裝 Node.js**: 確保您已安裝 Node.js 22.x 或更高版本。
-2.  **安裝依賴**: 
+### 前端開發
 
+1.  **進入前端目錄並安裝依賴**:
     ```bash
     npm install
     ```
 
-3.  **啟動前端開發伺服器**:
-
-    ```bash
-    npm run dev
-    ```
-
-4.  **設定環境變數**:
-
-    在前端開發伺服器中，您可以設定環境變數 `VITE_API_BASE_URL` 來指定後端 API 的基本 URL。例如：
+2. **設定環境變數**:  
+   在前端開發伺服器中，您可以設定環境變數(.env) `VITE_API_BASE_URL` 來指定後端 API 的基本 URL。例如：
 
     ```bash
     VITE_API_BASE_URL="http://localhost:8000"
     ```
 
-設定完成後，後端 API 將運行在 `http://localhost:8000`，前端開發伺服器將運行在 `http://localhost:5173` (或 Vite 指定的其他連接埠)。
+3.  **啟動開發伺服器**:
+    ```bash
+    npm run dev
+    ```
+    Vite 開發伺服器將啟動，你可以在終端輸出的位址（通常是 `http://localhost:5173`）上看到前端介面。
+
+### 執行測試
+
+專案使用 `pytest` 進行測試。
+
+```bash
+pytest
+```
