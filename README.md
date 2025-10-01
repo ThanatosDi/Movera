@@ -1,4 +1,5 @@
-# Movera - 技術分析與開發指南
+# Movera
+<img width="1600" height="400" alt="movera_banner_long" src="https://github.com/user-attachments/assets/5b14ab16-e81b-4b67-9d2d-ace8fccc2b9c" />
 
 ## 簡介
 
