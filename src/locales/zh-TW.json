@@ -1,0 +1,60 @@
+{
+  "common": {
+    "about": "關於",
+    "cancel": "取消",
+    "continue": "繼續",
+    "create": "建立",
+    "delete": "刪除任務",
+    "disabled": "已停用",
+    "emptyTasks": "未找到符合的任務",
+    "enabled": "已啟用",
+    "error": "錯誤",
+    "home": "首頁",
+    "language": "語言",
+    "loading": "載入中...",
+    "matchSuccess": "匹配成功",
+    "noMatch": "無匹配",
+    "save": "儲存設定",
+    "saving": "儲存中...",
+    "search": "搜尋...",
+    "settings": "設定",
+    "status": "狀態",
+    "success": "成功",
+    "tasks": "任務",
+    "timezone": "時區",
+    "version": "應用程式版本"
+  },
+  "components": {
+    "localeSelect": {
+      "placeholder": "選擇語言"
+    },
+    "sidebarTool": {
+      "createTaskBtn": "建立新任務"
+    }
+  },
+  "homeView": {
+    "description": "歡迎使用 Movera，自動化檔案管理系統",
+    "disabledTasks": "已停用任務",
+    "disabledTasksDesc": "個任務已停用",
+    "enabledTasks": "已啟用任務",
+    "enabledTasksDesc": "個任務已啟用",
+    "title": "首頁"
+  },
+  "settingView": {
+    "description": "管理全域應用程式設定",
+    "generalCard": {
+      "description": "調整應用程式的外觀和通知行為。",
+      "title": "一般設定",
+      "timezoneLoading": "載入時區中...",
+      "timezoneNotFound": "未找到時區。",
+      "timezonePlaceholder": "選擇時區...",
+      "timezoneSearch": "搜尋時區..."
+    },
+    "title": "設定"
+  },
+  "taskDetailView": {
+    "disableButton": "停用任務",
+    "enableButton": "啟用任務",
+    "taskId": "任務 ID"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "common": {
+    "about": "About",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "create": "Create",
+    "delete": "Delete Task",
+    "disabled": "Disabled",
+    "emptyTasks": "No matching tasks found",
+    "enabled": "Enabled",
+    "error": "Error",
+    "home": "Home",
+    "language": "Language",
+    "loading": "Loading...",
+    "matchSuccess": "Match successful",
+    "noMatch": "No match",
+    "save": "Save Settings",
+    "saving": "Saving...",
+    "search": "Search...",
+    "settings": "Settings",
+    "status": "Status",
+    "success": "Success",
+    "tasks": "Tasks",
+    "timezone": "Timezone",
+    "version": "Application Version"
+  },
+  "components": {
+    "localeSelect": {
+      "placeholder": "Select Language"
+    },
+    "sidebarTool": {
+      "createTaskBtn": "Create New Task"
+    }
+  },
+  "homeView": {
+    "description": "Welcome to Movera, the automated file management system",
+    "disabledTasks": "Disabled Tasks",
+    "disabledTasksDesc": "tasks are disabled",
+    "enabledTasks": "Enabled Tasks",
+    "enabledTasksDesc": "tasks are enabled",
+    "title": "Home"
+  },
+  "settingView": {
+    "description": "Manage global application settings",
+    "generalCard": {
+      "description": "Adjust the application's appearance and notification behavior.",
+      "title": "General Settings",
+      "timezoneLoading": "Loading timezones...",
+      "timezoneNotFound": "Timezone not found.",
+      "timezonePlaceholder": "Select timezone...",
+      "timezoneSearch": "Search timezone...",
+    },
+    "title": "Setting"
+  },
+  "taskDetailView": {
+    "enableButton": "Enable Task",
+    "disableButton": "Disable Task",
+    "taskId": "Task ID"
+  }
+}
