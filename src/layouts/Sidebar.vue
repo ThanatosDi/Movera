@@ -2,25 +2,14 @@
 // import { useTaskStore } from '@/stores/taskStore';
 import SidebarItem from '@/components/SidebarItem.vue';
 import SidebarTool from '@/components/SidebarTool.vue';
+import { useTaskStore } from '@/stores/taskStore';
 import { Search } from 'lucide-vue-next';
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-// const taskStore = useTaskStore()
-// const { filteredTasks: tasks } = storeToRefs(taskStore)
-
-const tasks = [
-  {
-    id: '5454a5d46as4d65as4da4d',
-    name: '範例任務一',
-    enabled: true,
-  },
-  {
-    id: '5454sdadadasda5d46as4d65as4da4d',
-    name: '範例任務2',
-    enabled: false,
-  }
-]
+const taskStore = useTaskStore()
+const { tasks } = storeToRefs(taskStore)
 
 </script>
 

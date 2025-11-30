@@ -1,11 +1,17 @@
 <script lang="ts" setup>
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { WebSocketService } from '@/services/websocketService'
-import { CheckCircle, XCircle } from 'lucide-vue-next'
-import { useI18n } from 'vue-i18n'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useWebSocketService } from '@/composables/useWebSocketService';
+import { useTaskStore } from '@/stores/taskStore';
+import { CheckCircle, LoaderCircle, XCircle } from 'lucide-vue-next';
+import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
+
 
 const { t } = useI18n()
-const { status: websocketStatus, data } = WebSocketService()
+const { status: websocketStatus } = useWebSocketService()
+const taskStore = useTaskStore()
+const { isLoading, enabledTaskCount, disabledTaskCount } = storeToRefs(taskStore)
+
 </script>
 
 <template>
@@ -16,17 +22,6 @@ const { status: websocketStatus, data } = WebSocketService()
       <p class="text-muted-foreground">{{ t('homeView.description') }}</p>
     </div>
 
-    <!-- WebSocket 狀態卡片 -->
-    <Card class="border-border">
-      <CardHeader>
-        <CardTitle>WebSocket Status</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>Status: {{ websocketStatus }}</p>
-        <p>Data: {{ data }}</p>
-      </CardContent>
-    </Card>
-
     <!-- 統計卡片 -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- 已啟動任務 -->
@@ -36,7 +31,14 @@ const { status: websocketStatus, data } = WebSocketService()
           <CheckCircle class="size-8 text-green-400" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold text-green-400">{{ enabledTasksCount ?? 0 }}</div>
+          <div
+            v-if="websocketStatus === 'OPEN' && !isLoading"
+            class="text-2xl font-bold text-green-400"
+          >{{ enabledTaskCount ?? 0 }}</div>
+          <LoaderCircle
+            v-else
+            class="animate-spin"
+          />
           <p class="text-xs text-muted-foreground">{{ t('homeView.enabledTasksDesc') }}</p>
         </CardContent>
       </Card>
@@ -48,7 +50,14 @@ const { status: websocketStatus, data } = WebSocketService()
           <XCircle class="size-8 text-red-500" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold text-red-500">{{ disabledTasksCount ?? 0 }}</div>
+          <div
+            v-if="websocketStatus === 'OPEN' && !isLoading"
+            class="text-2xl font-bold text-red-500"
+          >{{ disabledTaskCount ?? 0 }}</div>
+          <LoaderCircle
+            v-else
+            class="animate-spin"
+          />
           <p class="text-xs text-muted-foreground">{{ t('homeView.disabledTasksDesc') }}</p>
         </CardContent>
       </Card>

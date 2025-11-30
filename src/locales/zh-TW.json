@@ -22,7 +22,8 @@
     "success": "成功",
     "tasks": "任務",
     "timezone": "時區",
-    "version": "應用程式版本"
+    "version": "應用程式版本",
+    "reload": "重新載入"
   },
   "components": {
     "localeSelect": {
@@ -30,7 +31,60 @@
     },
     "sidebarTool": {
       "createTaskBtn": "建立新任務"
+    },
+    "taskForm": {
+      "dstFilename": "目標檔名規則 (Dst Filename Pattern)",
+      "include": "檔案名稱包含",
+      "moveTo": "移動至 (Move To)",
+      "name": "任務名稱",
+      "renameRule": "重新命名規則 (Rename Rule)",
+      "renameRuleOptions": {
+        "noRename": "不重新命名",
+        "parse": "模板解析 Parse",
+        "regex": "正規表示 Regex"
+      },
+      "srcFilename": "來源檔名規則 (Src Filename Pattern)"
+    },
+    "parsePreview": {
+      "title": "Parse 預覽",
+      "description": "即時預覽檔案名稱解析的結果。",
+      "testFilename": "測試檔案名稱",
+      "sourcePattern": "檔案原始名稱規則",
+      "destinationPattern": "重新命名檔案規則",
+      "groups": "已解析欄位",
+      "withoutGroups": "尚無解析任何欄位",
+      "result": "結果",
+      "noResult": "尚未產生結果",
+      "instructions": {
+        "title": "使用說明",
+        "commonTypesTitle": "常用類型指定符：",
+        "docsLink": "更詳細的語法，請參考 {link}。",
+        "lines": [
+          "使用大括號 {'{'}{'}'} 來定義要捕獲的欄位。",
+          "在冒號後添加類型指定符，例如 {'{'}episode:d{'}'} 來捕獲數字。",
+          "目標規則可以使用格式指定符，例如 {'{'}episode:02d{'}'} 來補零。",
+          "點擊上方的範例按鈕以載入範例。"
+        ],
+        "types": {
+          "default": "預設 (字串)",
+          "integer": "整數",
+          "float": "浮點數",
+          "string": "字串",
+          "lowercase": "小寫字串",
+          "uppercase": "大寫字串",
+          "timestamp": "時間戳"
+        },
+        "officialDocs": "官方文件"
+      }
     }
+  },
+  "errors": {
+    "failedToCreateTask": "建立任務失敗",
+    "failedToUpdateSettings": "更新設定失敗",
+    "failedToUpdateTask": "更新任務失敗",
+    "failedToFetchTaskLog": "取得任務日誌失敗",
+    "taskIdIsRequired": "缺少必要任務 ID",
+    "failedToDeleteTask": "刪除任務失敗"
   },
   "homeView": {
     "description": "歡迎使用 Movera，自動化檔案管理系統",
@@ -44,17 +98,60 @@
     "description": "管理全域應用程式設定",
     "generalCard": {
       "description": "調整應用程式的外觀和通知行為。",
-      "title": "一般設定",
       "timezoneLoading": "載入時區中...",
       "timezoneNotFound": "未找到時區。",
       "timezonePlaceholder": "選擇時區...",
-      "timezoneSearch": "搜尋時區..."
+      "timezoneSearch": "搜尋時區...",
+      "title": "一般設定"
     },
     "title": "設定"
   },
   "taskDetailView": {
+    "deleteDialogDesc": "此操作無法復原。這將永久刪除任務 \"{taskName}\" 並從資料庫中移除其相關資料。",
+    "deleteDialogTitle": "您確定要刪除此任務嗎？",
     "disableButton": "停用任務",
     "enableButton": "啟用任務",
-    "taskId": "任務 ID"
+    "taskId": "任務 ID",
+    "taskCardTitle": "任務設定",
+    "taskCardDescription": "查看和編輯任務詳細設定",
+    "saveChanges": "儲存變更",
+    "logsCardDescription": "最近的任務執行紀錄。",
+    "logsCardTitle": "日誌紀錄",
+    "loadingLogs": "載入日誌中...",
+    "noLogs": "目前尚無任務執行紀錄",
+    "taskNotFound": "找不到此任務",
+    "checkTaskId": "請確認任務 ID 是否正確，或任務可能已被刪除。",
+    "loadTasksFailed": "載入任務列表失敗"
+  },
+  "notifications": {
+    "taskUpdateSuccessTitle": "任務已更新",
+    "taskUpdateSuccessDesc": "任務 \"{taskName}\" 已成功更新。",
+    "taskUpdateErrorTitle": "更新任務失敗",
+    "taskLogFetchErrorTitle": "取得任務日誌失敗",
+    "taskDeleteErrorTitle": "刪除任務失敗",
+    "taskDeleteSuccessTitle": "任務已刪除",
+    "taskDeleteSuccessDesc": "已成功刪除 \"{taskName}\" 任務",
+    "taskCreateErrorTitle": "建立任務失敗",
+    "taskCreateSuccessTitle": "任務已建立",
+    "taskCreateSuccessDesc": "任務 \"{taskName}\" 已成功建立。",
+    "settingsSaveSuccessTitle": "設定已儲存",
+    "settingsSaveSuccessDesc": "您的變更已成功套用。",
+    "settingsSaveErrorTitle": "儲存設定失敗"
+  },
+  "tasksListView": {
+    "title": "任務清單",
+    "description": "管理所有已建立的任務"
+  },
+  "createTaskView": {
+    "title": "建立任務",
+    "description": "設定自動化檔案管理任務",
+    "cardTitle": "任務設定",
+    "cardDescription": "在這裡編輯任務的詳細設定。",
+    "clearRulesButton": "清除所有規則",
+    "creatingButton": "建立中...",
+    "createButton": "建立任務"
+  },
+  "exceptions": {
+    "TaskAlreadyExists": "任務 \"{taskName}\" 已存在"
   }
 }

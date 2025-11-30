@@ -38,7 +38,7 @@ const Locales = [
 <template>
   <Select v-model="selectedLocale">
     <SelectTrigger
-      class="w-[180px] bg-background text-foreground border-border"
+      class="w-[180px] bg-background text-foreground border-foreground"
     >
       <SelectValue :placeholder="t('components.localeSelect.placeholder')" />
     </SelectTrigger>

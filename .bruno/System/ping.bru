@@ -1,0 +1,21 @@
+meta {
+  name: ping
+  type: ws
+  seq: 1
+}
+
+ws {
+  url: {{HOST}}/ws
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "event": "system:ping"
+    }
+  '''
+}

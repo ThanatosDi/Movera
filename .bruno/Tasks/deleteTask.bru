@@ -1,0 +1,44 @@
+meta {
+  name: deleteTask
+  type: ws
+  seq: 4
+}
+
+ws {
+  url: {{HOST}}/ws
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "event": "delete:task",
+      "payload": {
+        "id": "d1085ab3-0fa5-420d-b57f-cb1281a0bc4a"
+      },
+      "requestId": "dbc3f6da-d528-44d4-b553-6980a972b713"
+    }
+  '''
+}
+
+docs {
+  # Summary
+  刪除指定任務
+  # Request
+  ```json
+  {
+    "event": "delete:task",
+    "payload": {
+      TaskUUID
+    }
+  }
+  ```
+  
+  ```
+  TaskUUID:
+    id: str
+  ```
+}

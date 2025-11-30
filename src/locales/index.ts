@@ -2,11 +2,6 @@ import { createI18n } from 'vue-i18n'
 import en from './en.json'
 import zhTW from './zh-TW.json'
 
-/**
- * 建立並設定 i18n 實例
- * @param locale - 初始語系
- * @returns i18n 實例
- */
 export function createI18nInstance(locale: string) {
   return createI18n({
     legacy: false, // 確保使用 Vue 3 Composition API 模式

@@ -1,0 +1,52 @@
+meta {
+  name: regexPreview (without named group)
+  type: ws
+  seq: 6
+}
+
+ws {
+  url: {{HOST}}/ws
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "event": "preview:regex",
+      "payload": {
+        "src_pattern": "(\\w+) - (\\d{2})(v2)? (.+)\\.mp4",
+        "text": "公爵千金的家庭教師 - 01 [1080P][WEB-DL][AAC AVC][CHT].mp4",
+        "dst_pattern": "\\1 - S01E\\2 \\4.mp4"
+      },
+      "requestId": "dbc3f6da-d528-44d4-b553-6980a972b713"
+    }
+  '''
+}
+
+docs {
+  # Summary
+  取得 regex 重新命名規則預覽結果
+  # Request
+  ```json
+  {
+    "event": "preview:regex",
+    "payload": {
+      "src_pattern": str,
+      "text": str,
+      "dst_pattern": str
+    },
+    "requestId": "dbc3f6da-d528-44d4-b553-6980a972b713"
+  }
+  ```
+  # Return Payload Schema
+  ```
+    src_pattern: str
+    text: str
+    dst_pattern: str
+    groups: dict[str, dict|list]
+    formatted: str
+  ```
+}

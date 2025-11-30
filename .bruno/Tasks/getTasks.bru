@@ -1,0 +1,56 @@
+meta {
+  name: getTasks
+  type: ws
+  seq: 2
+}
+
+ws {
+  url: {{HOST}}/ws
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "event": "get:tasks",
+      "payload": {},
+      "requestId": "dbc3f6da-d528-44d4-b553-6980a972b713"
+    }
+  '''
+}
+
+docs {
+  # Summary
+  取得所有任務
+  
+  # Request
+  ```json
+  {
+    "event": "get:tasks",
+    "payload": {},
+  }
+  ```
+  
+  # Return
+  ```json
+  {
+    "event": "get:tasks",
+    "payload":list[Task]
+  }
+  ```
+  ```
+  Task:
+    id: str
+    name: str
+    include: str
+    src_filename: str | None
+    dst_filename: str | None
+    rename_rule: Optional[Literal["regex", "parse", None]]
+    enabled: bool
+    created_at: str
+    logs: list[dict[str, str | int]]
+  ```
+}

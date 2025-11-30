@@ -1,6 +1,5 @@
 <script lang="js" setup>
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
@@ -24,8 +23,8 @@ const { t } = useI18n();
       @click="isSelectMode ? toggleSelection() : navigate()"
     >
       <div
-        class="p-4 hover:bg-gray-700 cursor-pointer transition-colors"
-        :class="{ 'bg-black border-l-4 rounded-l border-green-500': isActive }"
+        class="p-4 sidebar-item-hover cursor-pointer transition-colors"
+        :class="{ 'bg-background text-frontend border-l-4 rounded-l border-green-500': isActive }"
       >
         <div class="flex items-start gap-3">
 
@@ -43,7 +42,7 @@ const { t } = useI18n();
                 </Badge>
                 <!-- 名稱 -->
                 <h3
-                  class="font-medium truncate"
+                  class="font-medium"
                   :title="taskName"
                 >{{ taskName }}</h3>
               </div>

@@ -1,0 +1,23 @@
+meta {
+  name: getSettings
+  type: ws
+  seq: 2
+}
+
+ws {
+  url: {{HOST}}/ws
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "event": "get:settings",
+      "payload": "",
+      "requestId": "607e8eeb-7425-44e8-aa84-0fc1e1883a44"
+    }
+  '''
+}

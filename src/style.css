@@ -69,13 +69,19 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(70.9% 0.00008 271.152 / 0.255);
-  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-foreground: oklab(14.479000000000001% 0 -0.00002);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* 自定義變數 */
+  --outline-border: oklch(0% 0 0);
+  --btn-hover: oklch(86.855% 0.0066 16.462 / 0.695);
+  --card-border: oklch(0.87 0 0);
+  --sidebar-item-hover: oklch(0.872 0.01 258.338);
 }
 
 .dark {
@@ -111,6 +117,12 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+
+  /* 自定義變數 - 暗色模式 */
+  --outline-border: oklch(100% 0.00011 271.152);
+  --btn-hover: oklch(32.313% 0.00282 16.587 / 0.695);
+  --card-border: oklch(0.37 0.013 285.805);
+  --sidebar-item-hover: oklch(0.373 0.034 259.733);
 }
 
 
@@ -176,5 +188,26 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 142.4 71.8% 29.2%;
+  }
+}
+
+@layer utilities {
+
+  /* 只設定顏色（需要搭配 border 類別使用） */
+  .border-outline {
+    border-color: var(--outline-border);
+  }
+
+  /* 直接定義 hover 狀態的背景色 */
+  .btn-hover-bg:hover {
+    background-color: var(--btn-hover);
+  }
+
+  .normal-border {
+    border: 1px solid var(--card-border);
+  }
+
+  .sidebar-item-hover:hover {
+    background-color: var(--sidebar-item-hover);
   }
 }

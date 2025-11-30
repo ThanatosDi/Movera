@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,20 +9,47 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { RoutersEnum } from '@/enums/RoutersEnum'
-import { WebSocketService } from '@/services/websocketService'
-import { useDark, useToggle } from '@vueuse/core'
-import { Circle, CircleUser, GitBranch, Home, LoaderCircle, Moon, Sun, X } from 'lucide-vue-next'
-import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+} from '@/components/ui/dropdown-menu';
+import { useWebSocketService } from '@/composables/useWebSocketService';
+import { RoutersEnum } from '@/enums/RoutersEnum';
+import { useTaskStore } from '@/stores/taskStore';
+import { useDark, useToggle } from '@vueuse/core';
+import { CircleUser, Home, LoaderCircle, Moon, Plug, Sun, Unplug } from 'lucide-vue-next';
+import { onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 const { t } = useI18n()
 const router = useRouter()
-const { status: websocketStatus, data } = WebSocketService()
+const { status: websocketStatus, open } = useWebSocketService() // 從 useGlobalWebSocket 獲取 open 函式
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
+const taskStore = useTaskStore()
+
+const handleReconnect = () => {
+  if (websocketStatus.value === 'CLOSED') {
+    open()
+  }
+}
+
+// 當 WebSocket 連接成功時載入任務
+watch(websocketStatus, (newStatus, oldStatus) => {
+  // 當狀態變為 OPEN 時（不管是初次連接還是重新連接）
+  if (newStatus === 'OPEN' && oldStatus !== 'OPEN') {
+    console.log('WebSocket status changed:', oldStatus, '->', newStatus)
+    taskStore.fetchTasks()
+  }
+})
+
+onMounted(() => {
+  // 如果掛載時 WebSocket 已經連接，立即載入任務
+  if (websocketStatus.value === 'OPEN') {
+    console.log('WebSocket already connected on mount, fetching tasks')
+    taskStore.fetchTasks()
+  }
+  // 否則等待 watch 觸發
+})
 
 </script>
 
@@ -42,13 +69,14 @@ const toggleDark = useToggle(isDark)
         <Button
           variant="ghost"
           class="text-muted-foreground hover:text-foreground"
+          @click="handleReconnect"
         >
           連接狀態
-          <Circle
+          <Plug
             v-if="websocketStatus == 'OPEN'"
             class="ml-2 h-3 w-3 text-green-500"
           />
-          <X
+          <Unplug
             v-if="websocketStatus == 'CLOSED'"
             class="ml-2 h-3 w-3 text-red-500"
           />
@@ -56,14 +84,6 @@ const toggleDark = useToggle(isDark)
             v-if="websocketStatus == 'CONNECTING'"
             class="ml-2 h-3 w-3 animate-spin text-yellow-500"
           />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="text-muted-foreground hover:text-foreground"
-        >
-          <GitBranch class="mr-2 h-4 w-4" />
-          {{ t('common.status') }}
         </Button>
         <Button
           variant="ghost"

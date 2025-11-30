@@ -1,0 +1,52 @@
+meta {
+  name: parsePreview
+  type: ws
+  seq: 6
+}
+
+ws {
+  url: {{HOST}}/ws
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "event": "preview:parse",
+      "payload": {
+        "src_pattern": "[{fansub}] {title} - {ep} {tags}.mp4",
+        "text": "[ANi] 不擅吸血的吸血鬼 - 01 [1080P][Baha][WEB-DL][AAC AVC][CHT].mp4",
+        "dst_pattern": "[{fansub}] {title} - S01E{ep} {tags}.mp4"
+      },
+      "requestId": "dbc3f6da-d528-44d4-b553-6980a972b713"
+    }
+  '''
+}
+
+docs {
+  # Summary
+  取得 parse 重新命名規則預覽結果
+  # Request
+  ```json
+  {
+    "event": "preview:parse",
+    "payload": {
+      "src_pattern": str,
+      "text": str,
+      "dst_pattern": str
+    },
+    "requestId": "dbc3f6da-d528-44d4-b553-6980a972b713"
+  }
+  ```
+  # Return Payload Schema
+  ```
+    src_pattern: str
+    text: str
+    dst_pattern: str
+    groups: list[str, str]
+    formatted: str
+  ```
+}

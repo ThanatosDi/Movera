@@ -10,6 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, RouterView } from 'vue-router'
 
 const { t } = useI18n()
+
 </script>
 
 <template>

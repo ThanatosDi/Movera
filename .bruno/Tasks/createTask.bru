@@ -1,0 +1,72 @@
+meta {
+  name: createTask
+  type: ws
+  seq: 3
+}
+
+ws {
+  url: {{HOST}}/ws
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "event": "create:task",
+      "payload": {
+        "name": "公爵千金的家庭教師",
+        "include": "公爵千金的家庭教師",
+        "move_to": "/Downloads/anime/公爵千金的家庭教師",
+        "src_filename": "(.+公爵千金的家庭教師 - )(\\d{2})( .+)\\.mp4",
+        "dst_filename": "\\1S01E\\2\\3.mp4",
+        "rename_rule": "regex"
+      },
+      "requestId": "dbc3f6da-d528-44d4-b553-6980a972b713"
+    }
+  '''
+}
+
+docs {
+  # Summary
+  建立任務
+  # Request
+  ```json
+  {
+    "event": "create:task",
+    "payload": {
+      Task
+    }
+  }
+  ```
+  ```
+  Task:
+    name: str
+    include: str
+    move_to: str
+    src_filename: str | None = None
+    dst_filename: str | None = None
+    rename_rule: Optional[Literal["regex", "parse", None]] = None
+  ```
+  # Model Autocreate
+  ```
+    id: str: (default: uuid4)
+    enabled: bool = True
+    created_at: DateTime = datetime.now(UTC)
+  ```
+  # Return Payload Schema
+  ```
+    id: str
+    name: str
+    include: str
+    move_to: str
+    src_filename: str | None
+    dst_filename: str | None
+    rename_rule: Optional[Literal["regex", "parse", None]]
+    enabled: bool
+    created_at: str
+    logs: list[dict[str, str | int]]
+  ```
+}

@@ -1,0 +1,69 @@
+meta {
+  name: updateTask
+  type: ws
+  seq: 5
+}
+
+ws {
+  url: {{HOST}}/ws
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "event": "update:task",
+      "payload": {
+        "id": "d37bf330-579f-4dd3-a049-863cca98940b",
+        "name": "罪惡黃窟",
+        "include": "Guilty Hole",
+        "move_to": "/Anime/2025 10月/罪惡黃窟",
+        "src_filename": "[{fansub}] {title} - {ep} ({tags}) [{sha}].mp4 ",
+        "dst_filename": "[{fansub}] {title} - S01E{ep} ({tags}) [{sha}].mp4",
+        "rename_rule": "parse",
+        "enabled": false
+      },
+      "requestId": "dbc3f6da-d528-44d4-b553-6980a972b713"
+    }
+  '''
+}
+
+docs {
+  # Summary
+  更新指定任務
+  # Request
+  ```json
+  {
+    "event": "update:task",
+    "payload": {
+      TaskUpdate
+    }
+  }
+  ```
+  ```
+  TaskUpdate:
+    id: str
+    name: str
+    include: str
+    src_filename: str
+    dst_filename: str
+    rename_rule: Optional[Literal["regex", "parse", None]]
+    enabled: bool
+  ```
+  # Return Payload Schema
+  ```
+    id: str
+    name: str
+    include: str
+    move_to: str
+    src_filename: str | None
+    dst_filename: str | None
+    rename_rule: Optional[Literal["regex", "parse", None]]
+    enabled: bool
+    created_at: str
+    logs: list[dict[str, str | int]]
+  ```
+}

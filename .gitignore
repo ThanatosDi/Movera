@@ -243,3 +243,7 @@ __marimo__/
 
 # Database
 database.db
+
+.claude
+.gemini
+.bruno/environments/Movera(dev).bru

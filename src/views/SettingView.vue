@@ -14,21 +14,48 @@ import {
   ComboboxTrigger,
 } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
+import { useNotification } from '@/composables/useNotification'
 import { VariableEnum } from '@/enums/VariableEnum'
 import { cn } from '@/lib/utils'
+import { useSettingStore } from '@/stores/settingStore'
 import { Check, ChevronsUpDown, Info, Save } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
 
+// 從 localStorage 讀取時區資料
 const timezones = ref<{ value: string, label: string }[]>(JSON.parse(localStorage.getItem(VariableEnum.TimeZoneStorageKey) || '[]'))
 
-const isSaving = ref(false)
-const settings = ref({
-  locale: locale.value,
-  timezone: '',
-})
+const settingStore = useSettingStore()
+const { isSaving, settings } = storeToRefs(settingStore)
+
+const UpdateSettings = async () => {
+  isSaving.value = true
+  try {
+    await settingStore.updateSettings(settings.value)
+    useNotification.showSuccess(t('notifications.settingsSaveSuccessTitle'), t('notifications.settingsSaveSuccessDesc'))
+  } catch (e: any) {
+    console.error('Failed to update settings:', e as Error)
+    useNotification.showSuccess(t('notifications.settingsSaveErrorTitle'), e.message)
+  } finally {
+    isSaving.value = false
+  }
+}
+
+watch(
+  () => settings.value.locale, (newLocale, oldLocale) => {
+    if (newLocale !== oldLocale) {
+      locale.value = newLocale
+      UpdateSettings()
+    }
+  }
+)
+
+const btnActionSaveSettings = async () => {
+  await UpdateSettings()
+}
 </script>
 
 <template>
@@ -40,7 +67,7 @@ const settings = ref({
     </div>
 
     <!-- 一般設定卡片 -->
-    <Card class="border-gray-700 ">
+    <Card class="normal-border">
       <CardHeader>
         <CardTitle class="flex items-center gap-2">
           <Info class="size-5" />
@@ -58,7 +85,7 @@ const settings = ref({
               <ComboboxTrigger as-child>
                 <Button
                   variant="outline"
-                  class="w-full justify-between bg-background text-foreground border-border hover:border-border hover:text-foreground"
+                  class="w-full justify-between bg-background text-foreground border-foreground dark:border-foreground"
                   :disabled="timezones.length === 0"
                 >
                   <span v-if="timezones.length === 0">{{ t('settingView.generalCard.timezoneLoading') }}</span>
@@ -75,11 +102,11 @@ const settings = ref({
             </ComboboxAnchor>
             <ComboboxList
               align="start"
-              class="w-[--radix-combobox-trigger-width] bg-background border-border text-foreground"
+              class="w-[--radix-combobox-trigger-width] bg-background border-foreground text-foreground"
             >
-              <div class="relative w-full max-w-sm items-center p-1">
+              <div class="relative w-full max-w-sm items-center p-1 ">
                 <ComboboxInput
-                  class="pl-9 focus-visible:ring-0 border-0 rounded-none h-10 bg-transparent"
+                  class="pl-9 focus-visible:ring-0 border-foreground rounded-none h-10 bg-transparent"
                   :placeholder="t('settingView.generalCard.timezoneSearch')"
                 />
               </div>
@@ -104,7 +131,7 @@ const settings = ref({
     </Card>
 
     <!-- 關於卡片 -->
-    <Card class="border-gray-700">
+    <Card class="normal-border">
       <CardHeader>
         <CardTitle>{{ t('common.about') }}</CardTitle>
       </CardHeader>
@@ -118,6 +145,7 @@ const settings = ref({
       <Button
         :disabled="isSaving"
         class="bg-green-400 hover:bg-green-800 font-bold text-black"
+        @click="btnActionSaveSettings"
       >
         <Save class="size-4 mr-2" />
         {{ isSaving ? t('common.saving') : t('common.save') }}

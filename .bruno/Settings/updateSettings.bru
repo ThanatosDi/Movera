@@ -1,0 +1,33 @@
+meta {
+  name: updateSettings
+  type: ws
+  seq: 1
+}
+
+ws {
+  url: {{HOST}}/ws
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "event": "update:settings",
+      "payload": {
+        "timezone": "Asia/Taipei",
+        "locale": "zh-TW"
+      },
+      "requestId": "607e8eeb-7425-44e8-aa84-0fc1e1883a44"
+    }
+  '''
+}
+
+docs {
+  # Summary
+  更新多個設定
+  # Return
+  成功更新後的所有設定資訊
+}

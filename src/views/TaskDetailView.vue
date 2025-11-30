@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import LogItem from '@/components/LogItem.vue'
+import TaskForm from '@/components/TaskForm.vue'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,44 +15,169 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useNotification } from '@/composables/useNotification'
+import type { Task } from '@/schemas'
+import { useTaskStore } from '@/stores/taskStore'
 import { Play, RefreshCw, Save, Square, Trash2 } from 'lucide-vue-next'
+import { storeToRefs } from 'pinia'
+import { computed, nextTick, ref, watch, type ComponentPublicInstance } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 const { t } = useI18n()
-// 假資料
-const isLoading = false
-const isSaving = false
-const isLoadingLogs = false
-const task = {
-  id: '5454a5d46as4d65as4da4d',
-  name: '範例任務一',
-  enabled: true,
+const taskStore = useTaskStore()
+const router = useRouter()
+const route = useRoute()
+
+
+
+const taskId = computed(() => route.params.taskId as string)
+const task = ref<Task | null>(null)
+
+const logs = computed(() => task.value?.logs || [])
+const initialLoading = computed(() => taskStore.isLoading && !task.value)
+const isRenameRuleRequired = computed(() => {
+  return task.value && task.value.rename_rule !== null
+})
+
+const isLoadingLogs = ref<boolean>(false)
+const logCard = ref<ComponentPublicInstance | null>(null)
+const { isLoading, isSaving } = storeToRefs(taskStore)
+
+const initialTaskData = async () => {
+  if (taskStore.tasks.length === 0) {
+    try {
+      await taskStore.fetchTasks()
+    } catch (e) {
+      // 錯誤處理已在 taskStore.fetchTasks() 中完成
+    }
+  }
 }
-const logs = [
-  {
-    id: '5454a5d46as4d65as4da4d',
-    timestamp: '2024-01-01 12:00:00',
-    level: 'INFO',
-    message: '任務執行成功',
+
+// 監聽路由變化並加載任務數據
+watch(
+  () => route.params.taskId,
+  async (newTaskId) => {
+    if (newTaskId) {
+      await initialTaskData()
+      // 從 store 獲取任務並創建深拷貝（允許本地編輯）
+      const foundTask = taskStore.getRefTaskById(newTaskId as string)
+      task.value = foundTask ? JSON.parse(JSON.stringify(foundTask)) : null
+    }
   },
-]
+  { immediate: true }
+)
+
+// 監聽 store 任務列表變化，確保 F5 重新整理後能載入任務
+watch(
+  () => taskStore.tasks,
+  () => {
+    // 只有當 task 為 null 時才從 store 重新獲取（避免覆蓋用戶正在編輯的內容）
+    if (taskId.value && !task.value) {
+      const foundTask = taskStore.getRefTaskById(taskId.value)
+      if (foundTask) {
+        task.value = JSON.parse(JSON.stringify(foundTask))
+      }
+    }
+  },
+  { deep: true }
+)
 
 
+
+
+// onClick 事件處理函式
+
+/**
+ * 按點更新任務按鈕
+ * @async
+ * @description
+ *   按點更新任務，將 task 的資料傳遞 taskStore.updateTask()，
+ *   並顯示 Success 或 Error 的 Notification
+ * @returns {Promise<void>}
+ */
+const btnActionUpdateTask = async () => {
+  if (!task.value) return
+  isSaving.value = true
+  const { id, created_at, logs, ...taskData } = task.value
+  try {
+    const updatedTask = await taskStore.updateTask(id, taskData)
+    // 保存成功後，從 store 同步最新數據
+    if (updatedTask) {
+      task.value = JSON.parse(JSON.stringify(updatedTask))
+    }
+    useNotification.showSuccess(t('notifications.taskUpdateSuccessTitle'), t('notifications.taskUpdateSuccessDesc', { taskName: task.value?.name }))
+  } catch (e: any) {
+    console.error('Failed to update task:', e)
+    useNotification.showError(t('notifications.taskUpdateErrorTitle'), e.message)
+  } finally {
+    isSaving.value = false
+  }
+}
+
+
+const btnActionReloadLogs = async () => {
+  const taskId = route.params?.taskId as string
+  if (!taskId || !task.value) return
+  isLoadingLogs.value = true
+  try {
+    const logs = await taskStore.fetchTaskLogByTaskId(taskId)
+    // 更新本地 task 的 logs
+    if (logs && task.value) {
+      task.value.logs = logs
+    }
+  } catch (e: any) {
+    console.error('Failed to fetch task log:', e)
+    useNotification.showError(t('notifications.taskLogFetchErrorTitle'), e.message)
+  } finally {
+    isLoadingLogs.value = false
+    await nextTick()
+    const element = logCard.value?.$el as HTMLElement
+    element?.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
+const btnActionToggleTaskStatus = async () => {
+  if (!task.value) return
+  task.value.enabled = !task.value.enabled
+  await btnActionUpdateTask()
+}
+
+const btnActionDeleteTask = async () => {
+  if (!task.value) return
+  const taskId = task.value.id
+  try {
+    await taskStore.deleteTask(taskId)
+    router.push({ name: 'Home' })
+    useNotification.showSuccess(
+      t('notifications.taskDeleteSuccessTitle'),
+      t('notifications.taskDeleteSuccessDesc', { taskName: task.value.name })
+    )
+  } catch (e: any) {
+    console.error('Failed to delete task:', e)
+    useNotification.showError(t('notifications.taskDeleteErrorTitle'), e.message)
+  } finally {
+    isSaving.value = false
+  }
+}
 </script>
 
 <template>
-  <main :class="`flex-1 flex flex-col p-4 space-y-4 overflow-auto pb-6`">
+  <main :class="`flex-1 flex flex-col p-4 space-y-4 overflow-auto pb-6 bg-background text-foreground`">
     <div
-      v-if="isLoading"
+      v-if="initialLoading"
       class="flex items-center justify-center h-full"
     >
-      <!-- <p>{{ UI_CONSTANTS.LOADING_TEXT }}</p> -->
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-300 mx-auto mb-4"></div>
+        <p>{{ t('common.loading') }}...</p>
+      </div>
     </div>
 
     <div v-else-if="task">
       <div class="mb-4">
         <h1 class="text-2xl font-bold">{{ task.name }}</h1>
-        <p class="text-gray-400">{{ t('taskDetailView.taskId') }}: {{ task.id }}</p>
+        <p>{{ t('taskDetailView.taskId') }}: {{ task.id }}</p>
       </div>
 
       <div class="flex justify-between items-center mb-4">
@@ -83,13 +210,13 @@ const logs = [
                 :disabled="isSaving"
                 variant="destructive"
                 size="sm"
-                class="bg-red-500 hover:bg-red-600 text-white font-bold"
+                class="dark:bg-red-500 dark:hover:bg-red-600 text-white font-bold"
               >
                 <Trash2 class="size-4 mr-2" />
                 {{ t('common.delete') }}
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent class="bg-gray-800 border-gray-700 text-white">
+            <AlertDialogContent class="bg-background text-foreground normal-border">
               <AlertDialogHeader>
                 <AlertDialogTitle>{{ t('taskDetailView.deleteDialogTitle') }}</AlertDialogTitle>
                 <AlertDialogDescription class="text-current">
@@ -97,7 +224,9 @@ const logs = [
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel class="hover:bg-stone-400 text-black">{{ t('common.cancel') }}</AlertDialogCancel>
+                <AlertDialogCancel class="bg-background text-foreground border dark:border-foreground">{{
+                  t('common.cancel') }}
+                </AlertDialogCancel>
                 <AlertDialogAction
                   class="bg-green-400 hover:bg-green-800 text-black"
                   @click="btnActionDeleteTask"
@@ -108,10 +237,10 @@ const logs = [
         </div>
       </div>
 
-      <Card class="bg-gray-800 border-gray-700 text-white">
+      <Card class="normal-border">
         <CardHeader>
-          <CardTitle>{{ t('taskDetailView.cardTitle') }}</CardTitle>
-          <CardDescription>{{ t('taskDetailView.cardDescription') }}</CardDescription>
+          <CardTitle>{{ t('taskDetailView.taskCardTitle') }}</CardTitle>
+          <CardDescription>{{ t('taskDetailView.taskCardDescription') }}</CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
           <TaskForm
@@ -133,19 +262,18 @@ const logs = [
 
       <Card
         ref="logCard"
-        class="mt-4 bg-gray-800 border-gray-700 text-white"
+        class="mt-4 normal-border"
       >
         <CardHeader class="flex flex-row items-center justify-between">
           <div>
-            <CardTitle>{{ t('taskDetailView.logsTitle') }}</CardTitle>
-            <CardDescription>{{ t('taskDetailView.logsDescription') }}</CardDescription>
+            <CardTitle>{{ t('taskDetailView.logsCardTitle') }}</CardTitle>
+            <CardDescription>{{ t('taskDetailView.logsCardDescription') }}</CardDescription>
           </div>
           <Button
-            @click="btnActionFetchLogs"
+            @click="btnActionReloadLogs"
             :disabled="isLoadingLogs"
             size="sm"
-            variant="outline"
-            class="bg-gray-700 hover:bg-gray-600"
+            class="bg-background text-foreground border border-outline btn-hover-bg hover:text-foreground"
           >
             <RefreshCw
               class="size-4 mr-2"
