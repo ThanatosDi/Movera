@@ -119,14 +119,14 @@ const autoGrow = (event: Event) => {
         />
         <Label for="r1">{{ t('components.taskForm.renameRuleOptions.noRename') }}</Label>
       </div>
-      <!-- <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-2">
         <RadioGroupItem
           id="r2"
           value="regex"
           class="data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500 data-[state=checked]:text-green-500 border-foreground"
         />
         <Label for="r2">{{ t('components.taskForm.renameRuleOptions.regex') }}</Label>
-      </div> -->
+      </div>
       <div class="flex items-center space-x-2">
         <RadioGroupItem
           id="r3"

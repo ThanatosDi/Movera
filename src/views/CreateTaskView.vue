@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ParsePreview from '@/components/ParsePreview.vue'
-// import RegexPreview from '@/components/RegexPreview.vue'
+import RegexPreview from '@/components/RegexPreview.vue'
 import TaskForm from '@/components/TaskForm.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -111,11 +111,11 @@ const btnActionCreateTask = async () => {
       </CardContent>
     </Card>
     <!-- 正規表達式預覽 -->
-    <!-- <RegexPreview
+    <RegexPreview
       v-if="createTaskData.rename_rule === 'regex'"
       v-model:src-filename="createTaskData.src_filename"
       v-model:dst-filename="createTaskData.dst_filename"
-    /> -->
+    />
     <!-- 檔案名稱解析預覽 -->
     <ParsePreview
       v-if="createTaskData.rename_rule === 'parse'"

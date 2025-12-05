@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, CheckCircle, Lightbulb } from 'lucide-vue-next';
-import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { useRegexPreview } from '@/composables/useRegexPreview'
+import { useSessionStorage } from '@vueuse/core'
+import { Lightbulb } from 'lucide-vue-next'
+import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const { t, tm, rt } = useI18n()
 
@@ -21,52 +22,53 @@ const emit = defineEmits<{
 }>()
 
 // 本地元件狀態，用於測試的檔案名稱
-const testFilename = ref('')
+// 使用 sessionStorage 持久化測試檔名
+const testFilename = useSessionStorage('regexPreview:testFilename', '')
 
 // --- Refactor: Use local refs and watchers for v-model stability ---
-const srcRule = ref(props.srcFilename ?? '')
-const dstRule = ref(props.dstFilename ?? '')
+const srcPattern = ref(props.srcFilename ?? '')
+const dstPattern = ref(props.dstFilename ?? '')
 
 // Watch for prop changes from parent and update local state
 watch(
   () => props.srcFilename,
   (newValue) => {
-    if (newValue !== srcRule.value) {
-      srcRule.value = newValue ?? ''
+    if (newValue !== srcPattern.value) {
+      srcPattern.value = newValue ?? ''
     }
   }
 )
 watch(
   () => props.dstFilename,
   (newValue) => {
-    if (newValue !== dstRule.value) {
-      dstRule.value = newValue ?? ''
+    if (newValue !== dstPattern.value) {
+      dstPattern.value = newValue ?? ''
     }
   }
 )
 
 // Watch for local changes (user input) and emit to parent
-watch(srcRule, (newValue) => {
+watch(srcPattern, (newValue) => {
   emit('update:srcFilename', newValue)
 })
-watch(dstRule, (newValue) => {
+watch(dstPattern, (newValue) => {
   emit('update:dstFilename', newValue)
 })
 // --- End of Refactor ---
 
-// Use the composable with the reactive rules
-const { preview, highlightedParts, error, isValid, groups } = useRegexPreview(
+// Use the composable
+const { groups, formattedResult, error } = useRegexPreview(
   testFilename,
-  srcRule,
-  dstRule
+  srcPattern,
+  dstPattern
 )
 
 // 載入測試案例的處理函式
 const handleLoadTestCase = (testCase: any) => {
   testFilename.value = testCase.filename
   // These will trigger the computed setter and emit updates
-  srcRule.value = testCase.src_filename
-  dstRule.value = testCase.dst_filename
+  srcPattern.value = testCase.src_filename
+  dstPattern.value = testCase.dst_filename
 }
 
 const autoGrow = (event: Event) => {
@@ -81,7 +83,7 @@ const autoGrow = (event: Event) => {
     <CardHeader>
       <CardTitle class="flex items-center gap-2">
         <Lightbulb class="w-5 h-5 text-yellow-400" />
-        {{ t('components.preview.regex.title') }}
+        {{ t('components.regexPreview.title') }}
       </CardTitle>
     </CardHeader>
 
@@ -93,20 +95,19 @@ const autoGrow = (event: Event) => {
           <Textarea
             id="regex-test-filename"
             v-model="testFilename"
-            :placeholder="t('components.preview.testFilenamePlaceholder')"
             class="bg-gray-900 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+            placeholder="公爵千金的家庭教師 - 01 [1080P][WEB-DL][AAC AVC][CHT].mp4"
             rows="1"
             @input="autoGrow"
             @keydown.enter.prevent
           />
-
         </div>
         <div class="space-y-2">
-          <Label for="regex-src-rule">{{ t('components.taskForm.srcFilename') }}</Label>
+          <Label for="regex-src-pattern">{{ t('components.regexPreview.sourcePattern') }}</Label>
           <Textarea
-            id="regex-src-rule"
-            v-model="srcRule"
-            placeholder="e.g., (.*)\.S(\d{2})E(\d{2})\.(.*)"
+            id="regex-src-pattern"
+            v-model="srcPattern"
+            placeholder="(?P<title>\w+) - (?P<episode>\d{2})(v2)? (.+)\.mp4"
             class="bg-gray-900 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
             readonly
             rows="1"
@@ -114,8 +115,8 @@ const autoGrow = (event: Event) => {
             @keydown.enter.prevent
           />
         </div>
-        <div class="space-y-2 col-span-full">
-          <!-- 測試案例按鈕 -->
+        <!-- 測試案例按鈕 (暫時註解，需要定義 RegexExamples) -->
+        <!-- <div class="space-y-2 col-span-full">
           <div class="mt-2 flex flex-wrap gap-2">
             <Button
               v-for="exampleCase in RegexExamples"
@@ -129,13 +130,13 @@ const autoGrow = (event: Event) => {
               {{ exampleCase.label }}
             </Button>
           </div>
-        </div>
+        </div> -->
         <div class="space-y-2 col-span-full">
-          <Label for="regex-dst-rule">{{ t('components.taskForm.dstFilename') }}</Label>
+          <Label for="regex-dst-pattern">{{ t('components.regexPreview.destinationPattern') }}</Label>
           <Textarea
-            id="regex-dst-rule"
-            v-model="dstRule"
-            placeholder="e.g., \1 S\2E\3.\4"
+            id="regex-dst-pattern"
+            v-model="dstPattern"
+            placeholder="\g<title> - S01E\g<episode> \4.mp4"
             class="bg-gray-900 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
             readonly
             rows="1"
@@ -145,113 +146,110 @@ const autoGrow = (event: Event) => {
         </div>
       </div>
 
+      <!-- Error Display -->
+      <div
+        v-if="error"
+        class="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-md"
+      >
+        <p class="font-bold">{{ t('common.error') }}</p>
+        <p>{{ t(error) }}</p>
+      </div>
 
-      <!-- 預覽結果 -->
-      <div class="space-y-4">
-        <!-- 匹配狀態 -->
-        <div class="flex items-center space-x-2">
-          <CheckCircle
-            v-if="isValid"
-            class="w-5 h-5 text-green-400"
-          />
-          <AlertCircle
-            v-else
-            class="w-5 h-5 text-red-400"
-          />
-          <span :class="isValid ? 'text-green-400' : 'text-red-400'">
-            {{ isValid ? t('common.matchSuccess') : (error || t('common.noMatch')) }}
-          </span>
-        </div>
-
-        <!-- 匹配結果高亮 -->
-        <div
-          v-if="isValid"
-          class="bg-gray-900 p-3 rounded-md border border-gray-600"
-        >
-          <Label class="text-sm text-gray-400 mb-2 block">{{ t('components.preview.matchResult')
-          }}</Label>
-          <p class="preview-text">
-            <span>{{ highlightedParts.before }}</span>
-            <span
-              v-if="highlightedParts.match"
-              class="bg-green-700 rounded p-0.5"
-            >
-              {{ highlightedParts.match }}
-            </span>
-            <span>{{ highlightedParts.after }}</span>
-          </p>
-        </div>
-
-        <!-- 捕獲群組 -->
-        <div
-          v-if="isValid && groups.length > 0"
-          class="bg-gray-900 p-3 rounded-md border border-gray-600"
-        >
-          <Label class="text-sm text-gray-400 mb-2 block">{{
-            t('components.preview.regex.capturedGroups') }}</Label>
-          <div class="space-y-1">
+      <!-- Results -->
+      <div
+        v-else
+        class="grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
+        <!-- Named Groups -->
+        <div class="space-y-2">
+          <h3 class="font-semibold text-lg">{{ t('components.regexPreview.namedGroups') }}</h3>
+          <div
+            v-if="groups.named_group && Object.keys(groups.named_group).length > 0"
+            class="bg-gray-900 p-4 rounded-md font-mono text-sm space-y-1"
+          >
             <div
-              v-for="(group, index) in groups"
-              :key="index"
-              class="font-mono text-sm"
+              v-for="(value, key) in groups.named_group"
+              :key="key"
+              class="flex"
             >
-              <span class="text-blue-400">{{ t('components.preview.regex.group') }} {{ index + 1
-              }}:</span>
-              <span class="text-green-400 ml-2 bg-gray-700 px-2 py-1 rounded">{{ group }}</span>
+              <span class="text-purple-400 mr-2">{{ key }}:</span>
+              <span class="text-cyan-300">"{{ value }}"</span>
             </div>
+          </div>
+          <div
+            v-else
+            class="text-gray-400 italic"
+          >
+            {{ t('components.regexPreview.noNamedGroups') }}
           </div>
         </div>
 
-        <!-- 重新命名結果 -->
-        <div
-          v-if="isValid && preview"
-          class="bg-gray-900 p-3 rounded-md border border-gray-600"
-        >
-          <Label class="text-sm text-gray-400 mb-2 block">{{ t('components.preview.renameResult')
-          }}</Label>
-          <div class="font-mono text-sm break-all">
-            <span :class="preview.startsWith(t('components.preview.regex.renameFormatError'))
-              ? 'text-red-400'
-              : 'text-green-400'">
-              {{ preview }}
-            </span>
+        <!-- Numbered Groups -->
+        <div class="space-y-2">
+          <h3 class="font-semibold text-lg">{{ t('components.regexPreview.numberedGroups') }}</h3>
+          <div
+            v-if="groups.numbered_group && groups.numbered_group.length > 0"
+            class="bg-gray-900 p-4 rounded-md font-mono text-sm space-y-1"
+          >
+            <div
+              v-for="(value, index) in groups.numbered_group"
+              :key="index"
+              class="flex"
+            >
+              <span class="text-blue-400 mr-2">\{{ index + 1 }}:</span>
+              <span class="text-green-400">{{ value !== null ? `"${value}"` : 'null' }}</span>
+            </div>
+          </div>
+          <div
+            v-else
+            class="text-gray-400 italic"
+          >
+            {{ t('components.regexPreview.noNumberedGroups') }}
           </div>
         </div>
 
-        <!-- 使用說明 -->
-        <div class="text-s text-gray-500 bg-gray-800 p-3 rounded border">
-          <div class="mb-2"><strong>{{ t('components.preview.instructions') }}</strong></div>
-          <ul class="space-y-1 list-disc list-inside">
-            <li
-              v-for="(node, index) in tm('components.preview.regex.instructions')"
-              :key="index"
-            >
-              {{ rt(node) }}
-            </li>
-          </ul>
-          <div class="mt-3 pt-2 border-t border-gray-600">
-            <div class="mb-1"><strong>{{ t('components.preview.regex.exampleUsage')
-            }}</strong></div>
-            <div class="text-s space-y-1">
-              <div><code>(\d{2})</code> → <code>\1</code> ({{ t('components.preview.regex.usage1')
-              }})</div>
-              <div><code>(.+)</code> → <code>\1</code> ({{ t('components.preview.regex.usage2')
-              }})</div>
-              <div><code>(\d{4})</code> → <code>\1</code> ({{ t('components.preview.regex.usage3')
-              }})</div>
-            </div>
+        <!-- Formatted Result -->
+        <div class="space-y-2 col-span-full">
+          <h3 class="font-semibold text-lg">{{ t('components.regexPreview.result') }}</h3>
+          <div class="bg-gray-900 p-4 rounded-md font-mono text-sm text-green-400 break-all">
+            {{ formattedResult || t('components.regexPreview.noResult') }}
           </div>
-          <div class="mt-3 pt-2 border-t border-gray-600">
-            <div class="mb-1"><strong>{{ t('components.preview.regex.commonSymbols')
-            }}</strong></div>
-            <div class="grid grid-cols-2 gap-2 text-s">
-              <div><code>\d</code> - {{ t('components.preview.regex.symbols.d') }}</div>
-              <div><code>\w</code> - {{ t('components.preview.regex.symbols.w') }}</div>
-              <div><code>+</code> - {{ t('components.preview.regex.symbols.plus') }}</div>
-              <div><code>*</code> - {{ t('components.preview.regex.symbols.star') }}</div>
-              <div><code>?</code> - {{ t('components.preview.regex.symbols.qmark') }}</div>
-              <div><code>\.</code> - {{ t('components.preview.regex.symbols.dot') }}</div>
-            </div>
+        </div>
+      </div>
+
+      <!-- 使用說明 -->
+      <div class="text-s text-gray-500 bg-gray-800 p-3 rounded border">
+        <div class="mb-2"><strong>{{ t('components.regexPreview.instructions.title') }}</strong></div>
+        <ul class="space-y-1 list-disc list-inside">
+          <li
+            v-for="(node, index) in tm('components.regexPreview.instructions.lines')"
+            :key="index"
+          >
+            {{ rt(node) }}
+          </li>
+        </ul>
+        <div class="mt-3 pt-2 border-t border-gray-600">
+          <div class="mb-1"><strong>{{ t('components.regexPreview.exampleUsage')
+          }}</strong></div>
+          <div class="text-s space-y-1">
+            <div><code>(\d{2})</code> → <code>\1</code> ({{ t('components.regexPreview.usage1')
+            }})</div>
+            <div><code>(.+)</code> → <code>\1</code> ({{ t('components.regexPreview.usage2')
+            }})</div>
+            <div><code>(\d{4})</code> → <code>\1</code> ({{ t('components.regexPreview.usage3')
+            }})</div>
+          </div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-gray-600">
+          <div class="mb-1"><strong>{{ t('components.regexPreview.commonSymbols')
+          }}</strong></div>
+          <div class="grid grid-cols-2 gap-2 text-s">
+            <div><code>\d</code> - {{ t('components.regexPreview.symbols.d') }}</div>
+            <div><code>\w</code> - {{ t('components.regexPreview.symbols.w') }}</div>
+            <div><code>+</code> - {{ t('components.regexPreview.symbols.plus') }}</div>
+            <div><code>*</code> - {{ t('components.regexPreview.symbols.star') }}</div>
+            <div><code>?</code> - {{ t('components.regexPreview.symbols.qmark') }}</div>
+            <div><code>\.</code> - {{ t('components.regexPreview.symbols.dot') }}</div>
           </div>
         </div>
       </div>

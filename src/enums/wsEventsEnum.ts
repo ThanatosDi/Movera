@@ -17,6 +17,7 @@ export const wsEventsEnum = {
   updateSetting: 'update:settings',
   // 預覽事件
   previewParse: 'preview:parse',
+  previewRegex: 'preview:regex',
 } as const;
 
 export type wsEventsEnum = typeof wsEventsEnum[keyof typeof wsEventsEnum];
