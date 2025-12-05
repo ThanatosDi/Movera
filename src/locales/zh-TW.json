@@ -14,6 +14,7 @@
     "loading": "載入中...",
     "matchSuccess": "匹配成功",
     "noMatch": "無匹配",
+    "reload": "重新載入",
     "save": "儲存設定",
     "saving": "儲存中...",
     "search": "搜尋...",
@@ -22,12 +23,80 @@
     "success": "成功",
     "tasks": "任務",
     "timezone": "時區",
-    "version": "應用程式版本",
-    "reload": "重新載入"
+    "version": "應用程式版本"
   },
   "components": {
     "localeSelect": {
       "placeholder": "選擇語言"
+    },
+    "parsePreview": {
+      "description": "即時預覽檔案名稱解析的結果。",
+      "destinationPattern": "重新命名檔案規則",
+      "groups": "已解析欄位",
+      "instructions": {
+        "commonTypesTitle": "常用類型指定符：",
+        "docsLink": "更詳細的語法，請參考 {link}。",
+        "lines": [
+          "使用大括號 {'{'}{'}'} 來定義要捕獲的欄位。",
+          "在冒號後添加類型指定符，例如 {'{'}episode:d{'}'} 來捕獲數字。",
+          "目標規則可以使用格式指定符，例如 {'{'}episode:02d{'}'} 來補零。",
+          "點擊上方的範例按鈕以載入範例。"
+        ],
+        "officialDocs": "官方文件",
+        "title": "使用說明",
+        "types": {
+          "default": "預設 (字串)",
+          "float": "浮點數",
+          "integer": "整數",
+          "lowercase": "小寫字串",
+          "string": "字串",
+          "timestamp": "時間戳",
+          "uppercase": "大寫字串"
+        }
+      },
+      "noResult": "尚未產生結果",
+      "result": "結果",
+      "sourcePattern": "檔案原始名稱規則",
+      "testFilename": "測試檔案名稱",
+      "title": "Parse 預覽",
+      "withoutGroups": "尚無解析任何欄位"
+    },
+    "preview": {
+      "testFilename": "測試檔案名稱"
+    },
+    "regexPreview": {
+      "commonSymbols": "常用正規表達式符號：",
+      "destinationPattern": "重新命名檔案規則",
+      "exampleUsage": "群組引用範例：",
+      "instructions": {
+        "title": "使用說明",
+        "lines": [
+          "在「檔案名稱正規表示法」中使用括號 () 來建立捕獲群組",
+          "在「重新命名正規表示法」中使用 \\1, \\2, \\3 等來引用對應的群組",
+          "例如：(\\d{'{'}2{'}'}) 會捕獲兩位數字，在重新命名時用 \\1 引用",
+          "可以在上方修改測試檔案名稱來驗證不同的情況",
+          "點擊上方的測試案例按鈕可以快速載入範例"
+        ]
+      },
+      "namedGroups": "命名群組",
+      "noNamedGroups": "無命名群組",
+      "noNumberedGroups": "無編號群組",
+      "noResult": "尚未產生結果",
+      "numberedGroups": "編號群組",
+      "result": "結果",
+      "sourcePattern": "檔案原始名稱規則",
+      "symbols": {
+        "d": "數字 (0-9)",
+        "dot": "點號字面值",
+        "plus": "一個或多個",
+        "qmark": "零個或一個",
+        "star": "零個或多個",
+        "w": "字母數字"
+      },
+      "title": "Regex 預覽",
+      "usage1": "捕獲兩位數字",
+      "usage2": "捕獲任意字符",
+      "usage3": "捕獲四位數字，如年份"
     },
     "sidebarTool": {
       "createTaskBtn": "建立新任務"
@@ -44,47 +113,27 @@
         "regex": "正規表示 Regex"
       },
       "srcFilename": "來源檔名規則 (Src Filename Pattern)"
-    },
-    "parsePreview": {
-      "title": "Parse 預覽",
-      "description": "即時預覽檔案名稱解析的結果。",
-      "testFilename": "測試檔案名稱",
-      "sourcePattern": "檔案原始名稱規則",
-      "destinationPattern": "重新命名檔案規則",
-      "groups": "已解析欄位",
-      "withoutGroups": "尚無解析任何欄位",
-      "result": "結果",
-      "noResult": "尚未產生結果",
-      "instructions": {
-        "title": "使用說明",
-        "commonTypesTitle": "常用類型指定符：",
-        "docsLink": "更詳細的語法，請參考 {link}。",
-        "lines": [
-          "使用大括號 {'{'}{'}'} 來定義要捕獲的欄位。",
-          "在冒號後添加類型指定符，例如 {'{'}episode:d{'}'} 來捕獲數字。",
-          "目標規則可以使用格式指定符，例如 {'{'}episode:02d{'}'} 來補零。",
-          "點擊上方的範例按鈕以載入範例。"
-        ],
-        "types": {
-          "default": "預設 (字串)",
-          "integer": "整數",
-          "float": "浮點數",
-          "string": "字串",
-          "lowercase": "小寫字串",
-          "uppercase": "大寫字串",
-          "timestamp": "時間戳"
-        },
-        "officialDocs": "官方文件"
-      }
     }
+  },
+  "createTaskView": {
+    "cardDescription": "在這裡編輯任務的詳細設定。",
+    "cardTitle": "任務設定",
+    "clearRulesButton": "清除所有規則",
+    "createButton": "建立任務",
+    "creatingButton": "建立中...",
+    "description": "設定自動化檔案管理任務",
+    "title": "建立任務"
   },
   "errors": {
     "failedToCreateTask": "建立任務失敗",
+    "failedToDeleteTask": "刪除任務失敗",
+    "failedToFetchTaskLog": "取得任務日誌失敗",
     "failedToUpdateSettings": "更新設定失敗",
     "failedToUpdateTask": "更新任務失敗",
-    "failedToFetchTaskLog": "取得任務日誌失敗",
-    "taskIdIsRequired": "缺少必要任務 ID",
-    "failedToDeleteTask": "刪除任務失敗"
+    "taskIdIsRequired": "缺少必要任務 ID"
+  },
+  "exceptions": {
+    "TaskAlreadyExists": "任務 \"{taskName}\" 已存在"
   },
   "homeView": {
     "description": "歡迎使用 Movera，自動化檔案管理系統",
@@ -93,6 +142,21 @@
     "enabledTasks": "已啟用任務",
     "enabledTasksDesc": "個任務已啟用",
     "title": "首頁"
+  },
+  "notifications": {
+    "settingsSaveErrorTitle": "儲存設定失敗",
+    "settingsSaveSuccessDesc": "您的變更已成功套用。",
+    "settingsSaveSuccessTitle": "設定已儲存",
+    "taskCreateErrorTitle": "建立任務失敗",
+    "taskCreateSuccessDesc": "任務 \"{taskName}\" 已成功建立。",
+    "taskCreateSuccessTitle": "任務已建立",
+    "taskDeleteErrorTitle": "刪除任務失敗",
+    "taskDeleteSuccessDesc": "已成功刪除 \"{taskName}\" 任務",
+    "taskDeleteSuccessTitle": "任務已刪除",
+    "taskLogFetchErrorTitle": "取得任務日誌失敗",
+    "taskUpdateErrorTitle": "更新任務失敗",
+    "taskUpdateSuccessDesc": "任務 \"{taskName}\" 已成功更新。",
+    "taskUpdateSuccessTitle": "任務已更新"
   },
   "settingView": {
     "description": "管理全域應用程式設定",
@@ -107,51 +171,24 @@
     "title": "設定"
   },
   "taskDetailView": {
+    "checkTaskId": "請確認任務 ID 是否正確，或任務可能已被刪除。",
     "deleteDialogDesc": "此操作無法復原。這將永久刪除任務 \"{taskName}\" 並從資料庫中移除其相關資料。",
     "deleteDialogTitle": "您確定要刪除此任務嗎？",
     "disableButton": "停用任務",
     "enableButton": "啟用任務",
-    "taskId": "任務 ID",
-    "taskCardTitle": "任務設定",
-    "taskCardDescription": "查看和編輯任務詳細設定",
-    "saveChanges": "儲存變更",
+    "loadingLogs": "載入日誌中...",
+    "loadTasksFailed": "載入任務列表失敗",
     "logsCardDescription": "最近的任務執行紀錄。",
     "logsCardTitle": "日誌紀錄",
-    "loadingLogs": "載入日誌中...",
     "noLogs": "目前尚無任務執行紀錄",
-    "taskNotFound": "找不到此任務",
-    "checkTaskId": "請確認任務 ID 是否正確，或任務可能已被刪除。",
-    "loadTasksFailed": "載入任務列表失敗"
-  },
-  "notifications": {
-    "taskUpdateSuccessTitle": "任務已更新",
-    "taskUpdateSuccessDesc": "任務 \"{taskName}\" 已成功更新。",
-    "taskUpdateErrorTitle": "更新任務失敗",
-    "taskLogFetchErrorTitle": "取得任務日誌失敗",
-    "taskDeleteErrorTitle": "刪除任務失敗",
-    "taskDeleteSuccessTitle": "任務已刪除",
-    "taskDeleteSuccessDesc": "已成功刪除 \"{taskName}\" 任務",
-    "taskCreateErrorTitle": "建立任務失敗",
-    "taskCreateSuccessTitle": "任務已建立",
-    "taskCreateSuccessDesc": "任務 \"{taskName}\" 已成功建立。",
-    "settingsSaveSuccessTitle": "設定已儲存",
-    "settingsSaveSuccessDesc": "您的變更已成功套用。",
-    "settingsSaveErrorTitle": "儲存設定失敗"
+    "saveChanges": "儲存變更",
+    "taskCardDescription": "查看和編輯任務詳細設定",
+    "taskCardTitle": "任務設定",
+    "taskId": "任務 ID",
+    "taskNotFound": "找不到此任務"
   },
   "tasksListView": {
-    "title": "任務清單",
-    "description": "管理所有已建立的任務"
-  },
-  "createTaskView": {
-    "title": "建立任務",
-    "description": "設定自動化檔案管理任務",
-    "cardTitle": "任務設定",
-    "cardDescription": "在這裡編輯任務的詳細設定。",
-    "clearRulesButton": "清除所有規則",
-    "creatingButton": "建立中...",
-    "createButton": "建立任務"
-  },
-  "exceptions": {
-    "TaskAlreadyExists": "任務 \"{taskName}\" 已存在"
+    "description": "管理所有已建立的任務",
+    "title": "任務清單"
   }
 }

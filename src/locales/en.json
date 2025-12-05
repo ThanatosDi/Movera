@@ -14,6 +14,7 @@
     "loading": "Loading...",
     "matchSuccess": "Match successful",
     "noMatch": "No match",
+    "reload": "Reload",
     "save": "Save Settings",
     "saving": "Saving...",
     "search": "Search...",
@@ -22,61 +23,117 @@
     "success": "Success",
     "tasks": "Tasks",
     "timezone": "Timezone",
-    "version": "Application Version",
-    "reload": "Reload"
+    "version": "Application Version"
   },
   "components": {
     "localeSelect": {
       "placeholder": "Select Language"
     },
-    "sidebarTool": {
-      "createTaskBtn": "Create New Task"
-    },
     "parsePreview": {
+      "description": "Preview the result of filename parsing in real-time.",
+      "destinationPattern": "Destination Rename Filename Pattern",
+      "groups": "Parsed Groups",
       "instructions": {
+        "commonTypesTitle": "Common Type Specifiers:",
+        "docsLink": "For more detailed syntax, please refer to the {link}.",
         "lines": [
           "Use curly braces {'{'}{'}'} to define a field to capture.",
           "Add a type specifier after a colon, e.g., {'{'}episode:d{'}'} to capture a number.",
           "The destination rule can use format specifiers, e.g., {'{'}episode:02d{'}'} to pad with zeros.",
           "Click the example buttons above to load examples."
         ],
+        "officialDocs": "Official Documentation",
+        "title": "Usage Instructions",
         "types": {
           "default": "Default (string)",
-          "integer": "Integer",
           "float": "Float",
-          "string": "String",
+          "integer": "Integer",
           "lowercase": "Lowercase string",
-          "uppercase": "Uppercase string",
-          "timestamp": "Timestamp"
-        },
-        "title": "Usage Instructions",
-        "commonTypesTitle": "Common Type Specifiers:",
-        "officialDocs": "Official Documentation",
-        "docsLink": "For more detailed syntax, please refer to the {link}."
+          "string": "String",
+          "timestamp": "Timestamp",
+          "uppercase": "Uppercase string"
+        }
       },
-      "title": "Parse Preview",
-      "description": "Preview the result of filename parsing in real-time.",
-      "testFilename": "Test Filename",
-      "sourcePattern": "Source Filename Pattern",
-      "destinationPattern": "Destination Rename Filename Pattern",
-      "groups": "Parsed Groups",
-      "withoutGroups": "No groups parsed yet.",
+      "noResult": "No result generated yet.",
       "result": "Result",
-      "noResult": "No result generated yet."
+      "sourcePattern": "Source Filename Pattern",
+      "testFilename": "Test Filename",
+      "title": "Parse Preview",
+      "withoutGroups": "No groups parsed yet."
+    },
+    "preview": {
+      "testFilename": "Test Filename"
+    },
+    "regexPreview": {
+      "commonSymbols": "Common Regex Symbols:",
+      "destinationPattern": "Destination Filename Pattern",
+      "exampleUsage": "Group Reference Examples:",
+      "instructions": {
+        "title": "Instructions",
+        "lines": [
+          "Use parentheses () in 'Filename Regex' to create capture groups.",
+          "Use \\1, \\2, \\3, etc., in 'Rename Regex' to reference corresponding groups.",
+          "E.g., (\\d{'{'}2{'}'}) captures two digits, referenced with \\1.",
+          "You can modify the test filename above to validate different cases.",
+          "Click the test case buttons above to load examples."
+        ]
+      },
+      "namedGroups": "Named Groups",
+      "noNamedGroups": "No Named Groups",
+      "noNumberedGroups": "No Number Groups",
+      "noResult": "No Result",
+      "numberedGroups": "Number Groups",
+      "result": "Result",
+      "sourcePattern": "Source Filename Pattern",
+      "symbols": {
+        "d": "digit (0-9)",
+        "dot": "literal dot",
+        "plus": "one or more",
+        "qmark": "zero or one",
+        "star": "zero or more",
+        "w": "word character"
+      },
+      "title": "Regex Preview",
+      "usage1": "captures two digits",
+      "usage2": "captures any characters",
+      "usage3": "captures four digits, like a year"
+    },
+    "sidebarTool": {
+      "createTaskBtn": "Create New Task"
     },
     "taskForm": {
-      "name": "Task Name",
+      "dstFilename": "Destination Filename Pattern",
       "include": "Filename include",
+      "moveTo": "Move To",
+      "name": "Task Name",
       "renameRule": "Rename Rule",
       "renameRuleOptions": {
         "noRename": "Do not rename",
-        "regex": "Regular Expression (Regex)",
-        "parse": "Template Parsing (Parse)"
+        "parse": "Template Parsing (Parse)",
+        "regex": "Regular Expression (Regex)"
       },
-      "srcFilename": "Source Filename Pattern",
-      "dstFilename": "Destination Filename Pattern",
-      "moveTo": "Move To"
+      "srcFilename": "Source Filename Pattern"
     }
+  },
+  "createTaskView": {
+    "cardDescription": "Edit the detailed settings for the task here.",
+    "cardTitle": "Task Settings",
+    "clearRulesButton": "Clear All Rules",
+    "createButton": "Create Task",
+    "creatingButton": "Creating...",
+    "description": "Set up an automated file management task",
+    "title": "Create Task"
+  },
+  "errors": {
+    "failedToCreateTask": "Failed to create task",
+    "failedToDeleteTask": "Failed to delete task",
+    "failedToFetchTaskLog": "Failed to fetch task logs",
+    "failedToUpdateSettings": "Failed update settings.",
+    "failedToUpdateTask": "Failed to update task",
+    "taskIdIsRequired": "Missing necessary task ID"
+  },
+  "exceptions": {
+    "TaskAlreadyExists": "Task \"{taskName}\" already exists."
   },
   "homeView": {
     "description": "Welcome to Movera, the automated file management system",
@@ -86,67 +143,47 @@
     "enabledTasksDesc": "tasks are enabled",
     "title": "Home"
   },
+  "notifications": {
+    "taskCreateErrorTitle": "Failed to create task",
+    "taskDeleteErrorTitle": "Failed to delete task",
+    "taskDeleteSuccessDesc": "Task \"{taskName}\" has been deleted successfully.",
+    "taskDeleteSuccessTitle": "Task Deleted",
+    "taskLogFetchErrorTitle": "Failed to fetch task logs",
+    "taskUpdateErrorTitle": "Failed to update task",
+    "taskUpdateSuccessDesc": "Task \"{taskName}\" has been updated successfully.",
+    "taskUpdateSuccessTitle": "Task updated"
+  },
   "settingView": {
     "description": "Manage global application settings",
     "generalCard": {
       "description": "Adjust the application's appearance and notification behavior.",
-      "title": "General Settings",
       "timezoneLoading": "Loading timezones...",
       "timezoneNotFound": "Timezone not found.",
       "timezonePlaceholder": "Select timezone...",
-      "timezoneSearch": "Search timezone..."
+      "timezoneSearch": "Search timezone...",
+      "title": "General Settings"
     },
     "title": "Setting"
   },
   "taskDetailView": {
-    "enableButton": "Enable Task",
-    "disableButton": "Disable Task",
-    "taskId": "Task ID",
-    "deleteDialogTitle": "Are you sure you want to delete this task?",
-    "deleteDialogDesc": "This action cannot be undone. This will permanently delete the task \"{taskName}\" and remove its related data from the database.",
-    "taskCardTitle": "Task Settings",
-    "taskCardDescription": "Edit the detailed settings for the task here.",
-    "saveChanges": "Save Changes",
-    "logsCardTitle": "Log Records",
-    "logsCardDescription": "Recent task execution records.",
-    "loadingLogs": "Loading logs...",
-    "noLogs": "No task execution records yet",
-    "taskNotFound": "Task not found",
     "checkTaskId": "Please check if the task ID is correct, or the task may have been deleted.",
-    "loadTasksFailed": "Failed to load task list"
-  },
-  "errors": {
-    "failedToCreateTask": "Failed to create task",
-    "failedToUpdateSettings": "Failed update settings.",
-    "failedToUpdateTask": "Failed to update task",
-    "failedToFetchTaskLog": "Failed to fetch task logs",
-    "taskIdIsRequired": "Missing necessary task ID",
-    "failedToDeleteTask": "Failed to delete task"
-  },
-  "notifications": {
-    "taskUpdateSuccessTitle": "Task updated",
-    "taskUpdateSuccessDesc": "Task \"{taskName}\" has been updated successfully.",
-    "taskUpdateErrorTitle": "Failed to update task",
-    "taskLogFetchErrorTitle": "Failed to fetch task logs",
-    "taskDeleteErrorTitle": "Failed to delete task",
-    "taskDeleteSuccessTitle": "Task Deleted",
-    "taskDeleteSuccessDesc": "Task \"{taskName}\" has been deleted successfully.",
-    "taskCreateErrorTitle": "Failed to create task"
+    "deleteDialogDesc": "This action cannot be undone. This will permanently delete the task \"{taskName}\" and remove its related data from the database.",
+    "deleteDialogTitle": "Are you sure you want to delete this task?",
+    "disableButton": "Disable Task",
+    "enableButton": "Enable Task",
+    "loadingLogs": "Loading logs...",
+    "loadTasksFailed": "Failed to load task list",
+    "logsCardDescription": "Recent task execution records.",
+    "logsCardTitle": "Log Records",
+    "noLogs": "No task execution records yet",
+    "saveChanges": "Save Changes",
+    "taskCardDescription": "Edit the detailed settings for the task here.",
+    "taskCardTitle": "Task Settings",
+    "taskId": "Task ID",
+    "taskNotFound": "Task not found"
   },
   "tasksListView": {
-    "title": "Task List",
-    "description": "Manage all created tasks"
-  },
-  "createTaskView": {
-    "title": "Create Task",
-    "description": "Set up an automated file management task",
-    "cardTitle": "Task Settings",
-    "cardDescription": "Edit the detailed settings for the task here.",
-    "creatingButton": "Creating...",
-    "createButton": "Create Task",
-    "clearRulesButton": "Clear All Rules"
-  },
-  "exceptions": {
-    "TaskAlreadyExists": "Task \"{taskName}\" already exists."
+    "description": "Manage all created tasks",
+    "title": "Task List"
   }
 }
