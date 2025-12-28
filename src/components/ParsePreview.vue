@@ -79,7 +79,7 @@ const autoGrow = (event: Event) => {
 </script>
 
 <template>
-  <Card class="bg-gray-800 border-gray-700 text-white">
+  <Card class="border-gray-700 text-foreground bg-background">
     <CardHeader>
       <CardTitle>{{ t('components.parsePreview.title') }}</CardTitle>
       <CardDescription>{{ t('components.parsePreview.description') }}</CardDescription>
@@ -92,7 +92,7 @@ const autoGrow = (event: Event) => {
           <Textarea
             id="test-filename"
             v-model="testFilename"
-            class="bg-gray-900 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+            class="text-foreground bg-background border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
             rows="1"
             @input="autoGrow"
             @keydown.enter.prevent
@@ -105,7 +105,7 @@ const autoGrow = (event: Event) => {
             id="src-rule"
             v-model="srcPattern"
             placeholder="{title}.S{season:02d}E{episode:02d}.{extension}"
-            class="bg-gray-900 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+            class="text-foreground bg-background border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
             readonly
             rows="1"
             @input="autoGrow"
@@ -135,7 +135,7 @@ const autoGrow = (event: Event) => {
             id="dst-rule"
             v-model="dstPattern"
             placeholder="{title} S{season:02d}E{episode:02d}.{extension}"
-            class="bg-gray-900 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+            class="text-foreground bg-background border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
             readonly
             rows="1"
             @input="autoGrow"
@@ -169,15 +169,15 @@ const autoGrow = (event: Event) => {
           <h3 class="font-semibold text-lg">{{ t('components.parsePreview.groups') }}</h3>
           <div
             v-if="groups && Object.keys(groups).length > 0"
-            class="bg-gray-900 p-4 rounded-md font-mono text-sm space-y-1"
+            class="text-foreground bg-background p-4 rounded-md border font-mono text-sm space-y-1"
           >
             <div
               v-for="(value, key) in groups"
               :key="key"
               class="flex"
             >
-              <span class="text-purple-400 mr-2">{{ key }}:</span>
-              <span class="text-cyan-300">"{{ value }}"</span>
+              <span class="text-chart-3 mr-2">{{ key }}:</span>
+              <span class="text-chart-2">"{{ value }}"</span>
             </div>
           </div>
           <div
@@ -191,14 +191,14 @@ const autoGrow = (event: Event) => {
         <!-- Formatted Result -->
         <div class="space-y-2">
           <h3 class="font-semibold text-lg">{{ t('components.parsePreview.result') }}</h3>
-          <div class="bg-gray-900 p-4 rounded-md font-mono text-sm text-green-400 break-all">
+          <div class="text-chart-2 bg-background border p-4 rounded-md font-mono text-sm break-all">
             {{ formattedResult || t('components.parsePreview.noResult') }}
           </div>
         </div>
       </div>
 
       <!-- Instructions -->
-      <div class="text-xs text-gray-500 bg-gray-800 p-3 rounded border">
+      <div class="text-s text-ring bg-background p-3 rounded border">
         <div class="mb-2"><strong>{{ t('components.parsePreview.instructions.title') }}</strong></div>
         <ul class="space-y-1 list-disc list-inside">
           <li

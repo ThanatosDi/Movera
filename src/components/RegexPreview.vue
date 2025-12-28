@@ -79,7 +79,7 @@ const autoGrow = (event: Event) => {
 </script>
 
 <template>
-  <Card class="bg-gray-800 border-gray-700 text-white">
+  <Card class="border-gray-700 text-foreground bg-background">
     <CardHeader>
       <CardTitle class="flex items-center gap-2">
         <Lightbulb class="w-5 h-5 text-yellow-400" />
@@ -95,7 +95,7 @@ const autoGrow = (event: Event) => {
           <Textarea
             id="regex-test-filename"
             v-model="testFilename"
-            class="bg-gray-900 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+            class="text-foreground bg-background border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
             placeholder="公爵千金的家庭教師 - 01 [1080P][WEB-DL][AAC AVC][CHT].mp4"
             rows="1"
             @input="autoGrow"
@@ -108,7 +108,7 @@ const autoGrow = (event: Event) => {
             id="regex-src-pattern"
             v-model="srcPattern"
             placeholder="(?P<title>\w+) - (?P<episode>\d{2})(v2)? (.+)\.mp4"
-            class="bg-gray-900 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+            class="text-foreground bg-background border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
             readonly
             rows="1"
             @input="autoGrow"
@@ -137,7 +137,7 @@ const autoGrow = (event: Event) => {
             id="regex-dst-pattern"
             v-model="dstPattern"
             placeholder="\g<title> - S01E\g<episode> \4.mp4"
-            class="bg-gray-900 border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
+            class="text-foreground bg-background border-gray-600 resize-none min-h-0 py-2 px-3 overflow-hidden"
             readonly
             rows="1"
             @input="autoGrow"
@@ -149,7 +149,7 @@ const autoGrow = (event: Event) => {
       <!-- Error Display -->
       <div
         v-if="error"
-        class="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-md"
+        class="bg-destructive/30 border border-red-500 text-destructive-foreground px-4 py-3 rounded-md"
       >
         <p class="font-bold">{{ t('common.error') }}</p>
         <p>{{ t(error) }}</p>
@@ -165,15 +165,15 @@ const autoGrow = (event: Event) => {
           <h3 class="font-semibold text-lg">{{ t('components.regexPreview.namedGroups') }}</h3>
           <div
             v-if="groups.named_group && Object.keys(groups.named_group).length > 0"
-            class="bg-gray-900 p-4 rounded-md font-mono text-sm space-y-1"
+            class="text-foreground bg-background p-4 rounded-md border font-mono text-sm space-y-1"
           >
             <div
               v-for="(value, key) in groups.named_group"
               :key="key"
               class="flex"
             >
-              <span class="text-purple-400 mr-2">{{ key }}:</span>
-              <span class="text-cyan-300">"{{ value }}"</span>
+              <span class="text-chart-3 mr-2">{{ key }}:</span>
+              <span class="text-chart-2">"{{ value }}"</span>
             </div>
           </div>
           <div
@@ -189,15 +189,15 @@ const autoGrow = (event: Event) => {
           <h3 class="font-semibold text-lg">{{ t('components.regexPreview.numberedGroups') }}</h3>
           <div
             v-if="groups.numbered_group && groups.numbered_group.length > 0"
-            class="bg-gray-900 p-4 rounded-md font-mono text-sm space-y-1"
+            class="text-foreground bg-background p-4 rounded-md border font-mono text-sm space-y-1"
           >
             <div
               v-for="(value, index) in groups.numbered_group"
               :key="index"
               class="flex"
             >
-              <span class="text-blue-400 mr-2">\{{ index + 1 }}:</span>
-              <span class="text-green-400">{{ value !== null ? `"${value}"` : 'null' }}</span>
+              <span class="text-chart-3 mr-2">\{{ index + 1 }}:</span>
+              <span class="text-chart-2">{{ value !== null ? `"${value}"` : 'null' }}</span>
             </div>
           </div>
           <div
@@ -211,14 +211,14 @@ const autoGrow = (event: Event) => {
         <!-- Formatted Result -->
         <div class="space-y-2 col-span-full">
           <h3 class="font-semibold text-lg">{{ t('components.regexPreview.result') }}</h3>
-          <div class="bg-gray-900 p-4 rounded-md font-mono text-sm text-green-400 break-all">
+          <div class="text-chart-2 bg-background border p-4 rounded-md font-mono text-sm break-all">
             {{ formattedResult || t('components.regexPreview.noResult') }}
           </div>
         </div>
       </div>
 
       <!-- 使用說明 -->
-      <div class="text-s text-gray-500 bg-gray-800 p-3 rounded border">
+      <div class="text-s text-ring bg-background p-3 rounded border">
         <div class="mb-2"><strong>{{ t('components.regexPreview.instructions.title') }}</strong></div>
         <ul class="space-y-1 list-disc list-inside">
           <li
@@ -230,7 +230,7 @@ const autoGrow = (event: Event) => {
         </ul>
         <div class="mt-3 pt-2 border-t border-gray-600">
           <div class="mb-1"><strong>{{ t('components.regexPreview.exampleUsage')
-          }}</strong></div>
+              }}</strong></div>
           <div class="text-s space-y-1">
             <div><code>(\d{2})</code> → <code>\1</code> ({{ t('components.regexPreview.usage1')
             }})</div>
@@ -242,7 +242,7 @@ const autoGrow = (event: Event) => {
         </div>
         <div class="mt-3 pt-2 border-t border-gray-600">
           <div class="mb-1"><strong>{{ t('components.regexPreview.commonSymbols')
-          }}</strong></div>
+              }}</strong></div>
           <div class="grid grid-cols-2 gap-2 text-s">
             <div><code>\d</code> - {{ t('components.regexPreview.symbols.d') }}</div>
             <div><code>\w</code> - {{ t('components.regexPreview.symbols.w') }}</div>

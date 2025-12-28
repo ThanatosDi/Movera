@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useNotification } from '@/composables/useNotification'
 import type { TaskCreate } from '@/schemas'
 import { useTaskStore } from '@/stores/taskStore'
+import { useSessionStorage } from '@vueuse/core'
 import { Save, X } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -17,6 +18,9 @@ const router = useRouter()
 const tasksStore = useTaskStore()
 const isSaving = ref<boolean>(false)
 const error_message = ref<string>('')
+
+const regexTestFilename = useSessionStorage('regexPreview:testFilename', '')
+const parseTestFilename = useSessionStorage('parsePreview:testFilename', '')
 
 const createTaskData = ref<TaskCreate>({
   name: '',
@@ -36,6 +40,8 @@ const isRenameRuleRequired = computed(() => {
 const clearRenameRules = () => {
   createTaskData.value.src_filename = null
   createTaskData.value.dst_filename = null
+  regexTestFilename.value = ''
+  parseTestFilename.value = ''
 }
 
 const btnActionCreateTask = async () => {
