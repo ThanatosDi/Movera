@@ -99,7 +99,15 @@
       "usage3": "捕獲四位數字，如年份"
     },
     "sidebarTool": {
-      "createTaskBtn": "建立新任務"
+      "createTaskBtn": "建立新任務",
+      "selectMode": "選擇",
+      "exitSelectMode": "取消選擇",
+      "selectAll": "全選",
+      "deselectAll": "取消全選",
+      "selectedCount": "已選擇 {count} 項",
+      "batchEnable": "批量啟用",
+      "batchDisable": "批量停用",
+      "batchDelete": "批量刪除"
     },
     "taskForm": {
       "dstFilename": "目標檔名規則 (Dst Filename Pattern)",

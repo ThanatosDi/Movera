@@ -12,6 +12,10 @@ export const useTaskStore = defineStore('taskStore', () => {
   const isSaving = ref<boolean>(false)
   const error = ref<string | null>(null)
 
+  // 選擇模式相關狀態
+  const isSelectMode = ref<boolean>(false)
+  const selectedTaskIds = ref<Set<string>>(new Set())
+
   const enabledTaskCount = computed(() => {
     return tasks.value.filter(task => task.enabled).length;
   });
@@ -90,8 +94,75 @@ export const useTaskStore = defineStore('taskStore', () => {
       if (index !== -1) {
         tasks.value.splice(index, 1)
       }
+      // 從選中列表中移除已刪除的任務
+      const newSet = new Set(selectedTaskIds.value)
+      newSet.delete(taskId)
+      selectedTaskIds.value = newSet
     } catch (e) {
       throw e
+    }
+  }
+
+  // 選擇模式操作
+  function toggleSelectMode() {
+    isSelectMode.value = !isSelectMode.value
+    if (!isSelectMode.value) {
+      selectedTaskIds.value = new Set()
+    }
+  }
+
+  function toggleTaskSelection(taskId: string) {
+    const newSet = new Set(selectedTaskIds.value)
+    if (newSet.has(taskId)) {
+      newSet.delete(taskId)
+    } else {
+      newSet.add(taskId)
+    }
+    selectedTaskIds.value = newSet
+  }
+
+  function selectAllTasks() {
+    if (selectedTaskIds.value.size === tasks.value.length) {
+      selectedTaskIds.value = new Set()
+    } else {
+      selectedTaskIds.value = new Set(tasks.value.map(t => t.id))
+    }
+  }
+
+  function isTaskSelected(taskId: string) {
+    return selectedTaskIds.value.has(taskId)
+  }
+
+  const selectedCount = computed(() => selectedTaskIds.value.size)
+
+  // 批量操作
+  async function batchDelete() {
+    const idsToDelete = Array.from(selectedTaskIds.value)
+    for (const id of idsToDelete) {
+      await deleteTask(id)
+    }
+    selectedTaskIds.value = new Set()
+  }
+
+  async function batchEnable() {
+    const idsToEnable = Array.from(selectedTaskIds.value)
+    for (const id of idsToEnable) {
+      const task = getRefTaskById(id)
+      if (task && !task.enabled) {
+        const { id: _, created_at, logs, ...taskData } = task
+        await updateTask(id, { ...taskData, enabled: true })
+      }
+    }
+  }
+
+  async function batchDisable() {
+    const idsToDisable = Array.from(selectedTaskIds.value)
+    for (const id of idsToDisable) {
+      const task = getRefTaskById(id)
+      if (task && task.enabled) {
+        const { id: _, created_at, logs, ...taskData } = task
+        await updateTask(id, { ...taskData, enabled: false })
+      }
     }
   }
 
@@ -108,5 +179,17 @@ export const useTaskStore = defineStore('taskStore', () => {
     updateTask,
     deleteTask,
     fetchTaskLogByTaskId,
+    // 選擇模式
+    isSelectMode,
+    selectedTaskIds,
+    selectedCount,
+    toggleSelectMode,
+    toggleTaskSelection,
+    selectAllTasks,
+    isTaskSelected,
+    // 批量操作
+    batchDelete,
+    batchEnable,
+    batchDisable,
   }
 })

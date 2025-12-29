@@ -99,7 +99,15 @@
       "usage3": "captures four digits, like a year"
     },
     "sidebarTool": {
-      "createTaskBtn": "Create New Task"
+      "createTaskBtn": "Create New Task",
+      "selectMode": "Select",
+      "exitSelectMode": "Cancel",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "selectedCount": "{count} selected",
+      "batchEnable": "Enable Selected",
+      "batchDisable": "Disable Selected",
+      "batchDelete": "Delete Selected"
     },
     "taskForm": {
       "dstFilename": "Destination Filename Pattern",

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-// import { useTaskStore } from '@/stores/taskStore';
+import { Button } from '@/components/ui/button';
 import SidebarItem from '@/components/SidebarItem.vue';
 import SidebarTool from '@/components/SidebarTool.vue';
+import { RoutersEnum } from '@/enums/RoutersEnum';
 import { useTaskStore } from '@/stores/taskStore';
-import { Search } from 'lucide-vue-next';
+import { Plus, Search } from 'lucide-vue-next';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 
@@ -14,7 +15,20 @@ const { tasks } = storeToRefs(taskStore)
 </script>
 
 <template>
-  <aside class="hidden sm:flex flex-col w-90 p-4 rounded-lg mr-4">
+  <aside class="hidden sm:flex flex-col w-90 p-4 mr-4">
+    <!-- 建立新任務按鈕 -->
+    <RouterLink
+      :to="RoutersEnum.CreateTask"
+      class="mb-4"
+    >
+      <Button
+        class="bg-green-400 hover:bg-green-500 text-base text-black font-bold py-2 px-4 rounded-full w-full transition-colors"
+      >
+        <Plus class="w-4 h-4 mr-2" />{{ t('components.sidebarTool.createTaskBtn') }}
+      </Button>
+    </RouterLink>
+
+    <!-- 工具區 -->
     <SidebarTool />
     <!-- <nav class="flex flex-col space-y-2"> -->
     <nav class="flex-1 overflow-y-auto bg-sidebar rounded-b-md">
