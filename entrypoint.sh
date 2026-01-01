@@ -10,6 +10,17 @@ logger(){
 PUID=${PUID:-1000}
 PGID=${PGID:-1000}
 
+# 驗證 PUID/PGID 為有效數字且不為 0（防止以 root 身份執行）
+if ! echo "$PUID" | grep -qE '^[1-9][0-9]*$'; then
+    echo "[Entrypoint] 錯誤：PUID 必須為大於 0 的正整數，目前值為 '$PUID'"
+    exit 1
+fi
+
+if ! echo "$PGID" | grep -qE '^[1-9][0-9]*$'; then
+    echo "[Entrypoint] 錯誤：PGID 必須為大於 0 的正整數，目前值為 '$PGID'"
+    exit 1
+fi
+
 logger "啟動檢查：UID=$PUID, GID=$PGID"
 
 # --- 群組處理 ---
