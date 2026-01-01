@@ -64,12 +64,12 @@ const { groups, formattedResult, error } = useRegexPreview(
 )
 
 // 載入測試案例的處理函式
-const handleLoadTestCase = (testCase: any) => {
-  testFilename.value = testCase.filename
-  // These will trigger the computed setter and emit updates
-  srcPattern.value = testCase.src_filename
-  dstPattern.value = testCase.dst_filename
-}
+// const handleLoadTestCase = (testCase: any) => {
+//   testFilename.value = testCase.filename
+//   // These will trigger the computed setter and emit updates
+//   srcPattern.value = testCase.src_filename
+//   dstPattern.value = testCase.dst_filename
+// }
 
 const autoGrow = (event: Event) => {
   const target = event.target as HTMLTextAreaElement

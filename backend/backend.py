@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 
@@ -15,11 +16,16 @@ from backend.routers import setting, websocket
 from backend.utils.logger import logger
 
 
+def _run_alembic_upgrade():
+    """同步執行 Alembic 遷移"""
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")
+
+
 async def run_migrations():
     try:
         logger.info("開始資料庫遷移...")
-        alembic_cfg = Config("alembic.ini")
-        command.upgrade(alembic_cfg, "head")
+        await asyncio.to_thread(_run_alembic_upgrade)
         logger.info("資料庫遷移完成")
     except Exception as e:
         logger.info(f"遷移失敗: {e}")
@@ -51,7 +57,3 @@ setup_gzip(app)
 app.include_router(websocket.router)
 app.include_router(setting.router)
 
-
-@app.get("/")
-async def root():
-    return {"message": "Hello, World!"}

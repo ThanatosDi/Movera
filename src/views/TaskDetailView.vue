@@ -42,7 +42,7 @@ const isRenameRuleRequired = computed(() => {
 
 const isLoadingLogs = ref<boolean>(false)
 const logCard = ref<ComponentPublicInstance | null>(null)
-const { isLoading, isSaving } = storeToRefs(taskStore)
+const { isSaving } = storeToRefs(taskStore)
 
 const initialTaskData = async () => {
   if (taskStore.tasks.length === 0) {

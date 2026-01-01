@@ -63,12 +63,12 @@ const { groups, formattedResult, error } = useParsePreview(
 )
 
 // Load test case handler
-const handleLoadTestCase = (testCase: any) => {
-  testFilename.value = testCase.filename
-  // These will trigger the computed setter and emit updates
-  srcPattern.value = testCase.src_filename
-  dstPattern.value = testCase.dst_filename
-}
+// const handleLoadTestCase = (testCase: any) => {
+//   testFilename.value = testCase.filename
+//   // These will trigger the computed setter and emit updates
+//   srcPattern.value = testCase.src_filename
+//   dstPattern.value = testCase.dst_filename
+// }
 
 const autoGrow = (event: Event) => {
   const target = event.target as HTMLTextAreaElement
