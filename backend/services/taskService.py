@@ -20,6 +20,15 @@ class TaskService:
         """
         return self.repository.get_all()
 
+    def get_enabled_tasks(self) -> list[models.Task | None]:
+        """
+        取得所有啟用的任務
+
+        Returns:
+            list[models.Task | None]: 所有啟用的任務清單
+        """
+        return self.repository.get_enabled_tasks()
+
     def get_task_by_id(self, task_id: str) -> models.Task | None:
         """
         取得指定 id 的任務
