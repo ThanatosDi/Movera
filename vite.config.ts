@@ -32,6 +32,36 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
+        // 排除 API 和 FastAPI 文檔路徑不被快取
+        navigateFallbackDenylist: [
+          /^\/api/,
+          /^\/webhook/,
+          /^\/docs/,
+          /^\/redoc/,
+          /^\/openapi\.json/,
+        ],
+        runtimeCaching: [
+          {
+            urlPattern: /\/api\//,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /\/webhook\//,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /\/docs/,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /\/redoc/,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /\/openapi\.json/,
+            handler: 'NetworkOnly',
+          },
+        ],
       },
       manifest: {
         name: 'Movera',
