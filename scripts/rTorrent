@@ -1,0 +1,31 @@
+#!/bin/bash
+# rTorrent 下載完成腳本
+# 設定方式：在 .rtorrent.rc 中加入
+#   method.set_key = event.download.finished,movera,"execute2={/path/to/this/script,URL,$d.base_path=,$d.custom1=}"
+#
+# 參數：
+#   $1 - Movera Webhook URL
+#   $2 - 檔案路徑 (d.base_path)
+#   $3 - 自訂標籤 (d.custom1，可選)
+
+URL="$1"
+FILE_PATH="$2"
+CATEGORY="${3:-}"
+
+# Validate URL
+if [[ -z "$URL" ]]; then
+  echo "Error: URL is missing." >&2
+  echo "Usage: $0 <movera-webhook-url> <file_path> [category]" >&2
+  exit 1
+fi
+
+if [[ ! "$URL" =~ ^https?:// ]]; then
+  echo "Error: URL must start with http:// or https://" >&2
+  exit 1
+fi
+
+TAGS=""
+
+curl -sS -X POST "$URL" \
+  -H "Content-Type: application/json" \
+  -d "{\"filepath\": \"$FILE_PATH\", \"category\": \"$CATEGORY\", \"tags\": \"$TAGS\"}"
