@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
 from backend import __version__
-from backend.schemas import QBittorrentPayload
+from backend.schemas import DownloaderOnCompletePayload
 from backend.worker.worker import process_completed_download
 
 router = APIRouter(
@@ -39,21 +39,28 @@ def webhook_status():
     summary="QBittorrent Download Completion Webhook",
     response_description="Confirmation message that the webhook was received.",
 )
-async def qbittorrent_on_complete(
-    payload: QBittorrentPayload, background_tasks: BackgroundTasks
+@router.post(
+    "/on-complete",
+    summary="Downloader Completion Webhook",
+    response_description="Confirmation message that the webhook was received.",
+)
+async def downloader_on_complete(
+    payload: DownloaderOnCompletePayload, background_tasks: BackgroundTasks
 ):
     """
-    處理 qBittorrent 下載完成 webhook 的 API。
+    處理下載器下載完成 webhook 的 API。
 
-    在 qBittorrent 的 "執行外部程式" 功能中設定以下 URL，以便在下載完成時將事件傳遞給這個 API：
-    `http://localhost:8000/webhook/qbittorrent/on-complete`
+    在下載器的 "執行外部程式" 功能中設定以下 URL，以便在下載完成時將事件傳遞給這個 API：
+    `http://localhost:8000/webhook/on-complete`
 
-    事件處理器會在背景任務中執行，避免在 API 請求中 block 掉進一步的請求。
+    請依照各個下載器的說明文件，將 `./scripts` 下的對應腳本加入下載完成後的執行清單中。
+
+    事件處理器會在背景任務中執行，避免在 API 請求中 block 進一步的請求。
 
     回應內容:
     - `status`: always "success"
-    - `message`: "Webhook received and processing scheduled in the background."
-    - `content_path`: the content path of the downloaded torrent
+    - `code`: "200" for success, "500" for failure"
+    - `filepath`: the content path of the downloaded torrent
     """
     try:
         background_tasks.add_task(process_completed_download, payload.filepath)

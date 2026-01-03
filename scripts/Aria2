@@ -1,0 +1,36 @@
+#!/bin/bash
+# Aria2 下載完成腳本
+# 設定方式：
+#   aria2c --on-download-complete="/path/to/this/script <movera-webhook-url>"
+#   或在 aria2.conf 中設定：
+#   on-download-complete=/path/to/this/script <movera-webhook-url>
+#
+# Aria2 傳遞的參數：
+#   $1 - Movera Webhook URL (手動設定)
+#   $2 - GID (下載識別碼)
+#   $3 - 檔案數量
+#   $4 - 檔案路徑
+
+URL="$1"
+GID="$2"
+FILE_COUNT="$3"
+FILE_PATH="$4"
+
+# Validate URL
+if [[ -z "$URL" ]]; then
+  echo "Error: URL is missing." >&2
+  echo "Usage: $0 <movera-webhook-url> <gid> <file_count> <file_path>" >&2
+  exit 1
+fi
+
+if [[ ! "$URL" =~ ^https?:// ]]; then
+  echo "Error: URL must start with http:// or https://" >&2
+  exit 1
+fi
+
+CATEGORY=""
+TAGS=""
+
+curl -sS -X POST "$URL" \
+  -H "Content-Type: application/json" \
+  -d "{\"filepath\": \"$FILE_PATH\", \"category\": \"$CATEGORY\", \"tags\": \"$TAGS\"}"
