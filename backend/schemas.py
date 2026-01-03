@@ -214,7 +214,7 @@ class RegexPreviewResponse(RegexPreviewRequest):
 # --- Webhook Schemas ---
 
 
-class QBittorrentPayload(BaseModel):
+class DownloaderOnCompletePayload(BaseModel):
     """qBittorrent 'run external program' 的資料模型。"""
 
     filepath: str = Field(..., description="下載的內容路徑")
