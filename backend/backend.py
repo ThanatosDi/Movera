@@ -12,7 +12,7 @@ from alembic.config import Config
 from fastapi import FastAPI
 
 from backend.middlewares import setup_cors, setup_gzip
-from backend.routers import setting, websocket
+from backend.routers import setting, webhook, websocket
 from backend.utils.logger import logger
 
 
@@ -54,6 +54,6 @@ setup_cors(app)
 setup_gzip(app)
 
 
-app.include_router(websocket.router)
 app.include_router(setting.router)
-
+app.include_router(webhook.router)
+app.include_router(websocket.router)

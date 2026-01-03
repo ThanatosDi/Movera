@@ -52,6 +52,8 @@ fi
 
 # 無論如何，都確保家目錄存在且權限正確
 mkdir -p /home/movera
+
+mkdir /movera/database
 chown movera:movera /home/movera
 
 # 授權工作目錄給新使用者

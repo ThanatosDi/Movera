@@ -17,12 +17,12 @@ def setup_static_files():
     if (DIST_DIR / "assets").exists():
         app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
 
-    @app.get("/")
+    @app.get("/", include_in_schema=False)
     async def serve_index():
         """提供 Vue 應用的入口頁面"""
         return FileResponse(DIST_DIR / "index.html")
 
-    @app.get("/{full_path:path}")
+    @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str):
         """處理 SPA 路由，將未匹配的路徑導向 index.html"""
         # 嘗試提供靜態檔案
@@ -33,10 +33,9 @@ def setup_static_files():
         return FileResponse(DIST_DIR / "index.html")
 
 
-def main():
-    print("Hello from movera!")
-
-
 if __name__ == "__main__":
     setup_static_files()
+    for route in app.routes:
+        print(route)
+
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

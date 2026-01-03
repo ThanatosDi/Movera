@@ -1,8 +1,8 @@
 from datetime import UTC, datetime
 
-from core import __version__
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
+from backend import __version__
 from backend.schemas import QBittorrentPayload
 from backend.worker.worker import process_completed_download
 

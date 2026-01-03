@@ -2,7 +2,7 @@ import os
 from typing import Literal
 
 from backend import schemas
-from backend.handlers.websocket_connection_manager import WebSocketConnectionManager
+from backend.database import SessionLocal
 from backend.repositories.log import LogRepository
 from backend.repositories.task import TaskRepository
 from backend.services.logService import LogService
@@ -10,7 +10,7 @@ from backend.services.taskService import TaskService
 from backend.utils.move import move
 from backend.utils.rename import Rename
 
-db = WebSocketConnectionManager().get_db_session()
+db = SessionLocal()
 task_service = TaskService(TaskRepository(db=db))
 log_service = LogService(LogRepository(db=db))
 
