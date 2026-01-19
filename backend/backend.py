@@ -57,3 +57,8 @@ setup_gzip(app)
 app.include_router(setting.router)
 app.include_router(webhook.router)
 app.include_router(websocket.router)
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
