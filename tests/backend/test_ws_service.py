@@ -200,13 +200,25 @@ class TestWsServiceHandleGetSettings:
     """測試 wsService._handle_get_settings 方法"""
 
     @pytest.mark.asyncio
-    async def test_handle_get_settings(self, ws_service_instance):
+    async def test_handle_get_settings(self, ws_service_instance, db_session):
         """測試取得設定"""
-        # 注意：目前 _handle_get_settings 方法體為空，會回傳 None
+        from backend.models.setting import Setting
+
+        # 建立測試設定
+        setting = Setting(key="timezone", value="Asia/Taipei")
+        db_session.add(setting)
+        db_session.commit()
+
         result = await ws_service_instance._handle_get_settings({})
 
-        # 根據目前的實現，會回傳 None
-        assert result is None
+        assert result["timezone"] == "Asia/Taipei"
+
+    @pytest.mark.asyncio
+    async def test_handle_get_settings_empty(self, ws_service_instance):
+        """測試沒有設定時"""
+        result = await ws_service_instance._handle_get_settings({})
+
+        assert result == {}
 
 
 class TestWsServiceHandleUpdateSettings:

@@ -53,15 +53,13 @@ const btnActionCreateTask = async () => {
     useNotification.showSuccess(
       t('notifications.taskCreateSuccessTitle'),
       t('notifications.taskCreateSuccessDesc', { taskName: response.name }))
-  } catch (e: any) {
-    console.error(t('errors.failedToCreateTask'), (e))
-    switch (e.error) {
-      case 'TaskAlreadyExists':
-        error_message.value = t('exceptions.TaskAlreadyExists', { taskName: createTaskData.value.name })
-        break
-      default:
-        error_message.value = `${e.error}\n${e.message}`
-        break
+  } catch (e: unknown) {
+    console.error(t('errors.failedToCreateTask'), e)
+    const wsError = e as { error?: string; message?: string }
+    if (wsError.error === 'TaskAlreadyExists') {
+      error_message.value = t('exceptions.TaskAlreadyExists', { taskName: createTaskData.value.name })
+    } else {
+      error_message.value = wsError.message || (e as Error).message || 'Unknown error'
     }
     useNotification.showError(t('notifications.taskCreateErrorTitle'), error_message.value)
   } finally {

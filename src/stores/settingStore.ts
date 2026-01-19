@@ -17,32 +17,40 @@ export const useSettingStore = defineStore('settingStore', () => {
   })
 
   async function fetchSettings() {
+    error.value = null
     try {
       const response = await wsService.request<{ Settings: Settings }>(wsEventsEnum.getSettings)
       settings.value = { ...settings.value, ...response }
     } catch (e) {
+      error.value = (e as Error).message
       console.error('Failed to fetch settings:', e)
       throw e
     }
   }
 
   async function updateSettings(settingsData: Settings) {
+    error.value = null
+    isSaving.value = true
     try {
       const res = await wsService.request<{ Settings: Settings }>(wsEventsEnum.updateSetting, settingsData)
       settings.value = { ...settings.value, ...res }
-    } catch (error: any) {
-      throw error
+    } catch (e) {
+      error.value = (e as Error).message
+      throw e
+    } finally {
+      isSaving.value = false
     }
   }
 
   async function initializeSettings() {
+    error.value = null
     try {
       const res = await httpRequest<Settings>('GET', `/api/v1/settings`);
-      console.log(res)
       settings.value = { ...settings.value, ...res }
-    } catch (error: any) {
-      console.error('獲取設定失敗', error.message)
-      throw error
+    } catch (e) {
+      error.value = (e as Error).message
+      console.error('獲取設定失敗', (e as Error).message)
+      throw e
     }
   }
 

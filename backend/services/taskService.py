@@ -11,6 +11,24 @@ class TaskService:
     def __init__(self, repository: TaskRepository):
         self.repository = repository
 
+    def _get_task_or_raise(self, task_id: str) -> models.Task:
+        """
+        獲取任務，若不存在則拋出 TaskNotFound
+
+        Args:
+            task_id (str): 任務的 ID
+
+        Returns:
+            models.Task: 該任務
+
+        Raises:
+            TaskNotFound: 如果不存在相同ID的任務
+        """
+        task = self.get_task_by_id(task_id)
+        if task is None:
+            raise TaskNotFound(task_id)
+        return task
+
     def get_all_tasks(self) -> list[models.Task | None]:
         """
         取得所有任務
@@ -93,9 +111,7 @@ class TaskService:
             TaskNotFound: 如果不存在相同ID的任務
             TaskAlreadyExists: 如果已經存在相同名稱的任務
         """
-        exists_task = self.get_task_by_id(task_id)
-        if exists_task is None:
-            raise TaskNotFound(task_id)
+        exists_task = self._get_task_or_raise(task_id)
         if exists_task.name != task_update.name:
             same_name_task = self.get_task_by_name(task_update.name)
             if same_name_task is not None:
@@ -115,7 +131,5 @@ class TaskService:
         Raises:
             TaskNotFound: 如果不存在相同ID的任務
         """
-        exists_task = self.get_task_by_id(task_id)
-        if exists_task is None:
-            raise TaskNotFound(task_id)
+        self._get_task_or_raise(task_id)
         return self.repository.delete(task_id)
