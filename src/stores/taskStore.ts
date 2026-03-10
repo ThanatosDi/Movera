@@ -1,12 +1,10 @@
-import { useWebSocketService } from '@/composables/useWebSocketService'
-import { wsEventsEnum } from '@/enums/wsEventsEnum'
+import { request } from '@/composables/useHttpService'
 import type { Log, Task, TaskCreate, TaskUpdate } from '@/schemas'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 
 export const useTaskStore = defineStore('taskStore', () => {
-  const wsService = useWebSocketService()
   const tasks = ref<Task[]>([])
   const isLoading = ref<boolean>(false)
   const isSaving = ref<boolean>(false)
@@ -33,22 +31,24 @@ export const useTaskStore = defineStore('taskStore', () => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await wsService.request<Task[]>(wsEventsEnum.getTasks)
+      const response = await request<Task[]>('GET', '/api/v1/tasks')
       tasks.value = response
     } catch (e) {
       error.value = (e as Error).message
-      throw e // 重新拋出異常，讓調用者能正確處理
+      throw e
     } finally {
       isLoading.value = false
     }
   }
 
   async function createTask(taskData: TaskCreate) {
+    error.value = null
     try {
-      const response = await wsService.request<Task>(wsEventsEnum.createTask, taskData)
+      const response = await request<Task>('POST', '/api/v1/tasks', taskData)
       tasks.value.push(response)
       return response
     } catch (e) {
+      error.value = (e as Error).message
       throw e
     }
   }
@@ -61,10 +61,11 @@ export const useTaskStore = defineStore('taskStore', () => {
       if (taskIndex === -1) {
         throw new Error('task not found')
       }
-      const response = await wsService.request<Task>(wsEventsEnum.updateTask, { id: taskId, ...taskData })
+      const response = await request<Task>('PUT', `/api/v1/tasks/${taskId}`, taskData)
       tasks.value[taskIndex] = response
       return response
     } catch (e) {
+      error.value = (e as Error).message
       throw e
     } finally {
       isSaving.value = false
@@ -72,14 +73,16 @@ export const useTaskStore = defineStore('taskStore', () => {
   }
 
   async function fetchTaskLogByTaskId(taskId: string) {
+    error.value = null
     try {
-      const response = await wsService.request<Log[]>(wsEventsEnum.getLogs, { id: taskId })
+      const response = await request<Log[]>('GET', `/api/v1/tasks/${taskId}/logs`)
       const task = tasks.value.find(task => task.id === taskId)
       if (task) {
         task.logs = response
       }
       return response
     } catch (e) {
+      error.value = (e as Error).message
       throw e
     }
   }
@@ -88,8 +91,9 @@ export const useTaskStore = defineStore('taskStore', () => {
     if (!taskId) {
       return
     }
+    error.value = null
     try {
-      await wsService.request(wsEventsEnum.deleteTask, { id: taskId })
+      await request('DELETE', `/api/v1/tasks/${taskId}`)
       const index = tasks.value.findIndex(task => task.id === taskId)
       if (index !== -1) {
         tasks.value.splice(index, 1)
@@ -99,6 +103,7 @@ export const useTaskStore = defineStore('taskStore', () => {
       newSet.delete(taskId)
       selectedTaskIds.value = newSet
     } catch (e) {
+      error.value = (e as Error).message
       throw e
     }
   }
@@ -144,26 +149,23 @@ export const useTaskStore = defineStore('taskStore', () => {
     selectedTaskIds.value = new Set()
   }
 
-  async function batchEnable() {
-    const idsToEnable = Array.from(selectedTaskIds.value)
-    for (const id of idsToEnable) {
+  async function batchSetEnabled(enabled: boolean) {
+    const ids = Array.from(selectedTaskIds.value)
+    for (const id of ids) {
       const task = getRefTaskById(id)
-      if (task && !task.enabled) {
+      if (task && task.enabled !== enabled) {
         const { id: _, created_at, logs, ...taskData } = task
-        await updateTask(id, { ...taskData, enabled: true })
+        await updateTask(id, { ...taskData, enabled })
       }
     }
   }
 
+  async function batchEnable() {
+    await batchSetEnabled(true)
+  }
+
   async function batchDisable() {
-    const idsToDisable = Array.from(selectedTaskIds.value)
-    for (const id of idsToDisable) {
-      const task = getRefTaskById(id)
-      if (task && task.enabled) {
-        const { id: _, created_at, logs, ...taskData } = task
-        await updateTask(id, { ...taskData, enabled: false })
-      }
-    }
+    await batchSetEnabled(false)
   }
 
   return {

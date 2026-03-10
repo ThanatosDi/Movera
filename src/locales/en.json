@@ -152,6 +152,9 @@
     "title": "Home"
   },
   "notifications": {
+    "settingsSaveErrorTitle": "Failed to save settings",
+    "settingsSaveSuccessDesc": "Your changes have been applied successfully.",
+    "settingsSaveSuccessTitle": "Settings Saved",
     "taskCreateErrorTitle": "Failed to create task",
     "taskDeleteErrorTitle": "Failed to delete task",
     "taskDeleteSuccessDesc": "Task \"{taskName}\" has been deleted successfully.",

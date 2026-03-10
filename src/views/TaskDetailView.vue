@@ -20,7 +20,7 @@ import type { Task } from '@/schemas'
 import { useTaskStore } from '@/stores/taskStore'
 import { Play, RefreshCw, Save, Square, Trash2 } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
-import { computed, nextTick, ref, watch, type ComponentPublicInstance } from 'vue'
+import { computed, nextTick, ref, toRaw, watch, type ComponentPublicInstance } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -62,7 +62,7 @@ watch(
       await initialTaskData()
       // 從 store 獲取任務並創建深拷貝（允許本地編輯）
       const foundTask = taskStore.getRefTaskById(newTaskId as string)
-      task.value = foundTask ? JSON.parse(JSON.stringify(foundTask)) : null
+      task.value = foundTask ? structuredClone(toRaw(foundTask)) : null
     }
   },
   { immediate: true }
@@ -76,7 +76,7 @@ watch(
     if (taskId.value && !task.value) {
       const foundTask = taskStore.getRefTaskById(taskId.value)
       if (foundTask) {
-        task.value = JSON.parse(JSON.stringify(foundTask))
+        task.value = structuredClone(toRaw(foundTask))
       }
     }
   },
@@ -104,12 +104,12 @@ const btnActionUpdateTask = async () => {
     const updatedTask = await taskStore.updateTask(id, taskData)
     // 保存成功後，從 store 同步最新數據
     if (updatedTask) {
-      task.value = JSON.parse(JSON.stringify(updatedTask))
+      task.value = structuredClone(toRaw(updatedTask))
     }
     useNotification.showSuccess(t('notifications.taskUpdateSuccessTitle'), t('notifications.taskUpdateSuccessDesc', { taskName: task.value?.name }))
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Failed to update task:', e)
-    useNotification.showError(t('notifications.taskUpdateErrorTitle'), e.message)
+    useNotification.showError(t('notifications.taskUpdateErrorTitle'), (e as Error).message)
   } finally {
     isSaving.value = false
   }
@@ -126,9 +126,9 @@ const btnActionReloadLogs = async () => {
     if (logs && task.value) {
       task.value.logs = logs
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Failed to fetch task log:', e)
-    useNotification.showError(t('notifications.taskLogFetchErrorTitle'), e.message)
+    useNotification.showError(t('notifications.taskLogFetchErrorTitle'), (e as Error).message)
   } finally {
     isLoadingLogs.value = false
     await nextTick()
@@ -153,9 +153,9 @@ const btnActionDeleteTask = async () => {
       t('notifications.taskDeleteSuccessTitle'),
       t('notifications.taskDeleteSuccessDesc', { taskName: task.value.name })
     )
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Failed to delete task:', e)
-    useNotification.showError(t('notifications.taskDeleteErrorTitle'), e.message)
+    useNotification.showError(t('notifications.taskDeleteErrorTitle'), (e as Error).message)
   } finally {
     isSaving.value = false
   }

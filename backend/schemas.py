@@ -113,18 +113,6 @@ class Setting(SettingBase, OrmBaseModel):
     pass
 
 
-# --- WebSocket Schemas ---
-
-
-class WebSocketMessage(BaseModel):
-    """對應前端傳來的正規化 WebSocket 訊息結構。"""
-
-    event: str
-    payload: Optional[dict[str, str | bool | None]] = None
-    requestId: Optional[str] = None
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
-
-
 # --- Parse Preview Schemas ---
 
 

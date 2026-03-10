@@ -50,7 +50,7 @@ const handleClick = (navigate: () => void) => {
             class="flex items-center pointer-events-none"
           >
             <div
-              class="size-4 shrink-0 rounded-[4px] border shadow-xs transition-all"
+              class="size-4 shrink-0 rounded-lg border shadow-xs transition-all"
               :class="isSelected
                 ? 'bg-primary border-primary text-primary-foreground'
                 : 'border-input bg-transparent'"

@@ -36,9 +36,9 @@ const UpdateSettings = async () => {
   try {
     await settingStore.updateSettings(settings.value)
     useNotification.showSuccess(t('notifications.settingsSaveSuccessTitle'), t('notifications.settingsSaveSuccessDesc'))
-  } catch (e: any) {
-    console.error('Failed to update settings:', e as Error)
-    useNotification.showSuccess(t('notifications.settingsSaveErrorTitle'), e.message)
+  } catch (e: unknown) {
+    console.error('Failed to update settings:', e)
+    useNotification.showError(t('notifications.settingsSaveErrorTitle'), (e as Error).message)
   } finally {
     isSaving.value = false
   }

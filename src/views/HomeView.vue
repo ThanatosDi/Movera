@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useWebSocketService } from '@/composables/useWebSocketService';
 import { useTaskStore } from '@/stores/taskStore';
 import { CheckCircle, LoaderCircle, XCircle } from 'lucide-vue-next';
 import { storeToRefs } from 'pinia';
@@ -8,7 +7,6 @@ import { useI18n } from 'vue-i18n';
 
 
 const { t } = useI18n()
-const { status: websocketStatus } = useWebSocketService()
 const taskStore = useTaskStore()
 const { isLoading, enabledTaskCount, disabledTaskCount } = storeToRefs(taskStore)
 
@@ -32,7 +30,7 @@ const { isLoading, enabledTaskCount, disabledTaskCount } = storeToRefs(taskStore
         </CardHeader>
         <CardContent>
           <div
-            v-if="websocketStatus === 'OPEN' && !isLoading"
+            v-if="!isLoading"
             class="text-2xl font-bold text-green-400"
           >{{ enabledTaskCount ?? 0 }}</div>
           <LoaderCircle
@@ -51,7 +49,7 @@ const { isLoading, enabledTaskCount, disabledTaskCount } = storeToRefs(taskStore
         </CardHeader>
         <CardContent>
           <div
-            v-if="websocketStatus === 'OPEN' && !isLoading"
+            v-if="!isLoading"
             class="text-2xl font-bold text-red-500"
           >{{ disabledTaskCount ?? 0 }}</div>
           <LoaderCircle

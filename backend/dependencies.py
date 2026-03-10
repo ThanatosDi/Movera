@@ -4,8 +4,10 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from backend.database import SessionLocal
+from backend.repositories.log import LogRepository
 from backend.repositories.setting import SettingRepository
 from backend.repositories.task import TaskRepository
+from backend.services.logService import LogService
 from backend.services.settingService import SettingService
 from backend.services.taskService import TaskService
 
@@ -48,3 +50,17 @@ def depends_setting_service(
 ) -> SettingService:
     """Dependency to get a SettingService instance."""
     return SettingService(repository=repository)
+
+
+def depends_log_repository(
+    db: Session = Depends(get_db),
+) -> LogRepository:
+    """Dependency to get a LogRepository instance."""
+    return LogRepository(db=db)
+
+
+def depends_log_service(
+    repository: LogRepository = Depends(depends_log_repository),
+) -> LogService:
+    """Dependency to get a LogService instance."""
+    return LogService(repository=repository)
