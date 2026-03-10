@@ -6,15 +6,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick, ref } from 'vue'
 import { useRegexPreview } from '../useRegexPreview'
 
-// Mock useWebSocketService
+// Mock useHttpService
 const mockRequest = vi.fn()
-const mockStatus = ref('OPEN')
 
-vi.mock('../useWebSocketService', () => ({
-  useWebSocketService: () => ({
-    request: mockRequest,
-    status: mockStatus,
-  }),
+vi.mock('../useHttpService', () => ({
+  request: (...args: any[]) => mockRequest(...args),
 }))
 
 // Mock perfect-debounce
@@ -25,7 +21,6 @@ vi.mock('perfect-debounce', () => ({
 describe('useRegexPreview', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockStatus.value = 'OPEN'
   })
 
   describe('初始狀態', () => {
@@ -73,21 +68,6 @@ describe('useRegexPreview', () => {
 
       expect(groups.value).toEqual({ named_group: {}, numbered_group: [] })
       expect(formattedResult.value).toBe('')
-    })
-  })
-
-  describe('WebSocket 連線狀態', () => {
-    it('未連線時應該設置錯誤', async () => {
-      mockStatus.value = 'CLOSED'
-      const text = ref('test')
-      const srcPattern = ref('pattern')
-      const dstPattern = ref('output')
-
-      const { error } = useRegexPreview(text, srcPattern, dstPattern)
-      await nextTick()
-
-      expect(error.value).toBe('errors.websocket.notConnected')
-      expect(mockRequest).not.toHaveBeenCalled()
     })
   })
 

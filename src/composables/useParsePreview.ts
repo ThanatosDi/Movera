@@ -1,4 +1,3 @@
-import { wsEventsEnum } from '@/enums/wsEventsEnum'
 import type { Ref } from 'vue'
 import { usePreview } from './usePreview'
 
@@ -11,7 +10,7 @@ interface ParseGroups {
 
 /**
  * 解析預覽功能的 Composable
- * 透過 WebSocket 發送請求以預覽解析結果
+ * 透過 HTTP 發送請求以預覽解析結果
  *
  * @param text - 要解析的測試檔名或文字
  * @param srcPattern - 來源模式規則
@@ -24,7 +23,7 @@ export function useParsePreview(
   dstPattern: Ref<string>
 ) {
   return usePreview<ParseGroups>(text, srcPattern, dstPattern, {
-    eventType: wsEventsEnum.previewParse,
+    endpoint: '/api/v1/preview/parse',
     initialGroups: {},
     logPrefix: 'useParsePreview'
   })

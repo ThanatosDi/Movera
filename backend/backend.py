@@ -9,10 +9,12 @@ from contextlib import asynccontextmanager
 
 from alembic import command
 from alembic.config import Config
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
+from backend.exceptions.taskException import TaskAlreadyExists, TaskNotFound
 from backend.middlewares import setup_cors, setup_gzip
-from backend.routers import setting, webhook, websocket
+from backend.routers import log, preview, setting, task, webhook
 from backend.utils.logger import logger
 
 
@@ -49,14 +51,27 @@ app = FastAPI(
 )
 
 
+# Exception handlers
+@app.exception_handler(TaskNotFound)
+async def task_not_found_handler(request: Request, exc: TaskNotFound):
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+
+@app.exception_handler(TaskAlreadyExists)
+async def task_already_exists_handler(request: Request, exc: TaskAlreadyExists):
+    return JSONResponse(status_code=409, content={"detail": str(exc)})
+
+
 # Middlewares
 setup_cors(app)
 setup_gzip(app)
 
 
+app.include_router(task.router)
 app.include_router(setting.router)
+app.include_router(log.router)
+app.include_router(preview.router)
 app.include_router(webhook.router)
-app.include_router(websocket.router)
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,7 +1,7 @@
 import { debounce } from 'perfect-debounce'
 import type { Ref } from 'vue'
 import { ref, watch } from 'vue'
-import { useWebSocketService } from './useWebSocketService'
+import { request } from './useHttpService'
 
 /**
  * 預覽請求的 payload 結構
@@ -27,8 +27,8 @@ interface PreviewResponse<TGroups> {
  * Preview Composable 的配置選項
  */
 interface PreviewConfig<TGroups> {
-  /** WebSocket 事件類型 */
-  eventType: string
+  /** HTTP API 端點路徑 */
+  endpoint: string
   /** groups 的初始值 */
   initialGroups: TGroups
   /** 日誌前綴，用於錯誤訊息 */
@@ -37,7 +37,7 @@ interface PreviewConfig<TGroups> {
 
 /**
  * 通用的預覽功能 Composable
- * 透過 WebSocket 發送請求以預覽解析結果
+ * 透過 HTTP 發送請求以預覽解析結果
  *
  * @param text - 要解析的測試檔名或文字
  * @param srcPattern - 來源模式規則
@@ -51,13 +51,12 @@ export function usePreview<TGroups>(
   dstPattern: Ref<string>,
   config: PreviewConfig<TGroups>
 ) {
-  const { request, status } = useWebSocketService()
   const groups = ref<TGroups>(config.initialGroups) as Ref<TGroups>
   const formattedResult = ref<string>('')
   const error = ref<string | null>(null)
 
   /**
-   * 透過 WebSocket 從後端取得預覽結果
+   * 透過 HTTP 從後端取得預覽結果
    */
   const fetchPreview = async () => {
     // 如果必填欄位為空，重置結果
@@ -65,12 +64,6 @@ export function usePreview<TGroups>(
       groups.value = config.initialGroups
       formattedResult.value = ''
       error.value = null
-      return
-    }
-
-    // 檢查 WebSocket 連線狀態
-    if (status.value !== 'OPEN') {
-      error.value = 'errors.websocket.notConnected'
       return
     }
 
@@ -84,9 +77,9 @@ export function usePreview<TGroups>(
       }
 
       const response = await request<PreviewResponse<TGroups>>(
-        config.eventType,
-        payload,
-        5000 // 5 秒逾時
+        'POST',
+        config.endpoint,
+        payload
       )
 
       // 更新狀態與結果

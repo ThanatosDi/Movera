@@ -7,15 +7,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useTaskStore } from '../taskStore'
 import type { Task } from '@/schemas'
 
-// Mock useWebSocketService
+// Mock useHttpService
 const mockRequest = vi.fn()
-vi.mock('@/composables/useWebSocketService', () => ({
-  useWebSocketService: () => ({
-    request: mockRequest,
-    status: { value: 'OPEN' },
-    on: vi.fn(),
-    off: vi.fn(),
-  }),
+vi.mock('@/composables/useHttpService', () => ({
+  request: (...args: any[]) => mockRequest(...args),
 }))
 
 // 範例任務資料

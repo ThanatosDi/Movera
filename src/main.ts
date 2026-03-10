@@ -26,8 +26,8 @@ async function initializeApp() {
 
 
   try {
-    // 連線成功後，再從後端載入設定
-    await settingStore.initializeSettings()
+    // 從後端載入設定
+    await settingStore.fetchSettings()
   } catch (error) {
     console.error('應用程式初始化失敗:', error)
   }

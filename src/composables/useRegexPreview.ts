@@ -1,4 +1,3 @@
-import { wsEventsEnum } from '@/enums/wsEventsEnum'
 import type { Ref } from 'vue'
 import { usePreview } from './usePreview'
 
@@ -12,7 +11,7 @@ interface RegexGroups {
 
 /**
  * 正則表達式預覽功能的 Composable
- * 透過 WebSocket 發送請求以預覽正則表達式解析結果
+ * 透過 HTTP 發送請求以預覽正則表達式解析結果
  *
  * @param text - 要解析的測試檔名或文字
  * @param srcPattern - 來源正則表達式模式
@@ -25,7 +24,7 @@ export function useRegexPreview(
   dstPattern: Ref<string>
 ) {
   return usePreview<RegexGroups>(text, srcPattern, dstPattern, {
-    eventType: wsEventsEnum.previewRegex,
+    endpoint: '/api/v1/preview/regex',
     initialGroups: { named_group: {}, numbered_group: [] },
     logPrefix: 'useRegexPreview'
   })
