@@ -93,7 +93,7 @@ describe('SettingStore', () => {
       const store = useSettingStore()
       mockRequest.mockRejectedValueOnce(new Error('更新失敗'))
 
-      await expect(store.updateSettings({ timezone: 'UTC' })).rejects.toThrow('更新失敗')
+      await expect(store.updateSettings({ timezone: 'UTC', locale: 'en-US' })).rejects.toThrow('更新失敗')
     })
   })
 })

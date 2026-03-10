@@ -5,7 +5,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useTaskStore } from '../taskStore'
-import type { Task } from '@/schemas'
+import type { Task, TaskCreate } from '@/schemas'
 
 // Mock useHttpService
 const mockRequest = vi.fn()
@@ -67,7 +67,7 @@ describe('TaskStore', () => {
       await store.fetchTasks()
 
       expect(store.tasks).toHaveLength(2)
-      expect(store.tasks[0].name).toBe('測試任務')
+      expect(store.tasks[0]!.name).toBe('測試任務')
       expect(store.isLoading).toBe(false)
       expect(store.error).toBeNull()
     })
@@ -98,23 +98,27 @@ describe('TaskStore', () => {
       const store = useTaskStore()
       mockRequest.mockResolvedValueOnce(sampleTask)
 
-      const taskData = {
+      const taskData: TaskCreate = {
         name: '測試任務',
         include: '關鍵字',
         move_to: '/downloads/test',
+        src_filename: null,
+        dst_filename: null,
+        rename_rule: null,
+        enabled: true,
       }
       const result = await store.createTask(taskData)
 
       expect(result).toEqual(sampleTask)
       expect(store.tasks).toHaveLength(1)
-      expect(store.tasks[0].name).toBe('測試任務')
+      expect(store.tasks[0]!.name).toBe('測試任務')
     })
 
     it('應該在錯誤時拋出異常', async () => {
       const store = useTaskStore()
       mockRequest.mockRejectedValueOnce(new Error('任務已存在'))
 
-      await expect(store.createTask({ name: '測試', include: '', move_to: '' }))
+      await expect(store.createTask({ name: '測試', include: '', move_to: '', src_filename: null, dst_filename: null, rename_rule: null, enabled: true }))
         .rejects.toThrow('任務已存在')
     })
   })
@@ -131,10 +135,14 @@ describe('TaskStore', () => {
         name: '更新後的名稱',
         include: sampleTask.include,
         move_to: sampleTask.move_to,
+        src_filename: sampleTask.src_filename,
+        dst_filename: sampleTask.dst_filename,
+        rename_rule: sampleTask.rename_rule,
+        enabled: sampleTask.enabled,
       })
 
       expect(result.name).toBe('更新後的名稱')
-      expect(store.tasks[0].name).toBe('更新後的名稱')
+      expect(store.tasks[0]!.name).toBe('更新後的名稱')
     })
 
     it('應該在任務不存在時拋出錯誤', async () => {
@@ -145,6 +153,10 @@ describe('TaskStore', () => {
         name: '任何',
         include: '',
         move_to: '',
+        src_filename: null,
+        dst_filename: null,
+        rename_rule: null,
+        enabled: true,
       })).rejects.toThrow('task not found')
     })
 
@@ -159,6 +171,10 @@ describe('TaskStore', () => {
         name: sampleTask.name,
         include: sampleTask.include,
         move_to: sampleTask.move_to,
+        src_filename: sampleTask.src_filename,
+        dst_filename: sampleTask.dst_filename,
+        rename_rule: sampleTask.rename_rule,
+        enabled: sampleTask.enabled,
       })
       expect(store.isSaving).toBe(true)
 
@@ -353,7 +369,7 @@ describe('TaskStore', () => {
       const result = await store.fetchTaskLogByTaskId(sampleTask.id)
 
       expect(result).toEqual(logs)
-      expect(store.tasks[0].logs).toEqual(logs)
+      expect(store.tasks[0]!.logs).toEqual(logs)
     })
   })
 })
