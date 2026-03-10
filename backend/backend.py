@@ -47,7 +47,7 @@ app = FastAPI(
     lifespan=lifespan,
     title="Movera API",
     description="API for managing file moving and renaming tasks.",
-    version="3.1.0",
+    version="3.2.0",
 )
 
 
