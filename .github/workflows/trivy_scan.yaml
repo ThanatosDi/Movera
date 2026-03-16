@@ -16,7 +16,7 @@ jobs:
           docker build -t movera:latest .
 
       - name: Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@latest
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: 'movera:latest'
           format: 'sarif'
