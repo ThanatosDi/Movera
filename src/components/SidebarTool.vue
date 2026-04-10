@@ -62,7 +62,7 @@ const handleBatchDisable = async () => {
 
     <!-- 批量操作按鈕 (選擇模式且有選中項目時顯示) -->
     <div
-      v-if="isSelectMode && selectedCount > 0"
+      v-if="isSelectMode"
       class="flex items-center gap-2 p-2 bg-sidebar-accent rounded-md"
     >
       <span class="text-sm text-muted-foreground flex-1">
@@ -73,6 +73,7 @@ const handleBatchDisable = async () => {
         size="sm"
         class="text-green-500 hover:text-green-400 hover:bg-green-500/10"
         @click="handleBatchEnable"
+        :disabled="selectedCount === 0"
         :title="t('components.sidebarTool.batchEnable')"
       >
         <Play class="w-4 h-4" />
@@ -82,6 +83,7 @@ const handleBatchDisable = async () => {
         size="sm"
         class="text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10"
         @click="handleBatchDisable"
+        :disabled="selectedCount === 0"
         :title="t('components.sidebarTool.batchDisable')"
       >
         <StopCircle class="w-4 h-4" />
@@ -91,6 +93,7 @@ const handleBatchDisable = async () => {
         size="sm"
         class="text-red-500 hover:text-red-400 hover:bg-red-500/10"
         @click="handleBatchDelete"
+        :disabled="selectedCount === 0"
         :title="t('components.sidebarTool.batchDelete')"
       >
         <Trash2 class="w-4 h-4" />
