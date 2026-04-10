@@ -4,6 +4,19 @@ export interface TaskStats {
   total: number;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface TagCreate {
+  name: string;
+  color: string;
+}
+
+export type TagUpdate = TagCreate;
+
 export interface Task {
   id: string;
   name: string;
@@ -15,10 +28,11 @@ export interface Task {
   enabled: boolean;
   created_at: string; // ISO 8601 date string
   logs: Log[];
+  tags: Tag[];
 }
 
-export type TaskCreate = Omit<Task, 'id' | 'created_at' | 'logs'>;
-export type TaskUpdate = Omit<Task, 'id' | 'created_at' | 'logs'>;
+export type TaskCreate = Omit<Task, 'id' | 'created_at' | 'logs' | 'tags'> & { tag_ids: string[] };
+export type TaskUpdate = Omit<Task, 'id' | 'created_at' | 'logs' | 'tags'> & { tag_ids: string[] };
 
 export interface Log {
   id: number;

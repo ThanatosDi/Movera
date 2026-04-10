@@ -1,5 +1,14 @@
 {
     "i18n-ally.localesPaths": [
         "src/locales"
+    ],
+    "cSpell.words": [
+        "ASGI",
+        "movera",
+        "openspec",
+        "PGID",
+        "PUID",
+        "pytest",
+        "Uvicorn"
     ]
 }

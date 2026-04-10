@@ -1,15 +1,18 @@
 <script lang="ts" setup>
 import { Badge } from '@/components/ui/badge';
+import TagBadge from '@/components/TagBadge.vue';
+import type { Tag } from '@/schemas';
 import { useTaskStore } from '@/stores/taskStore';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps({
-  taskId: { type: String, required: true },
-  name: { type: String, required: true },
-  enabled: { type: Boolean, required: true },
-})
+const props = defineProps<{
+  taskId: string
+  name: string
+  enabled: boolean
+  tags: Tag[]
+}>()
 
 const { t } = useI18n();
 const taskStore = useTaskStore()
@@ -89,6 +92,15 @@ const handleClick = (navigate: () => void) => {
                   :title="name"
                 >{{ name }}</h3>
               </div>
+            </div>
+            <!-- 標籤 -->
+            <div v-if="tags.length > 0" class="flex flex-wrap gap-1 mt-1">
+              <TagBadge
+                v-for="tag in tags"
+                :key="tag.id"
+                :name="tag.name"
+                :color="tag.color"
+              />
             </div>
           </div>
         </div>

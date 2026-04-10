@@ -5,6 +5,8 @@ from datetime import UTC, datetime
 from sqlalchemy import Boolean, Column, DateTime, String
 from sqlalchemy.orm import relationship
 
+from backend.models.tag import task_tags
+
 from backend.database import Base
 
 
@@ -69,6 +71,12 @@ class Task(Base):
         back_populates="task",
         cascade="all, delete-orphan",
         order_by="Log.timestamp.desc()",
+    )
+
+    tags = relationship(
+        "Tag",
+        secondary=task_tags,
+        lazy="selectin",
     )
 
     def __repr__(self):

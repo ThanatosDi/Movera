@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LocaleSelect from '@/components/LocaleSelect.vue'
+import TagBadge from '@/components/TagBadge.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -20,7 +21,8 @@ import { ApiError } from '@/schemas/errors'
 import { VariableEnum } from '@/enums/VariableEnum'
 import { cn } from '@/lib/utils'
 import { useSettingStore } from '@/stores/settingStore'
-import { Check, ChevronsUpDown, FolderCog, Info, Plus, Save, X } from 'lucide-vue-next'
+import { useTagStore } from '@/stores/tagStore'
+import { Check, ChevronsUpDown, FolderCog, Info, Plus, Save, Tag, X } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -32,6 +34,46 @@ const timezones = ref<{ value: string, label: string }[]>(JSON.parse(localStorag
 
 const settingStore = useSettingStore()
 const { isSaving, settings } = storeToRefs(settingStore)
+
+const tagStore = useTagStore()
+const { tags } = storeToRefs(tagStore)
+
+const ALLOWED_COLORS = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'gray'] as const
+const newTagName = ref('')
+const newTagColor = ref<string>('blue')
+const editingTagId = ref<string | null>(null)
+const editTagName = ref('')
+const editTagColor = ref<string>('blue')
+
+tagStore.fetchTags()
+
+async function addTag() {
+  const name = newTagName.value.trim()
+  if (!name) return
+  await tagStore.createTag({ name, color: newTagColor.value })
+  newTagName.value = ''
+  newTagColor.value = 'blue'
+}
+
+function startEditTag(tag: { id: string; name: string; color: string }) {
+  editingTagId.value = tag.id
+  editTagName.value = tag.name
+  editTagColor.value = tag.color
+}
+
+async function saveEditTag() {
+  if (!editingTagId.value || !editTagName.value.trim()) return
+  await tagStore.updateTag(editingTagId.value, { name: editTagName.value.trim(), color: editTagColor.value })
+  editingTagId.value = null
+}
+
+function cancelEditTag() {
+  editingTagId.value = null
+}
+
+async function deleteTag(tagId: string) {
+  await tagStore.deleteTag(tagId)
+}
 
 const UpdateSettings = async () => {
   isSaving.value = true
@@ -164,6 +206,104 @@ function removeDirectory(index: number) {
               </ComboboxGroup>
             </ComboboxList>
           </Combobox>
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- 標籤管理卡片 -->
+    <Card class="border border-border" data-testid="tag-management-section">
+      <CardHeader>
+        <CardTitle class="flex items-center gap-2">
+          <Tag class="size-5" />
+          {{ t('settingView.tagManagementCard.title') }}
+        </CardTitle>
+        <CardDescription>{{ t('settingView.tagManagementCard.description') }}</CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <!-- 新增標籤 -->
+        <div class="flex gap-2 items-end">
+          <div class="flex-1">
+            <Input
+              v-model="newTagName"
+              :placeholder="t('settingView.tagManagementCard.namePlaceholder')"
+              class="border-foreground"
+              @keydown.enter.prevent="addTag"
+            />
+          </div>
+          <div class="flex gap-1">
+            <button
+              v-for="color in ALLOWED_COLORS"
+              :key="color"
+              :class="[
+                'w-6 h-6 rounded-full border-2 transition-all',
+                newTagColor === color ? 'border-white scale-110' : 'border-transparent opacity-60 hover:opacity-100',
+              ]"
+              :style="{ backgroundColor: `var(--color-${color}-500, ${color})` }"
+              :title="t(`settingView.tagManagementCard.colors.${color}`)"
+              @click="newTagColor = color"
+            />
+          </div>
+          <Button
+            variant="outline"
+            class="border-foreground shrink-0"
+            @click="addTag"
+          >
+            <Plus class="size-4 mr-1" />
+            {{ t('settingView.tagManagementCard.add') }}
+          </Button>
+        </div>
+
+        <!-- 標籤列表 -->
+        <div v-if="tags.length > 0" class="space-y-2">
+          <div
+            v-for="tag in tags"
+            :key="tag.id"
+            class="flex items-center gap-2 p-2 border rounded-md border-foreground/20"
+          >
+            <template v-if="editingTagId === tag.id">
+              <Input
+                v-model="editTagName"
+                class="flex-1 h-8 border-foreground"
+                @keydown.enter.prevent="saveEditTag"
+                @keydown.escape="cancelEditTag"
+              />
+              <div class="flex gap-1">
+                <button
+                  v-for="color in ALLOWED_COLORS"
+                  :key="color"
+                  :class="[
+                    'w-5 h-5 rounded-full border-2 transition-all',
+                    editTagColor === color ? 'border-white scale-110' : 'border-transparent opacity-60 hover:opacity-100',
+                  ]"
+                  :style="{ backgroundColor: `var(--color-${color}-500, ${color})` }"
+                  @click="editTagColor = color"
+                />
+              </div>
+              <Button variant="ghost" size="sm" @click="saveEditTag">
+                <Check class="size-4" />
+              </Button>
+              <Button variant="ghost" size="sm" @click="cancelEditTag">
+                <X class="size-4" />
+              </Button>
+            </template>
+            <template v-else>
+              <TagBadge :name="tag.name" :color="tag.color" class="cursor-pointer" @click="startEditTag(tag)" />
+              <span class="flex-1" />
+              <Button
+                variant="ghost"
+                size="sm"
+                class="text-red-500 hover:text-red-700 shrink-0"
+                @click="deleteTag(tag.id)"
+              >
+                <X class="size-4" />
+              </Button>
+            </template>
+          </div>
+        </div>
+
+        <!-- 空狀態 -->
+        <div v-else class="text-sm text-muted-foreground p-4 text-center">
+          {{ t('settingView.tagManagementCard.empty') }}
         </div>
       </CardContent>
     </Card>

@@ -68,7 +68,10 @@ watch(
 const handleUpdateTask = async () => {
   if (!task.value) return
   isSaving.value = true
-  const { id, created_at, logs, ...taskData } = task.value
+  const { id, created_at, logs, tags, ...taskData } = task.value
+  if (!taskData.tag_ids) {
+    taskData.tag_ids = tags?.map((t: { id: string }) => t.id) || []
+  }
   try {
     const updatedTask = await taskStore.updateTask(id, taskData)
     if (updatedTask) {

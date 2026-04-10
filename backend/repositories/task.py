@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -48,7 +50,11 @@ class TaskRepository:
         Returns:
             models.Task: 剛才建立的任務
         """
-        db_task = models.Task(**task.model_dump())
+        tag_ids = task.tag_ids if hasattr(task, "tag_ids") else []
+        db_task = models.Task(**task.model_dump(exclude={"tag_ids"}))
+        if tag_ids:
+            tags = self.db.query(models.Tag).filter(models.Tag.id.in_(tag_ids)).all()
+            db_task.tags = tags
         self.db.add(db_task)
         self.db.commit()
         self.db.refresh(db_task)
@@ -66,9 +72,12 @@ class TaskRepository:
         """
         db_task = self.get_by_id(task_id)
         if db_task:
-            update_data = task_update.model_dump(exclude_unset=True)
+            update_data = task_update.model_dump(exclude_unset=True, exclude={"tag_ids"})
             for key, value in update_data.items():
                 setattr(db_task, key, value)
+            if hasattr(task_update, "tag_ids"):
+                tags = self.db.query(models.Tag).filter(models.Tag.id.in_(task_update.tag_ids)).all()
+                db_task.tags = tags
             self.db.commit()
             self.db.refresh(db_task)
         return db_task

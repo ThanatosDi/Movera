@@ -15,7 +15,8 @@ def setup_static_files():
 
     # 掛載靜態資源目錄
     if (DIST_DIR / "assets").exists():
-        app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
+        app.mount("/assets", StaticFiles(directory=DIST_DIR /
+                  "assets"), name="assets")
 
     @app.get("/", include_in_schema=False)
     async def serve_index():

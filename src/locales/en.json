@@ -118,6 +118,11 @@
       "emptyDirectory": "No subdirectories in this directory",
       "noAllowedDirectories": "No allowed directories configured. Please set them in Settings first."
     },
+    "tagSelector": {
+      "label": "Tags",
+      "placeholder": "Select tags...",
+      "empty": "No tags yet. Create them in Settings."
+    },
     "taskForm": {
       "browse": "Browse",
       "dstFilename": "Destination Filename Pattern",
@@ -176,6 +181,25 @@
     "taskUpdateSuccessTitle": "Task updated"
   },
   "settingView": {
+    "tagManagementCard": {
+      "title": "Tag Management",
+      "description": "Manage tags for task classification.",
+      "empty": "No tags created yet",
+      "namePlaceholder": "Enter tag name",
+      "add": "Add",
+      "colorLabel": "Color",
+      "deleteConfirm": "Are you sure you want to delete tag \"{name}\"?",
+      "colors": {
+        "red": "Red",
+        "orange": "Orange",
+        "yellow": "Yellow",
+        "green": "Green",
+        "blue": "Blue",
+        "purple": "Purple",
+        "pink": "Pink",
+        "gray": "Gray"
+      }
+    },
     "allowedDirectoriesCard": {
       "absolutePathRequired": "Only absolute paths are accepted (e.g. /downloads or C:\\Downloads)",
       "add": "Add",

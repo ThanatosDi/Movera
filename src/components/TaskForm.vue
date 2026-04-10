@@ -5,11 +5,18 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from '@/components/ui/textarea'
 import DirectoryPickerModal from '@/components/DirectoryPickerModal.vue'
+import TagSelector from '@/components/TagSelector.vue'
+import { useTagStore } from '@/stores/tagStore'
 import { FolderOpen } from 'lucide-vue-next'
+import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n();
+
+const tagStore = useTagStore()
+const { tags: availableTags } = storeToRefs(tagStore)
+tagStore.fetchTags()
 
 // Props
 const props = defineProps({
@@ -51,6 +58,12 @@ const isDirectoryPickerOpen = ref(false)
 function handleDirectorySelect(path: string) {
   task.value.move_to = path
   emit('update:modelValue', { ...task.value, move_to: path })
+}
+
+const tagIds = computed(() => task.value.tag_ids ?? task.value.tags?.map((t: { id: string }) => t.id) ?? [])
+
+function handleTagIdsUpdate(value: string[]) {
+  emit('update:modelValue', { ...task.value, tag_ids: value })
 }
 </script>
 
@@ -112,6 +125,13 @@ function handleDirectorySelect(path: string) {
     <DirectoryPickerModal
       v-model:open="isDirectoryPickerOpen"
       @select="handleDirectorySelect"
+    />
+
+    <!-- 標籤選擇器 -->
+    <TagSelector
+      :available-tags="availableTags"
+      :model-value="tagIds"
+      @update:model-value="handleTagIdsUpdate"
     />
 
     <!-- 重新命名規則 -->

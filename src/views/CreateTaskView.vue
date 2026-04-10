@@ -31,6 +31,7 @@ const createTaskData = ref<TaskCreate>({
   src_filename: null,
   dst_filename: null,
   enabled: true,
+  tag_ids: [],
 })
 
 

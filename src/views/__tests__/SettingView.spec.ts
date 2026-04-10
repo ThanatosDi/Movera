@@ -27,12 +27,28 @@ vi.mock('@/stores/settingStore', () => ({
   }),
 }))
 
+// Mock tagStore
+vi.mock('@/stores/tagStore', () => ({
+  useTagStore: () => ({
+    tags: ref([]),
+    fetchTags: vi.fn(),
+    createTag: vi.fn(),
+    updateTag: vi.fn(),
+    deleteTag: vi.fn(),
+  }),
+}))
+
 // Mock pinia
 vi.mock('pinia', () => ({
-  storeToRefs: (store: any) => ({
-    settings: store.settings,
-    isSaving: store.isSaving,
-  }),
+  storeToRefs: (store: any) => {
+    const refs: Record<string, any> = {}
+    for (const key of Object.keys(store)) {
+      if (typeof store[key] !== 'function') {
+        refs[key] = store[key]
+      }
+    }
+    return refs
+  },
   defineStore: vi.fn(),
 }))
 

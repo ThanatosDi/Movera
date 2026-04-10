@@ -10,12 +10,15 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend.database import Base
 from backend.models.log import Log
 from backend.models.setting import Setting
+from backend.models.tag import Tag
 from backend.models.task import Task
 from backend.repositories.log import LogRepository
 from backend.repositories.setting import SettingRepository
+from backend.repositories.tag import TagRepository
 from backend.repositories.task import TaskRepository
 from backend.services.log_service import LogService
 from backend.services.setting_service import SettingService
+from backend.services.tag_service import TagService
 from backend.services.task_service import TaskService
 
 
@@ -71,6 +74,12 @@ def log_repository(db_session) -> LogRepository:
     return LogRepository(db=db_session)
 
 
+@pytest.fixture
+def tag_repository(db_session) -> TagRepository:
+    """建立 TagRepository 實例"""
+    return TagRepository(db=db_session)
+
+
 # --- Service Fixtures ---
 
 
@@ -90,6 +99,12 @@ def setting_service(setting_repository) -> SettingService:
 def log_service(log_repository) -> LogService:
     """建立 LogService 實例"""
     return LogService(repository=log_repository)
+
+
+@pytest.fixture
+def tag_service(tag_repository) -> TagService:
+    """建立 TagService 實例"""
+    return TagService(repository=tag_repository)
 
 
 # --- Sample Data Fixtures ---
@@ -120,6 +135,24 @@ def sample_task_data_2() -> dict:
         "dst_filename": "{title} - S01E{episode}.mp4",
         "rename_rule": "parse",
         "enabled": False,
+    }
+
+
+@pytest.fixture
+def sample_tag_data() -> dict:
+    """範例標籤資料"""
+    return {
+        "name": "動畫",
+        "color": "blue",
+    }
+
+
+@pytest.fixture
+def sample_tag_data_2() -> dict:
+    """第二個範例標籤資料"""
+    return {
+        "name": "電影",
+        "color": "red",
     }
 
 

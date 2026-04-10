@@ -16,9 +16,14 @@ from backend.exceptions.directory_exception import (
     DirectoryAccessDenied,
     DirectoryNotFound,
 )
+from backend.exceptions.tag_exception import (
+    InvalidTagColor,
+    TagAlreadyExists,
+    TagNotFound,
+)
 from backend.exceptions.task_exception import TaskAlreadyExists, TaskNotFound
 from backend.middlewares import setup_cors, setup_gzip
-from backend.routers import directory, log, preview, setting, task, webhook
+from backend.routers import directory, log, preview, setting, tag, task, webhook
 from backend.utils.logger import logger
 
 
@@ -66,6 +71,21 @@ async def task_already_exists_handler(request: Request, exc: TaskAlreadyExists):
     return JSONResponse(status_code=409, content={"detail": str(exc)})
 
 
+@app.exception_handler(TagNotFound)
+async def tag_not_found_handler(request: Request, exc: TagNotFound):
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+
+@app.exception_handler(TagAlreadyExists)
+async def tag_already_exists_handler(request: Request, exc: TagAlreadyExists):
+    return JSONResponse(status_code=409, content={"detail": str(exc)})
+
+
+@app.exception_handler(InvalidTagColor)
+async def invalid_tag_color_handler(request: Request, exc: InvalidTagColor):
+    return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+
 @app.exception_handler(DirectoryNotFound)
 async def directory_not_found_handler(request: Request, exc: DirectoryNotFound):
     return JSONResponse(status_code=404, content={"detail": str(exc)})
@@ -84,6 +104,7 @@ setup_gzip(app)
 
 
 app.include_router(task.router)
+app.include_router(tag.router)
 app.include_router(setting.router)
 app.include_router(log.router)
 app.include_router(preview.router)

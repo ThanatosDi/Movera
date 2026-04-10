@@ -7,6 +7,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 import TaskForm from '../TaskForm.vue'
 
+// Mock tagStore
+vi.mock('@/stores/tagStore', () => ({
+  useTagStore: () => ({
+    tags: ref([]),
+    fetchTags: vi.fn(),
+  }),
+}))
+
 // Mock useDirectoryBrowser
 vi.mock('@/composables/useDirectoryBrowser', () => ({
   useDirectoryBrowser: () => ({

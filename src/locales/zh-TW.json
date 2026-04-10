@@ -118,6 +118,11 @@
       "emptyDirectory": "此目錄下沒有子目錄",
       "noAllowedDirectories": "尚未設定允許目錄，請先至設定頁面設定"
     },
+    "tagSelector": {
+      "label": "標籤",
+      "placeholder": "選擇標籤...",
+      "empty": "尚無標籤，請至設定頁面新增"
+    },
     "taskForm": {
       "browse": "瀏覽",
       "dstFilename": "目標檔名規則 (Dst Filename Pattern)",
@@ -178,6 +183,25 @@
     "taskUpdateSuccessTitle": "任務已更新"
   },
   "settingView": {
+    "tagManagementCard": {
+      "title": "標籤管理",
+      "description": "管理任務分類用的標籤。",
+      "empty": "尚未建立任何標籤",
+      "namePlaceholder": "輸入標籤名稱",
+      "add": "新增",
+      "colorLabel": "顏色",
+      "deleteConfirm": "確定要刪除標籤「{name}」嗎？",
+      "colors": {
+        "red": "紅色",
+        "orange": "橘色",
+        "yellow": "黃色",
+        "green": "綠色",
+        "blue": "藍色",
+        "purple": "紫色",
+        "pink": "粉色",
+        "gray": "灰色"
+      }
+    },
     "allowedDirectoriesCard": {
       "absolutePathRequired": "僅接受絕對路徑（例如 /downloads 或 C:\\Downloads）",
       "add": "新增",

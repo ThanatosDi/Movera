@@ -196,8 +196,8 @@ export const useTaskStore = defineStore('taskStore', () => {
     for (const id of ids) {
       const task = getRefTaskById(id)
       if (task && task.enabled !== enabled) {
-        const { id: _, created_at, logs, ...taskData } = task
-        await updateTask(id, { ...taskData, enabled })
+        const { id: _, created_at, logs, tags, ...taskData } = task
+        await updateTask(id, { ...taskData, enabled, tag_ids: tags?.map(t => t.id) || [] })
       }
     }
   }

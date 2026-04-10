@@ -72,11 +72,11 @@ class TaskBase(BaseModel):
 
 
 class TaskCreate(TaskBase):
-    pass
+    tag_ids: List[str] = Field(default_factory=list, description="關聯的標籤 ID 列表")
 
 
 class TaskUpdate(TaskBase):
-    pass
+    tag_ids: List[str] = Field(default_factory=list, description="關聯的標籤 ID 列表")
 
 
 class Task(TaskBase, TaskUUID, OrmBaseModel):
@@ -84,11 +84,38 @@ class Task(TaskBase, TaskUUID, OrmBaseModel):
         description="任務的建立時間",
     )
     logs: List[Log] = []  # 包含關聯的 logs
+    tags: List["Tag_"] = Field(default_factory=list, description="關聯的標籤")
 
 
 class TaskStats(BaseModel):
     enabled: int = 0
     disabled: int = 0
+
+
+# --- Tag Schemas ---
+
+ALLOWED_TAG_COLORS = {"red", "orange", "yellow", "green", "blue", "purple", "pink", "gray"}
+
+
+class TagBase(BaseModel):
+    name: str = Field(..., description="標籤名稱", examples=["動畫"])
+    color: str = Field(..., description="標籤顏色（預定義色票名稱）", examples=["blue"])
+
+
+class TagCreate(TagBase):
+    pass
+
+
+class TagUpdate(TagBase):
+    pass
+
+
+class Tag_(TagBase, OrmBaseModel):
+    id: str = Field(
+        ...,
+        description="自動產生的標籤 ID，為 UUID 格式",
+        examples=["123e4567-e89b-12d3-a456-426614174000"],
+    )
 
 
 # --- Setting Schemas ---
