@@ -1,0 +1,35 @@
+#!/bin/bash
+# Transmission 下載完成腳本
+# 設定方式：settings.json 中設定
+#   "script-torrent-done-enabled": true,
+#   "script-torrent-done-filename": "/path/to/this/script"
+#
+# 使用方式：腳本會自動從環境變數取得資訊
+# 環境變數：
+#   TR_TORRENT_DIR  - 下載目錄
+#   TR_TORRENT_NAME - 種子名稱
+#   TR_TORRENT_HASH - 種子 Hash
+#   TR_TORRENT_LABELS - 標籤（逗號分隔）
+
+URL="$1"
+
+# Validate URL
+if [[ -z "$URL" ]]; then
+  echo "Error: URL is missing." >&2
+  echo "Usage: $0 <movera-webhook-url>" >&2
+  exit 1
+fi
+
+if [[ ! "$URL" =~ ^https?:// ]]; then
+  echo "Error: URL must start with http:// or https://" >&2
+  exit 1
+fi
+
+# 組合完整檔案路徑
+FILE_PATH="${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"
+CATEGORY=""
+TAGS="${TR_TORRENT_LABELS:-}"
+
+curl -sS -X POST "$URL" \
+  -H "Content-Type: application/json" \
+  -d "{\"filepath\": \"$FILE_PATH\", \"category\": \"$CATEGORY\", \"tags\": \"$TAGS\"}"

@@ -1,0 +1,38 @@
+#!/bin/bash
+# Deluge Execute 插件腳本
+# 設定方式：
+#   1. 啟用 Execute 插件：Preferences → Plugins → Execute
+#   2. 新增事件：Event: Torrent Complete
+#   3. Command: /path/to/this/script <movera-webhook-url>
+#
+# Deluge 傳遞的參數：
+#   $1 - Movera Webhook URL (手動設定)
+#   $2 - Torrent ID
+#   $3 - Torrent Name
+#   $4 - Save Path
+
+URL="$1"
+TORRENT_ID="$2"
+TORRENT_NAME="$3"
+SAVE_PATH="$4"
+
+# Validate URL
+if [[ -z "$URL" ]]; then
+  echo "Error: URL is missing." >&2
+  echo "Usage: $0 <movera-webhook-url> <torrent_id> <torrent_name> <save_path>" >&2
+  exit 1
+fi
+
+if [[ ! "$URL" =~ ^https?:// ]]; then
+  echo "Error: URL must start with http:// or https://" >&2
+  exit 1
+fi
+
+# 組合完整檔案路徑
+FILE_PATH="${SAVE_PATH}/${TORRENT_NAME}"
+CATEGORY=""
+TAGS=""
+
+curl -sS -X POST "$URL" \
+  -H "Content-Type: application/json" \
+  -d "{\"filepath\": \"$FILE_PATH\", \"category\": \"$CATEGORY\", \"tags\": \"$TAGS\"}"

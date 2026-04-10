@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(openspec:*)",
+      "Read(//h/VSCode/Python/Movera/**)"
+    ]
+  }
+}

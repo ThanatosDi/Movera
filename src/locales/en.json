@@ -1,0 +1,219 @@
+{
+  "common": {
+    "about": "About",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "create": "Create",
+    "delete": "Delete Task",
+    "disabled": "Disabled",
+    "emptyTasks": "No matching tasks found",
+    "enabled": "Enabled",
+    "error": "Error",
+    "home": "Home",
+    "language": "Language",
+    "loading": "Loading...",
+    "matchSuccess": "Match successful",
+    "noMatch": "No match",
+    "reload": "Reload",
+    "save": "Save Settings",
+    "saving": "Saving...",
+    "search": "Search...",
+    "settings": "Settings",
+    "status": "Status",
+    "success": "Success",
+    "tasks": "Tasks",
+    "timezone": "Timezone",
+    "version": "Application Version"
+  },
+  "components": {
+    "localeSelect": {
+      "placeholder": "Select Language"
+    },
+    "parsePreview": {
+      "description": "Preview the result of filename parsing in real-time.",
+      "destinationPattern": "Destination Rename Filename Pattern",
+      "groups": "Parsed Groups",
+      "instructions": {
+        "commonTypesTitle": "Common Type Specifiers:",
+        "docsLink": "For more detailed syntax, please refer to the {link}.",
+        "lines": [
+          "Use curly braces {'{'}{'}'} to define a field to capture.",
+          "Add a type specifier after a colon, e.g., {'{'}episode:d{'}'} to capture a number.",
+          "The destination rule can use format specifiers, e.g., {'{'}episode:02d{'}'} to pad with zeros.",
+          "Click the example buttons above to load examples."
+        ],
+        "officialDocs": "Official Documentation",
+        "title": "Usage Instructions",
+        "types": {
+          "default": "Default (string)",
+          "float": "Float",
+          "integer": "Integer",
+          "lowercase": "Lowercase string",
+          "string": "String",
+          "timestamp": "Timestamp",
+          "uppercase": "Uppercase string"
+        }
+      },
+      "noResult": "No result generated yet.",
+      "result": "Result",
+      "sourcePattern": "Source Filename Pattern",
+      "testFilename": "Test Filename",
+      "title": "Parse Preview",
+      "withoutGroups": "No groups parsed yet."
+    },
+    "preview": {
+      "testFilename": "Test Filename"
+    },
+    "regexPreview": {
+      "commonSymbols": "Common Regex Symbols:",
+      "destinationPattern": "Destination Filename Pattern",
+      "exampleUsage": "Group Reference Examples:",
+      "instructions": {
+        "title": "Instructions",
+        "lines": [
+          "Use parentheses () in 'Filename Regex' to create capture groups.",
+          "Use \\1, \\2, \\3, etc., in 'Rename Regex' to reference corresponding groups.",
+          "E.g., (\\d{'{'}2{'}'}) captures two digits, referenced with \\1.",
+          "You can modify the test filename above to validate different cases.",
+          "Click the test case buttons above to load examples."
+        ]
+      },
+      "namedGroups": "Named Groups",
+      "noNamedGroups": "No Named Groups",
+      "noNumberedGroups": "No Number Groups",
+      "noResult": "No Result",
+      "numberedGroups": "Number Groups",
+      "result": "Result",
+      "sourcePattern": "Source Filename Pattern",
+      "symbols": {
+        "d": "digit (0-9)",
+        "dot": "literal dot",
+        "plus": "one or more",
+        "qmark": "zero or one",
+        "star": "zero or more",
+        "w": "word character"
+      },
+      "title": "Regex Preview",
+      "usage1": "captures two digits",
+      "usage2": "captures any characters",
+      "usage3": "captures four digits, like a year"
+    },
+    "sidebarTool": {
+      "createTaskBtn": "Create New Task",
+      "selectMode": "Select",
+      "exitSelectMode": "Cancel",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "selectedCount": "{count} selected",
+      "batchEnable": "Enable Selected",
+      "batchDisable": "Disable Selected",
+      "batchDelete": "Delete Selected"
+    },
+    "directoryPicker": {
+      "title": "Select Directory",
+      "description": "Browse server directories and select a target path",
+      "root": "Root",
+      "confirm": "Confirm",
+      "selected": "Selected",
+      "emptyDirectory": "No subdirectories in this directory",
+      "noAllowedDirectories": "No allowed directories configured. Please set them in Settings first."
+    },
+    "taskForm": {
+      "browse": "Browse",
+      "dstFilename": "Destination Filename Pattern",
+      "include": "Filename include",
+      "moveTo": "Move To",
+      "moveToPlaceholder": "Enter or browse to select target directory path",
+      "name": "Task Name",
+      "renameRule": "Rename Rule",
+      "renameRuleOptions": {
+        "noRename": "Do not rename",
+        "parse": "Template Parsing (Parse)",
+        "regex": "Regular Expression (Regex)"
+      },
+      "srcFilename": "Source Filename Pattern"
+    }
+  },
+  "createTaskView": {
+    "cardDescription": "Edit the detailed settings for the task here.",
+    "cardTitle": "Task Settings",
+    "clearRulesButton": "Clear All Rules",
+    "createButton": "Create Task",
+    "creatingButton": "Creating...",
+    "description": "Set up an automated file management task",
+    "title": "Create Task"
+  },
+  "errors": {
+    "failedToCreateTask": "Failed to create task",
+    "failedToDeleteTask": "Failed to delete task",
+    "failedToFetchTaskLog": "Failed to fetch task logs",
+    "failedToUpdateSettings": "Failed update settings.",
+    "failedToUpdateTask": "Failed to update task",
+    "taskIdIsRequired": "Missing necessary task ID"
+  },
+  "exceptions": {
+    "TaskAlreadyExists": "Task \"{taskName}\" already exists."
+  },
+  "homeView": {
+    "description": "Welcome to Movera, the automated file management system",
+    "disabledTasks": "Disabled Tasks",
+    "disabledTasksDesc": "tasks are disabled",
+    "enabledTasks": "Enabled Tasks",
+    "enabledTasksDesc": "tasks are enabled",
+    "title": "Home"
+  },
+  "notifications": {
+    "settingsSaveErrorTitle": "Failed to save settings",
+    "settingsSaveSuccessDesc": "Your changes have been applied successfully.",
+    "settingsSaveSuccessTitle": "Settings Saved",
+    "taskCreateErrorTitle": "Failed to create task",
+    "taskDeleteErrorTitle": "Failed to delete task",
+    "taskDeleteSuccessDesc": "Task \"{taskName}\" has been deleted successfully.",
+    "taskDeleteSuccessTitle": "Task Deleted",
+    "taskLogFetchErrorTitle": "Failed to fetch task logs",
+    "taskUpdateErrorTitle": "Failed to update task",
+    "taskUpdateSuccessDesc": "Task \"{taskName}\" has been updated successfully.",
+    "taskUpdateSuccessTitle": "Task updated"
+  },
+  "settingView": {
+    "allowedDirectoriesCard": {
+      "absolutePathRequired": "Only absolute paths are accepted (e.g. /downloads or C:\\Downloads)",
+      "add": "Add",
+      "description": "Configure root directory paths that the directory picker can browse (absolute paths only).",
+      "empty": "No allowed directories configured",
+      "placeholder": "Enter absolute path, e.g. /downloads",
+      "title": "Allowed Directories"
+    },
+    "description": "Manage global application settings",
+    "generalCard": {
+      "description": "Adjust the application's appearance and notification behavior.",
+      "timezoneLoading": "Loading timezones...",
+      "timezoneNotFound": "Timezone not found.",
+      "timezonePlaceholder": "Select timezone...",
+      "timezoneSearch": "Search timezone...",
+      "title": "General Settings"
+    },
+    "title": "Setting"
+  },
+  "taskDetailView": {
+    "checkTaskId": "Please check if the task ID is correct, or the task may have been deleted.",
+    "deleteDialogDesc": "This action cannot be undone. This will permanently delete the task \"{taskName}\" and remove its related data from the database.",
+    "deleteDialogTitle": "Are you sure you want to delete this task?",
+    "disableButton": "Disable Task",
+    "enableButton": "Enable Task",
+    "loadingLogs": "Loading logs...",
+    "loadTasksFailed": "Failed to load task list",
+    "logsCardDescription": "Recent task execution records.",
+    "logsCardTitle": "Log Records",
+    "noLogs": "No task execution records yet",
+    "saveChanges": "Save Changes",
+    "taskCardDescription": "Edit the detailed settings for the task here.",
+    "taskCardTitle": "Task Settings",
+    "taskId": "Task ID",
+    "taskNotFound": "Task not found"
+  },
+  "tasksListView": {
+    "description": "Manage all created tasks",
+    "title": "Task List"
+  }
+}

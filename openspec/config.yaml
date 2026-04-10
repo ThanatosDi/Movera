@@ -1,0 +1,96 @@
+schema: spec-driven
+
+context: |
+  ## Project: Movera
+  Movera 是一個輕量級的自動化媒體檔案管理工具，整合多種 BitTorrent 下載器（qBittorrent、Transmission、Deluge、rTorrent、Aria2）。
+  當下載完成時，Movera 會根據預定義的任務規則自動移動和重新命名檔案。
+
+  ## Tech Stack
+
+  ### Backend (Python 3.13+)
+  - Web Framework: FastAPI + Uvicorn (ASGI)
+  - ORM: SQLAlchemy 2.0
+  - Database: SQLite
+  - Migrations: Alembic
+  - Validation: Pydantic v2
+  - Logging: Loguru
+  - Testing: pytest + pytest-asyncio + pytest-cov + pytest-mock
+  - Package Manager: uv (pyproject.toml)
+
+  ### Frontend (TypeScript)
+  - Framework: Vue 3 (Composition API)
+  - Build Tool: Vite 7
+  - UI: Tailwind CSS v4 + Reka UI (shadcn-vue style)
+  - State Management: Pinia
+  - Routing: Vue Router
+  - i18n: Vue I18n
+  - Validation: Zod
+  - Testing: Vitest + Vue Test Utils + happy-dom (單元測試)
+  - E2E/UI Testing: MCP Chrome DevTools（透過 Chrome DevTools Protocol 進行前端 UI 測試）
+  - PWA: vite-plugin-pwa (Workbox)
+
+  ## Architecture
+  - Backend: Layered Architecture — Routers → Services → Repositories → Models → Database
+  - Frontend: Component-Based — Views → Components → Composables → Stores → API
+  - API Style: RESTful JSON (prefix: /api/v1/)
+  - Webhook endpoints for BT downloader integration (/webhook/*)
+
+  ## Project Structure
+  - backend/ — Python FastAPI (routers/, services/, repositories/, models/, schemas.py)
+  - src/ — Vue 3 frontend (views/, components/, composables/, stores/, schemas/)
+  - tests/backend/ — Backend pytest tests
+  - src/composables/__tests__/ — Frontend composable tests
+  - migration/ — Alembic migration scripts
+  - main.py — Entry point (serves API + SPA)
+
+  ## Conventions
+  - 使用繁體中文撰寫 commit messages 和文件
+  - Backend follows repository pattern with dependency injection
+  - Frontend uses Vue 3 Composition API with TypeScript strict mode
+  - Path alias: @/* → ./src/*
+
+  ## Development Methodology: TDD 紅綠燈循環
+  本專案採用 TDD 紅綠燈循環作為標準開發流程：
+
+  🔴 紅燈階段（Red）：先撰寫測試案例定義期望行為，執行測試確認失敗
+  🟢 綠燈階段（Green）：實作最小可行程式碼讓測試通過
+  🔵 重構階段（Refactor）：優化程式碼結構和可讀性，確認測試仍然通過
+
+rules:
+  tasks:
+    - |
+      所有 tasks.md 必須使用 TDD 紅綠燈循環方式組織任務。
+      每個功能模組包含完整的三階段循環：紅燈 → 綠燈 → 重構。
+    - |
+      任務結構順序：
+      1. 前置準備（建立測試和程式碼骨架）
+      2. 功能開發（每個功能一個完整的紅綠燈循環）
+      3. 整合測試
+      4. 文件更新
+      5. 程式碼品質檢查
+    - |
+      每個功能的 TDD 循環格式：
+      ### N.1 🔴 紅燈 - 撰寫 XXX 測試
+      - [ ] 測試場景 A
+      - [ ] 測試場景 B
+      - [ ] 執行測試，確認全部失敗
+
+      ### N.2 🟢 綠燈 - 實作 XXX 功能
+      - [ ] 實作步驟 A
+      - [ ] 實作步驟 B
+      - [ ] 執行測試，確認全部通過
+
+      ### N.3 🔵 重構 - 優化 XXX 程式碼
+      - [ ] 提取重複邏輯
+      - [ ] 改善程式碼結構
+      - [ ] 執行測試，確認仍然通過
+    - Backend 測試使用 pytest，放在 tests/backend/ 目錄
+    - Frontend 單元測試使用 Vitest，放在對應的 __tests__/ 或 .spec.ts 檔案
+    - Frontend UI/E2E 測試可使用 MCP Chrome DevTools 進行，透過 Chrome DevTools Protocol 操作瀏覽器（導航、點擊、填表、截圖、檢查 console/network 等）
+  proposal:
+    - 使用繁體中文撰寫
+    - 清楚說明變更的動機和預期效果
+  design:
+    - 使用繁體中文撰寫
+    - 說明架構決策的理由
+    - 標明影響的層級（Router / Service / Repository / Model / Component / Store）
