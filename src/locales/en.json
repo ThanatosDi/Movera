@@ -189,6 +189,12 @@
       "add": "Add",
       "colorLabel": "Color",
       "deleteConfirm": "Are you sure you want to delete tag \"{name}\"?",
+      "createSuccess": "Tag \"{name}\" created successfully",
+      "createError": "Failed to create tag \"{name}\"",
+      "updateSuccess": "Tag \"{name}\" updated successfully",
+      "updateError": "Failed to update tag",
+      "deleteSuccess": "Tag deleted successfully",
+      "deleteError": "Failed to delete tag",
       "colors": {
         "red": "Red",
         "orange": "Orange",

@@ -191,6 +191,12 @@
       "add": "新增",
       "colorLabel": "顏色",
       "deleteConfirm": "確定要刪除標籤「{name}」嗎？",
+      "createSuccess": "標籤「{name}」已成功建立",
+      "createError": "新增標籤「{name}」失敗",
+      "updateSuccess": "標籤「{name}」已成功更新",
+      "updateError": "更新標籤失敗",
+      "deleteSuccess": "標籤已成功刪除",
+      "deleteError": "刪除標籤失敗",
       "colors": {
         "red": "紅色",
         "orange": "橘色",

@@ -22,6 +22,7 @@ import { VariableEnum } from '@/enums/VariableEnum'
 import { cn } from '@/lib/utils'
 import { useSettingStore } from '@/stores/settingStore'
 import { useTagStore } from '@/stores/tagStore'
+import { useTaskStore } from '@/stores/taskStore'
 import { Check, ChevronsUpDown, FolderCog, Info, Plus, Save, Tag, X } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { ref, watch } from 'vue'
@@ -38,6 +39,8 @@ const { isSaving, settings } = storeToRefs(settingStore)
 const tagStore = useTagStore()
 const { tags } = storeToRefs(tagStore)
 
+const taskStore = useTaskStore()
+
 const ALLOWED_COLORS = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'gray'] as const
 const newTagName = ref('')
 const newTagColor = ref<string>('blue')
@@ -50,9 +53,15 @@ tagStore.fetchTags()
 async function addTag() {
   const name = newTagName.value.trim()
   if (!name) return
-  await tagStore.createTag({ name, color: newTagColor.value })
-  newTagName.value = ''
-  newTagColor.value = 'blue'
+  try {
+    await tagStore.createTag({ name, color: newTagColor.value })
+    useNotification.showSuccess(t('settingView.tagManagementCard.title'), t('settingView.tagManagementCard.createSuccess', { name }))
+    newTagName.value = ''
+    newTagColor.value = 'blue'
+  } catch (e) {
+    const message = e instanceof Error ? e.message : ''
+    useNotification.showError(t('settingView.tagManagementCard.createError', { name }), message)
+  }
 }
 
 function startEditTag(tag: { id: string; name: string; color: string }) {
@@ -63,8 +72,16 @@ function startEditTag(tag: { id: string; name: string; color: string }) {
 
 async function saveEditTag() {
   if (!editingTagId.value || !editTagName.value.trim()) return
-  await tagStore.updateTag(editingTagId.value, { name: editTagName.value.trim(), color: editTagColor.value })
-  editingTagId.value = null
+  const name = editTagName.value.trim()
+  try {
+    await tagStore.updateTag(editingTagId.value, { name, color: editTagColor.value })
+    useNotification.showSuccess(t('settingView.tagManagementCard.title'), t('settingView.tagManagementCard.updateSuccess', { name }))
+    editingTagId.value = null
+    await taskStore.fetchTasks()
+  } catch (e) {
+    const message = e instanceof Error ? e.message : ''
+    useNotification.showError(t('settingView.tagManagementCard.updateError'), message)
+  }
 }
 
 function cancelEditTag() {
@@ -72,7 +89,14 @@ function cancelEditTag() {
 }
 
 async function deleteTag(tagId: string) {
-  await tagStore.deleteTag(tagId)
+  try {
+    await tagStore.deleteTag(tagId)
+    useNotification.showSuccess(t('settingView.tagManagementCard.title'), t('settingView.tagManagementCard.deleteSuccess'))
+    await taskStore.fetchTasks()
+  } catch (e) {
+    const message = e instanceof Error ? e.message : ''
+    useNotification.showError(t('settingView.tagManagementCard.deleteError'), message)
+  }
 }
 
 const UpdateSettings = async () => {

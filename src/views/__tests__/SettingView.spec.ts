@@ -38,6 +38,14 @@ vi.mock('@/stores/tagStore', () => ({
   }),
 }))
 
+// Mock taskStore
+vi.mock('@/stores/taskStore', () => ({
+  useTaskStore: () => ({
+    tasks: ref([]),
+    fetchTasks: vi.fn(),
+  }),
+}))
+
 // Mock pinia
 vi.mock('pinia', () => ({
   storeToRefs: (store: any) => {
