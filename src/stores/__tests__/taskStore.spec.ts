@@ -5,7 +5,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useTaskStore } from '../taskStore'
-import type { Task, TaskCreate } from '@/schemas'
+import type { Tag, Task, TaskCreate } from '@/schemas'
 
 // Mock useHttpService
 const mockRequest = vi.fn()
@@ -39,6 +39,48 @@ const sampleTask2: Task = {
   enabled: false,
   created_at: '2024-01-02T00:00:00Z',
   logs: [],
+  tags: [],
+}
+
+const tagAnime: Tag = {
+  id: 'tag-anime',
+  name: '動畫',
+  color: 'blue',
+  created_at: '2024-01-01T00:00:00Z',
+}
+
+const tagMovie: Tag = {
+  id: 'tag-movie',
+  name: '電影',
+  color: 'red',
+  created_at: '2024-01-01T00:00:00Z',
+}
+
+const taskWithAnimeTag: Task = {
+  ...sampleTask,
+  id: 'task-anime',
+  name: '動畫任務',
+  tags: [tagAnime],
+}
+
+const taskWithMovieTag: Task = {
+  ...sampleTask,
+  id: 'task-movie',
+  name: '電影任務',
+  tags: [tagMovie],
+}
+
+const taskWithBothTags: Task = {
+  ...sampleTask,
+  id: 'task-both',
+  name: '動畫電影任務',
+  tags: [tagAnime, tagMovie],
+}
+
+const taskWithNoTags: Task = {
+  ...sampleTask,
+  id: 'task-notag',
+  name: '無標籤任務',
   tags: [],
 }
 
@@ -376,6 +418,73 @@ describe('TaskStore', () => {
 
       expect(result).toEqual(logs)
       expect(store.tasks[0]!.logs).toEqual(logs)
+    })
+  })
+
+  describe('Tag 篩選功能', () => {
+    it('selectedFilterTagIds 初始應為空集合', () => {
+      const store = useTaskStore()
+      expect(store.selectedFilterTagIds.size).toBe(0)
+    })
+
+    it('toggleFilterTag 應切換 Tag 選取狀態', () => {
+      const store = useTaskStore()
+
+      store.toggleFilterTag('tag-anime')
+      expect(store.selectedFilterTagIds.has('tag-anime')).toBe(true)
+
+      store.toggleFilterTag('tag-anime')
+      expect(store.selectedFilterTagIds.has('tag-anime')).toBe(false)
+    })
+
+    it('clearFilterTags 應清除所有篩選', () => {
+      const store = useTaskStore()
+      store.toggleFilterTag('tag-anime')
+      store.toggleFilterTag('tag-movie')
+      expect(store.selectedFilterTagIds.size).toBe(2)
+
+      store.clearFilterTags()
+      expect(store.selectedFilterTagIds.size).toBe(0)
+    })
+
+    it('filteredTasks 在未選取 Tag 時應返回全部任務', () => {
+      const store = useTaskStore()
+      store.tasks = [taskWithAnimeTag, taskWithMovieTag, taskWithNoTags]
+
+      expect(store.filteredTasks).toHaveLength(3)
+    })
+
+    it('filteredTasks 在選取單一 Tag 時應僅返回包含該 Tag 的任務', () => {
+      const store = useTaskStore()
+      store.tasks = [taskWithAnimeTag, taskWithMovieTag, taskWithNoTags]
+
+      store.toggleFilterTag('tag-anime')
+
+      expect(store.filteredTasks).toHaveLength(1)
+      expect(store.filteredTasks[0]!.id).toBe('task-anime')
+    })
+
+    it('filteredTasks 在選取多個 Tag 時應使用聯集邏輯', () => {
+      const store = useTaskStore()
+      store.tasks = [taskWithAnimeTag, taskWithMovieTag, taskWithBothTags, taskWithNoTags]
+
+      store.toggleFilterTag('tag-anime')
+      store.toggleFilterTag('tag-movie')
+
+      expect(store.filteredTasks).toHaveLength(3)
+      const ids = store.filteredTasks.map(t => t.id)
+      expect(ids).toContain('task-anime')
+      expect(ids).toContain('task-movie')
+      expect(ids).toContain('task-both')
+    })
+
+    it('filteredTasks 篩選結果為空時應返回空陣列', () => {
+      const store = useTaskStore()
+      store.tasks = [taskWithNoTags]
+
+      store.toggleFilterTag('tag-music')
+
+      expect(store.filteredTasks).toHaveLength(0)
     })
   })
 })

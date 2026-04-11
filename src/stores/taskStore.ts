@@ -10,9 +10,38 @@ export const useTaskStore = defineStore('taskStore', () => {
   const isSaving = ref<boolean>(false)
   const error = ref<string | null>(null)
 
+  // Tag 篩選相關狀態
+  const selectedFilterTagIds = ref<Set<string>>(new Set())
+
   // 選擇模式相關狀態
   const isSelectMode = ref<boolean>(false)
   const selectedTaskIds = ref<Set<string>>(new Set())
+
+  /** Tasks filtered by selected tags (union logic). Returns all tasks when no tags selected. */
+  const filteredTasks = computed(() => {
+    if (selectedFilterTagIds.value.size === 0) {
+      return tasks.value
+    }
+    return tasks.value.filter(task =>
+      task.tags.some(tag => selectedFilterTagIds.value.has(tag.id))
+    )
+  })
+
+  /** Toggle a tag's filter selection state. */
+  function toggleFilterTag(tagId: string) {
+    const newSet = new Set(selectedFilterTagIds.value)
+    if (newSet.has(tagId)) {
+      newSet.delete(tagId)
+    } else {
+      newSet.add(tagId)
+    }
+    selectedFilterTagIds.value = newSet
+  }
+
+  /** Clear all tag filter selections. */
+  function clearFilterTags() {
+    selectedFilterTagIds.value = new Set()
+  }
 
   /** Number of currently enabled tasks. */
   const enabledTaskCount = computed(() => {
@@ -158,12 +187,13 @@ export const useTaskStore = defineStore('taskStore', () => {
     selectedTaskIds.value = newSet
   }
 
-  /** Select all tasks, or deselect all if every task is already selected. */
+  /** Select all filtered tasks, or deselect all if every filtered task is already selected. */
   function selectAllTasks() {
-    if (selectedTaskIds.value.size === tasks.value.length) {
+    const target = filteredTasks.value
+    if (selectedTaskIds.value.size === target.length) {
       selectedTaskIds.value = new Set()
     } else {
-      selectedTaskIds.value = new Set(tasks.value.map(t => t.id))
+      selectedTaskIds.value = new Set(target.map(t => t.id))
     }
   }
 
@@ -225,6 +255,11 @@ export const useTaskStore = defineStore('taskStore', () => {
     updateTask,
     deleteTask,
     fetchTaskLogByTaskId,
+    // Tag 篩選
+    selectedFilterTagIds,
+    filteredTasks,
+    toggleFilterTag,
+    clearFilterTags,
     // 選擇模式
     isSelectMode,
     selectedTaskIds,

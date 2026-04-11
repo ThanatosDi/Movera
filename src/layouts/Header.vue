@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { RoutersEnum } from '@/enums/RoutersEnum';
+import { useTagStore } from '@/stores/tagStore';
 import { useTaskStore } from '@/stores/taskStore';
 import { useDark, useToggle } from '@vueuse/core';
 import { CircleUser, Home, Moon, Sun } from 'lucide-vue-next';
@@ -24,9 +25,11 @@ const router = useRouter()
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
 const taskStore = useTaskStore()
+const tagStore = useTagStore()
 
 onMounted(() => {
   taskStore.fetchTasks()
+  tagStore.fetchTags()
 })
 
 </script>

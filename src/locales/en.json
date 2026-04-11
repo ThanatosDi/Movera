@@ -118,6 +118,11 @@
       "emptyDirectory": "No subdirectories in this directory",
       "noAllowedDirectories": "No allowed directories configured. Please set them in Settings first."
     },
+    "sidebarTagFilter": {
+      "title": "Filter by Tags",
+      "selected": "{count} selected",
+      "noResults": "No tasks match the selected tags"
+    },
     "tagSelector": {
       "label": "Tags",
       "placeholder": "Select tags...",
