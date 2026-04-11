@@ -61,6 +61,21 @@ class TestTaskTagRead:
         assert len(tasks[0].tags) == 1
 
 
+class TestTaskTagOrder:
+    def test_task_tags_have_created_at(self, task_repository, tag_repository, db_session, sample_task_data, sample_tag_data):
+        """task_tags 記錄應包含 created_at 時間戳"""
+        from backend.models.tag import task_tags as task_tags_table
+        tag = tag_repository.create(TagCreate(**sample_tag_data))
+        task_data = {**sample_task_data, "tag_ids": [tag.id]}
+        task = task_repository.create(TaskCreate(**task_data))
+        # 查詢 task_tags 表確認 created_at 欄位存在且有值
+        result = db_session.execute(
+            task_tags_table.select().where(task_tags_table.c.task_id == task.id)
+        ).fetchone()
+        assert result is not None
+        assert result.created_at is not None
+
+
 class TestTaskTagCascadeDelete:
     def test_delete_task_clears_association(self, task_repository, tag_repository, db_session, sample_task_data, sample_tag_data):
         tag = tag_repository.create(TagCreate(**sample_tag_data))

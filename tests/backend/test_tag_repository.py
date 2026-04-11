@@ -58,6 +58,19 @@ class TestTagRepositoryUpdate:
         assert result is None
 
 
+class TestTagRepositoryGetAllOrder:
+    def test_get_all_ordered_by_created_at(self, tag_repository):
+        """get_all 應按 created_at ASC 排序"""
+        import time
+        tag1 = tag_repository.create(TagCreate(name="第一個", color="red"))
+        time.sleep(0.01)
+        tag2 = tag_repository.create(TagCreate(name="第二個", color="blue"))
+        tags = tag_repository.get_all()
+        assert len(tags) == 2
+        assert tags[0].id == tag1.id
+        assert tags[1].id == tag2.id
+
+
 class TestTagRepositoryDelete:
     def test_delete_tag_success(self, tag_repository, sample_tag_data):
         created = tag_repository.create(TagCreate(**sample_tag_data))

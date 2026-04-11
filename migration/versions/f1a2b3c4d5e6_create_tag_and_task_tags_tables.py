@@ -7,7 +7,9 @@ Create Date: 2026-04-10 20:00:00.000000
 """
 
 import uuid
+from datetime import UTC, datetime
 from typing import Sequence, Union
+
 
 import sqlalchemy as sa
 from alembic import op
@@ -46,6 +48,13 @@ def upgrade() -> None:
             nullable=False,
             comment="標籤顏色（預定義色票名稱）",
         ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(),
+            nullable=False,
+            default=datetime.now(UTC),
+            comment="建立時間",
+        ),
     )
 
     op.create_table(
@@ -61,6 +70,13 @@ def upgrade() -> None:
             sa.String(),
             sa.ForeignKey("tag.id", ondelete="CASCADE"),
             primary_key=True,
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(),
+            nullable=False,
+            default=datetime.now(UTC),
+            comment="建立時間",
         ),
     )
 

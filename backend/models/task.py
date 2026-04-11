@@ -77,6 +77,7 @@ class Task(Base):
         "Tag",
         secondary=task_tags,
         lazy="selectin",
+        order_by=task_tags.c.created_at.asc(),
     )
 
     def __repr__(self):

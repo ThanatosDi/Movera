@@ -53,10 +53,12 @@ def client(app):
 
 
 def _make_tag(id="tag-1", name="動畫", color="blue"):
+    from datetime import UTC, datetime
     tag = Tag()
     tag.id = id
     tag.name = name
     tag.color = color
+    tag.created_at = datetime.now(UTC)
     return tag
 
 

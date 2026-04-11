@@ -116,6 +116,9 @@ class Tag_(TagBase, OrmBaseModel):
         description="自動產生的標籤 ID，為 UUID 格式",
         examples=["123e4567-e89b-12d3-a456-426614174000"],
     )
+    created_at: datetime = Field(
+        description="標籤的建立時間",
+    )
 
 
 # --- Setting Schemas ---

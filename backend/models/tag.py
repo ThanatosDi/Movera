@@ -1,7 +1,8 @@
 
 import uuid
+from datetime import UTC, datetime
 
-from sqlalchemy import Column, ForeignKey, String, Table
+from sqlalchemy import Column, DateTime, ForeignKey, String, Table, func
 
 from backend.database import Base
 
@@ -10,6 +11,14 @@ task_tags = Table(
     Base.metadata,
     Column("task_id", String, ForeignKey("task.id", ondelete="CASCADE"), primary_key=True),
     Column("tag_id", String, ForeignKey("tag.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "created_at",
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(UTC),
+        server_default=func.now(),
+        comment="標籤加入任務的時刻",
+    ),
 )
 
 
@@ -35,6 +44,12 @@ class Tag(Base):
         String,
         nullable=False,
         comment="標籤顏色（預定義色票名稱）",
+    )
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.now(UTC),
+        comment="建立時間",
     )
 
     def __repr__(self):

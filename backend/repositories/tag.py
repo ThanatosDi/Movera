@@ -15,7 +15,7 @@ class TagRepository:
         return self.db.query(models.Tag).filter(models.Tag.name == name).first()
 
     def get_all(self) -> list[models.Tag]:
-        return self.db.query(models.Tag).all()
+        return self.db.query(models.Tag).order_by(models.Tag.created_at.asc()).all()
 
     def create(self, tag: TagCreate) -> models.Tag:
         db_tag = models.Tag(**tag.model_dump())
