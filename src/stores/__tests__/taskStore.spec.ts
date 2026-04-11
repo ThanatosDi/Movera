@@ -25,6 +25,7 @@ const sampleTask: Task = {
   enabled: true,
   created_at: '2024-01-01T00:00:00Z',
   logs: [],
+  tags: [],
 }
 
 const sampleTask2: Task = {
@@ -38,6 +39,7 @@ const sampleTask2: Task = {
   enabled: false,
   created_at: '2024-01-02T00:00:00Z',
   logs: [],
+  tags: [],
 }
 
 describe('TaskStore', () => {
@@ -106,6 +108,7 @@ describe('TaskStore', () => {
         dst_filename: null,
         rename_rule: null,
         enabled: true,
+        tag_ids: [],
       }
       const result = await store.createTask(taskData)
 
@@ -118,7 +121,7 @@ describe('TaskStore', () => {
       const store = useTaskStore()
       mockRequest.mockRejectedValueOnce(new Error('任務已存在'))
 
-      await expect(store.createTask({ name: '測試', include: '', move_to: '', src_filename: null, dst_filename: null, rename_rule: null, enabled: true }))
+      await expect(store.createTask({ name: '測試', include: '', move_to: '', src_filename: null, dst_filename: null, rename_rule: null, enabled: true, tag_ids: [] }))
         .rejects.toThrow('任務已存在')
     })
   })
@@ -139,6 +142,7 @@ describe('TaskStore', () => {
         dst_filename: sampleTask.dst_filename,
         rename_rule: sampleTask.rename_rule,
         enabled: sampleTask.enabled,
+        tag_ids: [],
       })
 
       expect(result.name).toBe('更新後的名稱')
@@ -157,6 +161,7 @@ describe('TaskStore', () => {
         dst_filename: null,
         rename_rule: null,
         enabled: true,
+        tag_ids: [],
       })).rejects.toThrow('task not found')
     })
 
@@ -175,6 +180,7 @@ describe('TaskStore', () => {
         dst_filename: sampleTask.dst_filename,
         rename_rule: sampleTask.rename_rule,
         enabled: sampleTask.enabled,
+        tag_ids: [],
       })
       expect(store.isSaving).toBe(true)
 
