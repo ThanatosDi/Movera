@@ -39,6 +39,7 @@ const { tasks } = storeToRefs(taskStore)
         :taskId="task.id"
         :name="task.name"
         :enabled="task.enabled"
+        :tags="task.tags || []"
       />
     </div>
   </main>

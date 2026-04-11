@@ -14,7 +14,8 @@
       "mcp__chrome-devtools__evaluate_script",
       "mcp__chrome-devtools__get_console_message",
       "mcp__chrome-devtools__list_network_requests",
-      "mcp__chrome-devtools__list_console_messages"
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__chrome-devtools__resize_page"
     ]
   }
 }

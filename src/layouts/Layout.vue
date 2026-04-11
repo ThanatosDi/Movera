@@ -18,7 +18,7 @@ const { t } = useI18n()
     <Header />
     <div class="flex flex-1 overflow-hidden">
       <Sidebar />
-      <main class="flex-1 p-4 overflow-y-auto">
+      <main class="flex-1 p-4 pb-20 sm:pb-4 overflow-y-auto">
         <RouterView />
       </main>
     </div>
