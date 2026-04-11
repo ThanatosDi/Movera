@@ -56,13 +56,6 @@ const tagMovie: Tag = {
   created_at: '2024-01-01T00:00:00Z',
 }
 
-const tagMusic: Tag = {
-  id: 'tag-music',
-  name: '音樂',
-  color: 'green',
-  created_at: '2024-01-01T00:00:00Z',
-}
-
 const taskWithAnimeTag: Task = {
   ...sampleTask,
   id: 'task-anime',
