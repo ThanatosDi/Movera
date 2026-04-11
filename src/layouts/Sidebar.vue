@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import SidebarItem from '@/components/SidebarItem.vue';
+import SidebarTagFilter from '@/components/SidebarTagFilter.vue';
 import SidebarTool from '@/components/SidebarTool.vue';
 import { RoutersEnum } from '@/enums/RoutersEnum';
 import { useTaskStore } from '@/stores/taskStore';
@@ -10,7 +11,7 @@ import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const taskStore = useTaskStore()
-const { tasks } = storeToRefs(taskStore)
+const { filteredTasks } = storeToRefs(taskStore)
 
 </script>
 
@@ -28,6 +29,9 @@ const { tasks } = storeToRefs(taskStore)
       </Button>
     </RouterLink>
 
+    <!-- Tag 篩選 -->
+    <SidebarTagFilter />
+
     <!-- 工具區 -->
     <SidebarTool />
     <!-- <nav class="flex flex-col space-y-2"> -->
@@ -35,7 +39,7 @@ const { tasks } = storeToRefs(taskStore)
       <!-- <div :class="`flex-1 overflow-y-auto bg-gray-800 rounded-md`"> -->
       <!-- 空狀態 -->
       <div
-        v-if="tasks.length === 0"
+        v-if="filteredTasks.length === 0"
         class="p-4 text-center"
       >
         <div class="mb-2">
@@ -46,7 +50,7 @@ const { tasks } = storeToRefs(taskStore)
 
       <!-- 任務列表 -->
       <SidebarItem
-        v-for="task in tasks"
+        v-for="task in filteredTasks"
         :key="task.id"
         :taskId="task.id"
         :name="task.name"
