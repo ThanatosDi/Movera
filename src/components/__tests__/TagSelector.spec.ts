@@ -27,9 +27,9 @@ vi.mock('lucide-vue-next', () => ({
 }))
 
 const mockTags: Tag[] = [
-  { id: 'tag-1', name: '動畫', color: 'blue' },
-  { id: 'tag-2', name: '電影', color: 'red' },
-  { id: 'tag-3', name: '音樂', color: 'green' },
+  { id: 'tag-1', name: '動畫', color: 'blue', created_at: '2025-01-01T00:00:00Z' },
+  { id: 'tag-2', name: '電影', color: 'red', created_at: '2025-01-02T00:00:00Z' },
+  { id: 'tag-3', name: '音樂', color: 'green', created_at: '2025-01-03T00:00:00Z' },
 ]
 
 describe('TagSelector', () => {
@@ -74,11 +74,11 @@ describe('TagSelector', () => {
   it('選取標籤後 emit 更新事件', async () => {
     const wrapper = mountComponent()
     const items = wrapper.findAll('[data-checkbox]')
-    await items[0].trigger('click')
+    await items[0]!.trigger('click')
 
     const emitted = wrapper.emitted('update:modelValue')
     expect(emitted).toBeTruthy()
-    expect(emitted![0][0]).toEqual(['tag-1'])
+    expect(emitted![0]![0]).toEqual(['tag-1'])
   })
 
   it('已選標籤以 Badge 顯示在選擇器中', () => {

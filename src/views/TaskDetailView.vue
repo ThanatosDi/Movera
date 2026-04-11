@@ -4,7 +4,7 @@ import TaskEditForm from '@/components/TaskEditForm.vue'
 import TaskLogsPanel from '@/components/TaskLogsPanel.vue'
 import { Button } from '@/components/ui/button'
 import { useNotification } from '@/composables/useNotification'
-import type { Task } from '@/schemas'
+import type { Task, TaskUpdate } from '@/schemas'
 import { ApiError } from '@/schemas/errors'
 import { useTaskStore } from '@/stores/taskStore'
 import { Play, Square } from 'lucide-vue-next'
@@ -68,12 +68,13 @@ watch(
 const handleUpdateTask = async () => {
   if (!task.value) return
   isSaving.value = true
-  const { id, created_at, logs, tags, ...taskData } = task.value
-  if (!taskData.tag_ids) {
-    taskData.tag_ids = tags?.map((t: { id: string }) => t.id) || []
+  const { id, created_at, logs, tags, tag_ids, ...baseData } = task.value as any
+  const updateData: TaskUpdate = {
+    ...baseData,
+    tag_ids: tag_ids ?? tags?.map((t: { id: string }) => t.id) ?? [],
   }
   try {
-    const updatedTask = await taskStore.updateTask(id, taskData)
+    const updatedTask = await taskStore.updateTask(id, updateData)
     if (updatedTask) {
       task.value = structuredClone(toRaw(updatedTask))
     }
