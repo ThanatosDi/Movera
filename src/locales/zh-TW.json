@@ -123,6 +123,11 @@
       "selected": "已選取 {count} 個",
       "noResults": "沒有符合篩選條件的任務"
     },
+    "presetRuleModal": {
+      "title": "套用常用規則",
+      "empty": "尚無對應的常用規則",
+      "emptyHint": "請至設定頁面新增常用規則"
+    },
     "tagSelector": {
       "label": "標籤",
       "placeholder": "選擇標籤...",
@@ -188,6 +193,31 @@
     "taskUpdateSuccessTitle": "任務已更新"
   },
   "settingView": {
+    "presetRuleCard": {
+      "title": "常用規則",
+      "description": "管理可快速套用的常用重新命名規則。",
+      "empty": "尚未建立任何常用規則",
+      "namePlaceholder": "輸入規則名稱",
+      "patternPlaceholder": "輸入規則內容",
+      "ruleTypeLabel": "規則類型",
+      "fieldTypeLabel": "欄位類型",
+      "ruleTypes": {
+        "parse": "Parse",
+        "regex": "Regex"
+      },
+      "fieldTypes": {
+        "src": "來源 (Src)",
+        "dst": "目標 (Dst)"
+      },
+      "add": "新增",
+      "deleteConfirm": "確定要刪除常用規則「{name}」嗎？",
+      "createSuccess": "常用規則「{name}」已成功建立",
+      "createError": "新增常用規則「{name}」失敗",
+      "updateSuccess": "常用規則「{name}」已成功更新",
+      "updateError": "更新常用規則失敗",
+      "deleteSuccess": "常用規則已成功刪除",
+      "deleteError": "刪除常用規則失敗"
+    },
     "tagManagementCard": {
       "title": "標籤管理",
       "description": "管理任務分類用的標籤。",

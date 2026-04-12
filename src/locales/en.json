@@ -123,6 +123,11 @@
       "selected": "{count} selected",
       "noResults": "No tasks match the selected tags"
     },
+    "presetRuleModal": {
+      "title": "Apply Preset Rule",
+      "empty": "No matching preset rules",
+      "emptyHint": "Go to Settings to create preset rules"
+    },
     "tagSelector": {
       "label": "Tags",
       "placeholder": "Select tags...",
@@ -186,6 +191,31 @@
     "taskUpdateSuccessTitle": "Task updated"
   },
   "settingView": {
+    "presetRuleCard": {
+      "title": "Preset Rules",
+      "description": "Manage reusable rename rules for quick application.",
+      "empty": "No preset rules created yet",
+      "namePlaceholder": "Enter rule name",
+      "patternPlaceholder": "Enter rule pattern",
+      "ruleTypeLabel": "Rule Type",
+      "fieldTypeLabel": "Field Type",
+      "ruleTypes": {
+        "parse": "Parse",
+        "regex": "Regex"
+      },
+      "fieldTypes": {
+        "src": "Source (Src)",
+        "dst": "Destination (Dst)"
+      },
+      "add": "Add",
+      "deleteConfirm": "Are you sure you want to delete preset rule \"{name}\"?",
+      "createSuccess": "Preset rule \"{name}\" created successfully",
+      "createError": "Failed to create preset rule \"{name}\"",
+      "updateSuccess": "Preset rule \"{name}\" updated successfully",
+      "updateError": "Failed to update preset rule",
+      "deleteSuccess": "Preset rule deleted successfully",
+      "deleteError": "Failed to delete preset rule"
+    },
     "tagManagementCard": {
       "title": "Tag Management",
       "description": "Manage tags for task classification.",

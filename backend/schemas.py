@@ -121,6 +121,38 @@ class Tag_(TagBase, OrmBaseModel):
     )
 
 
+# --- Preset Rule Schemas ---
+
+ALLOWED_RULE_TYPES = {"parse", "regex"}
+ALLOWED_FIELD_TYPES = {"src", "dst"}
+
+
+class PresetRuleBase(BaseModel):
+    name: str = Field(..., description="常用規則名稱", examples=["動畫季番命名"])
+    rule_type: Literal["parse", "regex"] = Field(..., description="規則引擎類型", examples=["parse"])
+    field_type: Literal["src", "dst"] = Field(..., description="對應欄位類型", examples=["src"])
+    pattern: str = Field(..., description="規則內容", examples=["{title} - {episode}.mp4"])
+
+
+class PresetRuleCreate(PresetRuleBase):
+    pass
+
+
+class PresetRuleUpdate(PresetRuleBase):
+    pass
+
+
+class PresetRule_(PresetRuleBase, OrmBaseModel):
+    id: str = Field(
+        ...,
+        description="自動產生的常用規則 ID，為 UUID 格式",
+        examples=["123e4567-e89b-12d3-a456-426614174000"],
+    )
+    created_at: datetime = Field(
+        description="常用規則的建立時間",
+    )
+
+
 # --- Setting Schemas ---
 
 

@@ -5,9 +5,10 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from '@/components/ui/textarea'
 import DirectoryPickerModal from '@/components/DirectoryPickerModal.vue'
+import PresetRuleModal from '@/components/PresetRuleModal.vue'
 import TagSelector from '@/components/TagSelector.vue'
 import { useTagStore } from '@/stores/tagStore'
-import { FolderOpen } from 'lucide-vue-next'
+import { FileCode, FolderOpen } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -54,6 +55,24 @@ const autoGrow = (event: Event) => {
 
 // Directory picker modal state
 const isDirectoryPickerOpen = ref(false)
+
+// Preset rule modal state
+const isPresetRuleModalOpen = ref(false)
+const presetRuleFieldType = ref<'src' | 'dst'>('src')
+
+function openPresetRuleModal(fieldType: 'src' | 'dst') {
+  presetRuleFieldType.value = fieldType
+  isPresetRuleModalOpen.value = true
+}
+
+function handlePresetRuleSelect(pattern: string) {
+  if (presetRuleFieldType.value === 'src') {
+    task.value.src_filename = pattern
+  } else {
+    task.value.dst_filename = pattern
+  }
+  emit('update:modelValue', { ...task.value })
+}
 
 function handleDirectorySelect(path: string) {
   task.value.move_to = path
@@ -178,14 +197,25 @@ function handleTagIdsUpdate(value: string[]) {
           class="text-red-500"
         >*</span>
       </Label>
-      <Textarea
-        id="src_filename"
-        v-model="task.src_filename"
-        class="resize-none min-h-0 py-2 px-3 overflow-hidden border-foreground"
-        rows="1"
-        @input="autoGrow"
-        @keydown.enter.prevent
-      />
+      <div class="flex gap-2">
+        <Textarea
+          id="src_filename"
+          v-model="task.src_filename"
+          class="flex-1 resize-none min-h-0 py-2 px-3 overflow-hidden border-foreground"
+          rows="1"
+          @input="autoGrow"
+          @keydown.enter.prevent
+        />
+        <Button
+          type="button"
+          variant="outline"
+          class="border-foreground shrink-0"
+          data-testid="preset-rule-src-btn"
+          @click="openPresetRuleModal('src')"
+        >
+          <FileCode class="size-4" />
+        </Button>
+      </div>
     </div>
 
     <!-- 目標檔名規則 -->
@@ -200,14 +230,34 @@ function handleTagIdsUpdate(value: string[]) {
           class="text-red-500"
         >*</span>
       </Label>
-      <Textarea
-        id="dst_filename"
-        v-model="task.dst_filename"
-        class="resize-none min-h-0 py-2 px-3 overflow-hidden border-foreground"
-        rows="1"
-        @input="autoGrow"
-        @keydown.enter.prevent
-      />
+      <div class="flex gap-2">
+        <Textarea
+          id="dst_filename"
+          v-model="task.dst_filename"
+          class="flex-1 resize-none min-h-0 py-2 px-3 overflow-hidden border-foreground"
+          rows="1"
+          @input="autoGrow"
+          @keydown.enter.prevent
+        />
+        <Button
+          type="button"
+          variant="outline"
+          class="border-foreground shrink-0"
+          data-testid="preset-rule-dst-btn"
+          @click="openPresetRuleModal('dst')"
+        >
+          <FileCode class="size-4" />
+        </Button>
+      </div>
     </div>
+
+    <!-- Preset Rule Modal -->
+    <PresetRuleModal
+      v-if="task.rename_rule"
+      v-model:open="isPresetRuleModalOpen"
+      :rule-type="task.rename_rule"
+      :field-type="presetRuleFieldType"
+      @select="handlePresetRuleSelect"
+    />
   </div>
 </template>

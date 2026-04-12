@@ -18,6 +18,18 @@ export interface TagCreate {
 
 export type TagUpdate = TagCreate;
 
+export interface PresetRule {
+  id: string;
+  name: string;
+  rule_type: 'parse' | 'regex';
+  field_type: 'src' | 'dst';
+  pattern: string;
+  created_at: string;
+}
+
+export type PresetRuleCreate = Omit<PresetRule, 'id' | 'created_at'>;
+export type PresetRuleUpdate = PresetRuleCreate;
+
 export interface Task {
   id: string;
   name: string;

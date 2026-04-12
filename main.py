@@ -33,9 +33,14 @@ def setup_static_files():
         return FileResponse(DIST_DIR / "index.html")
 
 
-if __name__ == "__main__":
-    setup_static_files()
-    for route in app.routes:
-        print(route)
+setup_static_files()
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        log_level="info",
+        # reload=True,
+        # reload_dirs=["backend"],
+    )

@@ -46,6 +46,19 @@ vi.mock('@/stores/taskStore', () => ({
   }),
 }))
 
+// Mock presetRuleStore
+vi.mock('@/stores/presetRuleStore', () => ({
+  usePresetRuleStore: () => ({
+    presetRules: ref([]),
+    isLoading: ref(false),
+    error: ref(null),
+    fetchPresetRules: vi.fn(),
+    createPresetRule: vi.fn(),
+    updatePresetRule: vi.fn(),
+    deletePresetRule: vi.fn(),
+  }),
+}))
+
 // Mock pinia
 vi.mock('pinia', () => ({
   storeToRefs: (store: any) => {
