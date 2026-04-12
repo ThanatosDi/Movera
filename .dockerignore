@@ -1,0 +1,17 @@
+.git/
+.env
+.env.*
+!.env.example
+.*
+__pycache__/
+__*
+database
+node_modules
+tests
+dist
+openspec/
+*.spec.ts
+.pytest_cache/
+.coverage
+htmlcov/
+SECURITY_AUDIT_REPORT.md

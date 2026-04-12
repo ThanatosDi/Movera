@@ -20,7 +20,7 @@ jobs:
         with:
           image-ref: 'movera:latest'
           format: 'sarif'
-          exit-code: 0
+          exit-code: 1
           severity: 'CRITICAL,HIGH'
           output: 'trivy-results.sarif'
 

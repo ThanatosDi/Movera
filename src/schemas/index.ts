@@ -58,7 +58,6 @@ export interface Log {
 export type ToastPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
 
 export interface NotificationOptions {
-  html?: boolean;
   position?: ToastPosition;
   duration?: number;
 }

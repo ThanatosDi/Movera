@@ -266,8 +266,9 @@ class TestProcessCompletedDownload:
     @patch("backend.worker.worker.perform_move_operation")
     @patch("backend.worker.worker.perform_rename_operation")
     @patch("backend.worker.worker.match_task")
+    @patch("backend.worker.worker.Path.is_file", return_value=True)
     def test_process_completed_download_success(
-        self, mock_match_task, mock_rename, mock_move, mock_services,
+        self, mock_is_file, mock_match_task, mock_rename, mock_move, mock_services,
     ):
         """測試成功處理下載完成"""
         mock_task = MagicMock()
@@ -286,8 +287,9 @@ class TestProcessCompletedDownload:
     @patch("backend.worker.worker.perform_move_operation")
     @patch("backend.worker.worker.perform_rename_operation")
     @patch("backend.worker.worker.match_task")
+    @patch("backend.worker.worker.Path.is_file", return_value=True)
     def test_process_completed_download_skip_rename(
-        self, mock_match_task, mock_rename, mock_move, mock_services,
+        self, mock_is_file, mock_match_task, mock_rename, mock_move, mock_services,
     ):
         """測試跳過重命名 (當 rename_rule 為 None)"""
         mock_task = MagicMock()
@@ -305,8 +307,9 @@ class TestProcessCompletedDownload:
     @patch("backend.worker.worker.perform_move_operation")
     @patch("backend.worker.worker.perform_rename_operation")
     @patch("backend.worker.worker.match_task")
+    @patch("backend.worker.worker.Path.is_file", return_value=True)
     def test_process_completed_download_rename_error(
-        self, mock_match_task, mock_rename, mock_move, mock_services,
+        self, mock_is_file, mock_match_task, mock_rename, mock_move, mock_services,
     ):
         """測試重命名失敗時不執行移動"""
         mock_task = MagicMock()
@@ -323,8 +326,9 @@ class TestProcessCompletedDownload:
     @patch("backend.worker.worker.perform_move_operation")
     @patch("backend.worker.worker.perform_rename_operation")
     @patch("backend.worker.worker.match_task")
+    @patch("backend.worker.worker.Path.is_file", return_value=True)
     def test_process_completed_download_move_error(
-        self, mock_match_task, mock_rename, mock_move, mock_services,
+        self, mock_is_file, mock_match_task, mock_rename, mock_move, mock_services,
     ):
         """測試移動失敗時正常處理"""
         mock_task = MagicMock()

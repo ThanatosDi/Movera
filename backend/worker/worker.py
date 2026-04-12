@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 from backend import schemas
@@ -9,6 +10,7 @@ from backend.repositories.log import LogRepository
 from backend.repositories.task import TaskRepository
 from backend.services.log_service import LogService
 from backend.services.task_service import TaskService
+from backend.utils.logger import logger
 from backend.utils.move import move
 from backend.utils.rename import Rename
 
@@ -181,6 +183,12 @@ def process_completed_download(filepath: str, services: WorkerServices | None = 
     """
     if services is None:
         services = create_worker_services()
+
+    # 路徑安全驗證：確認檔案存在且路徑合法
+    filepath_path = Path(filepath).resolve()
+    if not filepath_path.is_file():
+        logger.warning(f"Webhook filepath 不存在或非檔案，已跳過: {filepath}")
+        return
 
     tasks = services.task_service.get_enabled_tasks()
 

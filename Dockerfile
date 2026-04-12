@@ -26,7 +26,7 @@ COPY ./entrypoint.sh /usr/local/bin/
 # 賦予它執行權限
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.7 /uv /uvx /bin/
 
 # 先複製專案檔案，再複製 build 產物，避免被覆蓋
 COPY . /movera

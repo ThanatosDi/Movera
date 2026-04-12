@@ -115,3 +115,10 @@ def depends_log_service(
 ) -> LogService:
     """Dependency to get a LogService instance."""
     return LogService(repository=repository)
+
+
+def depends_allowed_directories(
+    setting_service: SettingService = Depends(depends_setting_service),
+) -> list[str]:
+    """Dependency to get the allowed directories from settings."""
+    return setting_service.get_allowed_directories()

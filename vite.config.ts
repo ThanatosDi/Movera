@@ -24,6 +24,10 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/runtime-config.js': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
     },
   },
   define: {
@@ -49,6 +53,7 @@ export default defineConfig({
           /^\/docs/,
           /^\/redoc/,
           /^\/openapi\.json/,
+          /^\/runtime-config\.js/,
         ],
         runtimeCaching: [
           {
@@ -69,6 +74,10 @@ export default defineConfig({
           },
           {
             urlPattern: /\/openapi\.json/,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /\/runtime-config\.js/,
             handler: 'NetworkOnly',
           },
         ],

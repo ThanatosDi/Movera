@@ -11,6 +11,10 @@ import type { ApiErrorDetail } from '@/schemas/errors'
 // 從環境變數讀取 API 的基本 URL，如果未設定則使用預設值
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
+// 從 runtime config 讀取 API Key（由後端 /runtime-config.js 注入）
+const _config = (window as any).__MOVERA_CONFIG__ || {};
+const API_KEY: string = _config.MOVERA_API_KEY || '';
+
 // #endregion
 
 // #region 通用 API 處理邏輯
@@ -51,6 +55,7 @@ async function handleResponse<T>(response: Response): Promise<T | void> {
 function createRequestOptions(method: string, data?: unknown): RequestInit {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
+    ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
   };
 
   const options: RequestInit = {

@@ -26,7 +26,7 @@ from backend.exceptions.tag_exception import (
     TagNotFound,
 )
 from backend.exceptions.task_exception import TaskAlreadyExists, TaskNotFound
-from backend.middlewares import setup_cors, setup_gzip
+from backend.middlewares import setup_api_key_auth, setup_cors, setup_gzip
 from backend.routers import directory, log, preset_rule, preview, setting, tag, task, webhook
 from backend.utils.logger import logger
 
@@ -56,11 +56,16 @@ async def lifespan(app: FastAPI):
     pass
 
 
+_enable_docs = os.environ.get("MOVERA_ENABLE_DOCS", "").lower() == "true"
+
 app = FastAPI(
     lifespan=lifespan,
     title="Movera API",
     description="API for managing file moving and renaming tasks.",
-    version="4.0.0",
+    version="4.2.0",
+    docs_url="/docs" if _enable_docs else None,
+    redoc_url="/redoc" if _enable_docs else None,
+    openapi_url="/openapi.json" if _enable_docs else None,
 )
 
 
@@ -114,7 +119,14 @@ async def preset_rule_already_exists_handler(
     return JSONResponse(status_code=409, content={"detail": str(exc)})
 
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"未預期的錯誤: {exc}", exc_info=True)
+    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
+
+
 # Middlewares
+setup_api_key_auth(app)
 setup_cors(app)
 setup_gzip(app)
 

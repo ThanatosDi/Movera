@@ -1,4 +1,7 @@
+import re
+
 from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
 
 from backend import schemas
 from backend.dependencies import depends_parse_preview_service, depends_regex_preview_service
@@ -30,8 +33,14 @@ def preview_regex(
     payload: schemas.RegexPreviewRequest,
     service: RegexPreviewService = Depends(depends_regex_preview_service),
 ):
-    return service.preview(
-        src_pattern=payload.src_pattern,
-        text=payload.text,
-        dst_pattern=payload.dst_pattern,
-    )
+    try:
+        return service.preview(
+            src_pattern=payload.src_pattern,
+            text=payload.text,
+            dst_pattern=payload.dst_pattern,
+        )
+    except (TimeoutError, re.error) as e:
+        return JSONResponse(
+            status_code=422,
+            content={"detail": f"Regex 執行超時或錯誤: {str(e)}"},
+        )

@@ -75,11 +75,13 @@ def update_setting(
     response_description="成功更新後的設定資訊",
 )
 def update_settings(
-    settings: dict,
+    settings: schemas.SettingsUpdate,
     service: SettingService = Depends(depends_setting_service),
 ):
     try:
-        service.update_settings(settings)
+        # 將 Pydantic model 轉為 dict，僅包含已設定的欄位
+        update_data = settings.model_dump(exclude_none=True)
+        service.update_settings(update_data)
     except ValueError as e:
         return JSONResponse(status_code=400, content={"detail": str(e)})
     # 回傳完整的最新設定（含 JSON 反序列化）

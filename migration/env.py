@@ -1,3 +1,4 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -8,6 +9,10 @@ from alembic import context
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# 使用環境變數覆蓋 alembic.ini 中的資料庫路徑
+sqlite_path = os.getenv("SQLITE_PATH", "./database/database.db")
+config.set_main_option("sqlalchemy.url", f"sqlite:///{sqlite_path}")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

@@ -5,6 +5,7 @@ from backend.exceptions.task_exception import (
 )
 from backend.repositories.task import TaskRepository
 from backend.utils.logger import logger
+from backend.utils.path_security import validate_path_within
 
 
 class TaskService:
@@ -77,22 +78,41 @@ class TaskService:
         """
         return self.repository.get_by_name(name)
 
+    def _validate_move_to(self, move_to: str, allowed_directories: list[str] | None) -> None:
+        """驗證 move_to 路徑是否在允許的目錄白名單內。
+
+        Args:
+            move_to: 目標目錄路徑
+            allowed_directories: 允許的目錄列表（None 或空列表時跳過驗證）
+
+        Raises:
+            ValueError: move_to 不在允許的目錄內
+        """
+        if not allowed_directories:
+            return
+        if not validate_path_within(move_to, allowed_directories):
+            raise ValueError(f"move_to 路徑不在允許的目錄白名單內")
+
     def create_task(
         self,
         task: schemas.TaskCreate,
+        allowed_directories: list[str] | None = None,
     ) -> models.Task:
         """
         創建一個任務
 
         Args:
             task (schemas.TaskCreate): 任務的資料
+            allowed_directories: 允許的目錄白名單（可選）
 
         Returns:
             models.Task: 剛才建立的任務
 
         Raises:
             TaskAlreadyExists: 如果已經存在相同名稱的任務
+            ValueError: 如果 move_to 不在允許的目錄內
         """
+        self._validate_move_to(task.move_to, allowed_directories)
         exists_task = self.get_task_by_name(task.name)
         if exists_task is not None:
             raise TaskAlreadyExists(task.name)
@@ -102,6 +122,7 @@ class TaskService:
         self,
         task_id: str,
         task_update: schemas.TaskUpdate,
+        allowed_directories: list[str] | None = None,
     ) -> models.Task:
         """
         更新一個任務
@@ -109,6 +130,7 @@ class TaskService:
         Args:
             task_id (str): 任務的 ID
             task_update (schemas.TaskUpdate): 任務的更新資料
+            allowed_directories: 允許的目錄白名單（可選）
 
         Returns:
             models.Task: 該任務
@@ -116,7 +138,9 @@ class TaskService:
         Raises:
             TaskNotFound: 如果不存在相同ID的任務
             TaskAlreadyExists: 如果已經存在相同名稱的任務
+            ValueError: 如果 move_to 不在允許的目錄內
         """
+        self._validate_move_to(task_update.move_to, allowed_directories)
         exists_task = self._get_task_or_raise(task_id)
         if exists_task.name != task_update.name:
             same_name_task = self.get_task_by_name(task_update.name)

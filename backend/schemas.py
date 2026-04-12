@@ -54,17 +54,18 @@ class TaskUUID(BaseModel):
 
 
 class TaskBase(BaseModel):
-    name: str = Field(..., description="任務的名稱", examples=["公爵千金的家庭教師"])
+    name: str = Field(..., max_length=255, description="任務的名稱", examples=["公爵千金的家庭教師"])
     include: str = Field(
-        ..., description="用於匹配檔案的包含規則", examples=["公爵千金的家庭教師"]
+        ..., max_length=1024, description="用於匹配檔案的包含規則", examples=["公爵千金的家庭教師"]
     )
     move_to: str = Field(
         ...,
+        max_length=1024,
         description="檔案移動到的目標目錄路徑",
         examples=["/Downloads/anime/公爵千金的家庭教師"],
     )
-    src_filename: Optional[str] = Field(None, description="來源檔案名稱規則")
-    dst_filename: Optional[str] = Field(None, description="目標檔案名稱模板")
+    src_filename: Optional[str] = Field(None, max_length=1024, description="來源檔案名稱規則")
+    dst_filename: Optional[str] = Field(None, max_length=1024, description="目標檔案名稱模板")
     rename_rule: Optional[Literal["regex", "parse"]] = Field(
         None, description="重新命名規則的類型"
     )
@@ -98,8 +99,8 @@ ALLOWED_TAG_COLORS = {"red", "orange", "yellow", "green", "blue", "purple", "pin
 
 
 class TagBase(BaseModel):
-    name: str = Field(..., description="標籤名稱", examples=["動畫"])
-    color: str = Field(..., description="標籤顏色（預定義色票名稱）", examples=["blue"])
+    name: str = Field(..., max_length=255, description="標籤名稱", examples=["動畫"])
+    color: str = Field(..., max_length=50, description="標籤顏色（預定義色票名稱）", examples=["blue"])
 
 
 class TagCreate(TagBase):
@@ -128,10 +129,10 @@ ALLOWED_FIELD_TYPES = {"src", "dst"}
 
 
 class PresetRuleBase(BaseModel):
-    name: str = Field(..., description="常用規則名稱", examples=["動畫季番命名"])
+    name: str = Field(..., max_length=255, description="常用規則名稱", examples=["動畫季番命名"])
     rule_type: Literal["parse", "regex"] = Field(..., description="規則引擎類型", examples=["parse"])
     field_type: Literal["src", "dst"] = Field(..., description="對應欄位類型", examples=["src"])
-    pattern: str = Field(..., description="規則內容", examples=["{title} - {episode}.mp4"])
+    pattern: str = Field(..., max_length=1024, description="規則內容", examples=["{title} - {episode}.mp4"])
 
 
 class PresetRuleCreate(PresetRuleBase):
@@ -173,6 +174,11 @@ class SettingUpdate(BaseModel):
 
 class Setting(SettingBase, OrmBaseModel):
     pass
+
+
+class SettingsUpdate(BaseModel):
+    """批次更新設定的請求 schema，僅允許白名單欄位。"""
+    allowed_directories: Optional[List[str]] = Field(None, description="允許的目錄列表")
 
 
 # --- Parse Preview Schemas ---

@@ -1,7 +1,20 @@
 import datetime
 import re
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 from parse import parse
+
+REGEX_TIMEOUT_SECONDS = 2
+_regex_executor = ThreadPoolExecutor(max_workers=2)
+
+
+def _run_with_timeout(fn, *args, timeout=REGEX_TIMEOUT_SECONDS):
+    """在限時內執行函式，超時引發 TimeoutError。"""
+    future = _regex_executor.submit(fn, *args)
+    try:
+        return future.result(timeout=timeout)
+    except FuturesTimeoutError:
+        raise TimeoutError(f"Regex 執行超時（{timeout} 秒）")
 
 
 class ParsePreviewService:
@@ -97,8 +110,11 @@ class RegexPreviewService:
         回傳:
             re.Match | None: 如果匹配成功，回傳匹配物件；否則回傳 None。
         """
-        pattern = re.compile(pattern, re.IGNORECASE)
-        match = re.search(pattern, text)
+        def _do_match():
+            compiled = re.compile(pattern, re.IGNORECASE)
+            return re.search(compiled, text)
+
+        match = _run_with_timeout(_do_match)
         named_group = match.groupdict() if match else {}
         numbered_group = [_match for _match in match.groups()]
         return {"named_group": named_group, "numbered_group": numbered_group}
@@ -118,8 +134,11 @@ class RegexPreviewService:
         回傳:
             str: 使用替換字串產生的新字串。
         """
-        src_pattern = re.compile(src_pattern, re.IGNORECASE)
-        format = re.sub(src_pattern, dst_pattern, text)
+        def _do_sub():
+            compiled = re.compile(src_pattern, re.IGNORECASE)
+            return re.sub(compiled, dst_pattern, text)
+
+        format = _run_with_timeout(_do_sub)
         return format
 
     @staticmethod

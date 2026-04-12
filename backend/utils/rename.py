@@ -1,8 +1,23 @@
 import re
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from pathlib import Path
 from typing import Literal
 
 import parse
+
+from backend.utils.path_security import sanitize_filename
+
+REGEX_TIMEOUT_SECONDS = 2
+_regex_executor = ThreadPoolExecutor(max_workers=2)
+
+
+def _run_regex_with_timeout(fn, timeout=REGEX_TIMEOUT_SECONDS):
+    """在限時內執行 regex 函式，超時引發 TimeoutError。"""
+    future = _regex_executor.submit(fn)
+    try:
+        return future.result(timeout=timeout)
+    except FuturesTimeoutError:
+        raise TimeoutError(f"Regex 執行超時（{timeout} 秒）")
 
 
 def _ensure_path(filepath: str | Path) -> Path:
@@ -31,6 +46,7 @@ class ParseRenameRule:
         filename = filepath.name
         template = parse.parse(self.src, filename)
         renamed = self.dst.format(**template.named)
+        sanitize_filename(renamed)
         dst_path = filepath.parent.joinpath(renamed)
         return Path.rename(filepath, dst_path)
 
@@ -50,8 +66,12 @@ class RegexRenameRule:
     def rename(self) -> Path:
         filepath = _ensure_path(self.filepath)
         filename = filepath.name
-        src_filename_regex = re.compile(self.src, re.IGNORECASE)
-        renamed = re.sub(src_filename_regex, self.dst, filename)
+        def _do_regex():
+            compiled = re.compile(self.src, re.IGNORECASE)
+            return re.sub(compiled, self.dst, filename)
+
+        renamed = _run_regex_with_timeout(_do_regex)
+        sanitize_filename(renamed)
         dst_path = filepath.parent.joinpath(renamed)
         return Path.rename(filepath, dst_path)
 

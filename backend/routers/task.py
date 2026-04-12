@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from backend import schemas
-from backend.dependencies import depends_task_service
+from backend.dependencies import depends_allowed_directories, depends_task_service
 from backend.services.task_service import TaskService
 
 router = APIRouter(prefix="/api/v1", tags=["Tasks"])
@@ -34,8 +34,9 @@ def get_task(task_id: str, service: TaskService = Depends(depends_task_service))
 def create_task(
     task: schemas.TaskCreate,
     service: TaskService = Depends(depends_task_service),
+    allowed_directories: list[str] = Depends(depends_allowed_directories),
 ):
-    return service.create_task(task)
+    return service.create_task(task, allowed_directories=allowed_directories)
 
 
 @router.put(
@@ -47,8 +48,9 @@ def update_task(
     task_id: str,
     task: schemas.TaskUpdate,
     service: TaskService = Depends(depends_task_service),
+    allowed_directories: list[str] = Depends(depends_allowed_directories),
 ):
-    return service.update_task(task_id, task)
+    return service.update_task(task_id, task, allowed_directories=allowed_directories)
 
 
 @router.delete(

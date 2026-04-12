@@ -200,6 +200,7 @@ const autoGrow = (event: Event) => {
               <a
                 href="https://pypi.org/project/parse/"
                 target="_blank"
+                rel="noopener noreferrer"
                 class="text-blue-400 hover:underline"
               >{{ t('components.parsePreview.instructions.officialDocs') }}</a>
             </template>

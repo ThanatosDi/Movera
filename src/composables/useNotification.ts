@@ -1,10 +1,9 @@
 import type { NotificationOptions, ToastPosition, ToastType } from '@/schemas'
-import { type VNode, h } from 'vue'
 import { toast } from 'vue-sonner'
 
 /** Options forwarded to the underlying vue-sonner toast call. */
 interface ToastOptions {
-  description?: string | VNode
+  description?: string
   position?: ToastPosition
   duration?: number
 }
@@ -19,7 +18,7 @@ interface ToastOptions {
 function showToast(type: ToastType, message: string, description?: string, options?: NotificationOptions) {
   // 建立一個乾淨的 toastOptions 物件
   const toastOptions: ToastOptions = {
-    description: options?.html && description ? h('div', { innerHTML: description }) : description,
+    description,
     // 直接使用每則 toast 的 position 覆蓋顯示位置
     position: options?.position,
     duration: options?.duration || 3000,
