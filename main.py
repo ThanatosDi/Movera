@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import uvicorn
@@ -41,6 +42,6 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         log_level="info",
-        # reload=True,
-        # reload_dirs=["backend"],
+        reload=os.getenv("ENV") == "development",
+        reload_dirs=["backend"],
     )
