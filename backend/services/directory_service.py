@@ -76,7 +76,7 @@ class DirectoryService:
         result = []
         try:
             for entry in sorted(path.iterdir()):
-                if entry.is_dir() and not self._is_hidden_directory(entry.name):
+                if entry.is_dir() and not entry.is_symlink() and not self._is_hidden_directory(entry.name):
                     result.append({
                         "name": entry.name,
                         "path": str(entry),
@@ -89,7 +89,7 @@ class DirectoryService:
     def _has_subdirectories(self, path: Path) -> bool:
         try:
             for entry in path.iterdir():
-                if entry.is_dir() and not self._is_hidden_directory(entry.name):
+                if entry.is_dir() and not entry.is_symlink() and not self._is_hidden_directory(entry.name):
                     return True
         except PermissionError:
             pass
