@@ -197,3 +197,64 @@ class TestUpdateSettings:
 
         assert response.status_code == 200
         assert response.json() == {}
+
+
+class TestUpdateSettingsWebuiLock:
+    """測試 ALLOW_WEBUI_SETTING 鎖定機制"""
+
+    @patch("backend.routers.setting.get_allow_webui_setting", return_value=False)
+    def test_webui_locked_rejects_allowed_directories(
+        self, _mock_webui, client, mock_setting_service
+    ):
+        """測試 ALLOW_WEBUI_SETTING=false 時拒絕修改 allowed_directories"""
+        response = client.put(
+            "/api/v1/settings",
+            json={"allowed_directories": ["/new-dir"]},
+        )
+
+        assert response.status_code == 403
+        assert "鎖定" in response.json()["detail"] or "locked" in response.json()["detail"].lower()
+
+    @patch("backend.routers.setting.get_allow_webui_setting", return_value=False)
+    def test_webui_locked_rejects_allowed_source_directories(
+        self, _mock_webui, client, mock_setting_service
+    ):
+        """測試 ALLOW_WEBUI_SETTING=false 時拒絕修改 allowed_source_directories"""
+        response = client.put(
+            "/api/v1/settings",
+            json={"allowed_source_directories": ["/new-dir"]},
+        )
+
+        assert response.status_code == 403
+
+    @patch("backend.routers.setting.get_allow_webui_setting", return_value=False)
+    def test_webui_locked_allows_other_settings(
+        self, _mock_webui, client, mock_setting_service
+    ):
+        """測試 ALLOW_WEBUI_SETTING=false 時其他設定正常更新"""
+        mock_setting_service.update_settings.return_value = []
+        mock_setting_service.get_all_settings.return_value = {"timezone": "UTC"}
+
+        response = client.put(
+            "/api/v1/settings",
+            json={"timezone": "UTC"},
+        )
+
+        assert response.status_code == 200
+
+    @patch("backend.routers.setting.get_allow_webui_setting", return_value=True)
+    def test_webui_unlocked_allows_all(
+        self, _mock_webui, client, mock_setting_service
+    ):
+        """測試 ALLOW_WEBUI_SETTING=true 時正常更新所有設定"""
+        mock_setting_service.update_settings.return_value = []
+        mock_setting_service.get_all_settings.return_value = {
+            "allowed_directories": [{"path": "/new-dir", "source": "db"}],
+        }
+
+        response = client.put(
+            "/api/v1/settings",
+            json={"allowed_directories": ["/new-dir"]},
+        )
+
+        assert response.status_code == 200

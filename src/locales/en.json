@@ -241,6 +241,7 @@
         "gray": "Gray"
       }
     },
+    "lockedByEnv": "Locked by environment variable, cannot be removed",
     "allowedDirectoriesCard": {
       "absolutePathRequired": "Only absolute paths are accepted (e.g. /downloads or C:\\Downloads)",
       "add": "Add",

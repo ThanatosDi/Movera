@@ -243,6 +243,7 @@
         "gray": "灰色"
       }
     },
+    "lockedByEnv": "由環境變數鎖定，無法刪除",
     "allowedDirectoriesCard": {
       "absolutePathRequired": "僅接受絕對路徑（例如 /downloads 或 C:\\Downloads）",
       "add": "新增",

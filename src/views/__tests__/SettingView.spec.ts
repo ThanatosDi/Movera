@@ -11,7 +11,9 @@ import SettingView from '../SettingView.vue'
 const mockSettings = ref({
   timezone: 'Asia/Taipei',
   locale: 'zh-TW',
-  allowed_directories: [] as string[],
+  allowed_directories: [] as { path: string; source: 'env' | 'db' }[],
+  allowed_source_directories: [] as { path: string; source: 'env' | 'db' }[],
+  allow_webui_setting: true,
 })
 const mockIsSaving = ref(false)
 const mockFetchSettings = vi.fn()
@@ -96,6 +98,8 @@ describe('SettingView - allowed_directories', () => {
       timezone: 'Asia/Taipei',
       locale: 'zh-TW',
       allowed_directories: [],
+      allowed_source_directories: [],
+      allow_webui_setting: true,
     }
   })
 
@@ -141,11 +145,14 @@ describe('SettingView - allowed_directories', () => {
     await wrapper.find('[data-testid="add-directory-btn"]').trigger('click')
     await flushPromises()
 
-    expect(mockSettings.value.allowed_directories).toContain('/downloads')
+    expect(mockSettings.value.allowed_directories).toContainEqual({ path: '/downloads', source: 'db' })
   })
 
   it('應能刪除允許目錄路徑', async () => {
-    mockSettings.value.allowed_directories = ['/downloads', '/media']
+    mockSettings.value.allowed_directories = [
+      { path: '/downloads', source: 'db' },
+      { path: '/media', source: 'db' },
+    ]
 
     const wrapper = mountView()
     await flushPromises()
@@ -156,7 +163,7 @@ describe('SettingView - allowed_directories', () => {
     await removeButtons[0]!.trigger('click')
     await flushPromises()
 
-    expect(mockSettings.value.allowed_directories).not.toContain('/downloads')
-    expect(mockSettings.value.allowed_directories).toContain('/media')
+    expect(mockSettings.value.allowed_directories).not.toContainEqual({ path: '/downloads', source: 'db' })
+    expect(mockSettings.value.allowed_directories).toContainEqual({ path: '/media', source: 'db' })
   })
 })

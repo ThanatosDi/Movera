@@ -2,6 +2,11 @@ import json
 
 from backend import models, schemas
 from backend.repositories.setting import SettingRepository
+from backend.utils.env_config import (
+    get_allow_webui_setting,
+    get_env_allowed_directories,
+    get_env_allowed_source_directories,
+)
 from backend.utils.logger import logger
 from backend.utils.path_validator import validate_allowed_directories
 
@@ -20,12 +25,32 @@ class SettingService:
     # 需要特殊序列化/反序列化的 JSON 欄位
     _JSON_FIELDS = {"allowed_directories", "allowed_source_directories"}
 
+    @staticmethod
+    def _get_env_paths(key: str) -> list[str]:
+        """取得指定 setting key 對應的環境變數路徑。"""
+        if key == "allowed_directories":
+            return get_env_allowed_directories()
+        if key == "allowed_source_directories":
+            return get_env_allowed_source_directories()
+        return []
+
+    @staticmethod
+    def _merge_with_env(db_paths: list[str], env_paths: list[str]) -> list[dict]:
+        """將資料庫路徑與環境變數路徑合併為 {path, source} 結構，環境變數優先。"""
+        env_set = set(env_paths)
+        merged = [{"path": p, "source": "env"} for p in env_paths]
+        for p in db_paths:
+            if p not in env_set:
+                merged.append({"path": p, "source": "db"})
+        return merged
+
     def get_all_settings(self) -> dict:
         """Return every setting as a plain dict, deserialising JSON fields.
 
         Why: JSON-list settings (e.g. allowed_directories) are stored as strings
         in the database but the API must return them as native lists so the
-        frontend can consume them without extra parsing.
+        frontend can consume them without extra parsing. Directory fields are
+        merged with environment variables and returned as {path, source}[] format.
         """
         settings = self.repository.get_all()
         result: dict = {}
@@ -37,6 +62,18 @@ class SettingService:
                     result[setting.key] = []
             else:
                 result[setting.key] = setting.value
+
+        # 合併環境變數項目，轉為 {path, source} 結構
+        for key in self._JSON_FIELDS:
+            db_paths = result.get(key, [])
+            if not isinstance(db_paths, list):
+                db_paths = []
+            env_paths = self._get_env_paths(key)
+            result[key] = self._merge_with_env(db_paths, env_paths)
+
+        # 加入 allow_webui_setting 旗標
+        result["allow_webui_setting"] = get_allow_webui_setting()
+
         return result
 
     def get_setting_by_key(self, key: str) -> models.Setting | None:
@@ -99,13 +136,25 @@ class SettingService:
         except (json.JSONDecodeError, TypeError):
             return []
 
+    def _get_merged_directories(self, key: str) -> list[str]:
+        """合併資料庫與環境變數的目錄清單，回傳去重後的路徑陣列。"""
+        db_paths = self._get_json_list_setting(key)
+        env_paths = self._get_env_paths(key)
+        merged = list(env_paths)
+        env_set = set(env_paths)
+        for p in db_paths:
+            if p not in env_set:
+                merged.append(p)
+        return merged
+
     def get_allowed_source_directories(self) -> list[str]:
         """Return the list of allowed source directory paths, defaulting to ``[]``.
 
         Why: Webhook 傳入的檔案路徑必須在此白名單範圍內，
         防止攻擊者透過偽造 webhook 操作任意檔案。
+        合併環境變數 ALLOWED_SOURCE_DIRECTORIES 與資料庫設定。
         """
-        return self._get_json_list_setting("allowed_source_directories")
+        return self._get_merged_directories("allowed_source_directories")
 
     def get_allowed_directories(self) -> list[str]:
         """Return the list of allowed directory paths, defaulting to ``[]``.
@@ -113,8 +162,9 @@ class SettingService:
         Why: Multiple callers (DirectoryService, path validation) need the
         parsed list. Centralising the deserialisation and fallback logic here
         prevents each caller from repeating JSON-decode error handling.
+        合併環境變數 ALLOWED_DIRECTORIES 與資料庫設定。
         """
-        return self._get_json_list_setting("allowed_directories")
+        return self._get_merged_directories("allowed_directories")
 
     def set_allowed_directories(self, directories: list[str]) -> None:
         invalid = validate_allowed_directories(directories)

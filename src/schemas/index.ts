@@ -65,11 +65,17 @@ export interface NotificationOptions {
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
+export interface DirectoryEntry {
+  path: string;
+  source: 'env' | 'db';
+}
+
 export interface Settings {
   timezone: string;
   locale: string;
-  allowed_directories?: string[];
-  allowed_source_directories?: string[];
+  allowed_directories?: DirectoryEntry[];
+  allowed_source_directories?: DirectoryEntry[];
+  allow_webui_setting?: boolean;
 }
 
 export interface DirectoryItem {

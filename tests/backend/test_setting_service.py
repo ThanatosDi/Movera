@@ -3,6 +3,7 @@ SettingService 單元測試
 """
 
 import json
+from unittest.mock import patch
 
 import pytest
 
@@ -16,7 +17,10 @@ class TestSettingServiceGetAllSettings:
     def test_get_all_settings_empty(self, setting_service):
         """測試空資料庫取得所有設定"""
         settings = setting_service.get_all_settings()
-        assert settings == {}
+        # 即使資料庫為空，仍包含環境變數合併的目錄欄位與 allow_webui_setting
+        assert "allowed_directories" in settings
+        assert "allowed_source_directories" in settings
+        assert "allow_webui_setting" in settings
 
     def test_get_all_settings_with_settings(self, setting_service, db_session):
         """測試取得所有設定並轉為字典格式"""
@@ -166,7 +170,7 @@ class TestSettingServiceAllowedDirectories:
         assert result == []
 
     def test_get_all_settings_deserializes_allowed_directories(self, setting_service, db_session):
-        """測試 get_all_settings 回傳時 allowed_directories 已反序列化為 list"""
+        """測試 get_all_settings 回傳時 allowed_directories 為 {path, source} 結構"""
         setting1 = Setting(key="timezone", value="Asia/Taipei")
         setting2 = Setting(key="allowed_directories", value=json.dumps(["/downloads", "/media"]))
         db_session.add(setting1)
@@ -175,8 +179,10 @@ class TestSettingServiceAllowedDirectories:
 
         result = setting_service.get_all_settings()
         assert result["timezone"] == "Asia/Taipei"
-        assert result["allowed_directories"] == ["/downloads", "/media"]
-        assert isinstance(result["allowed_directories"], list)
+        dirs = result["allowed_directories"]
+        assert isinstance(dirs, list)
+        assert {"path": "/downloads", "source": "db"} in dirs
+        assert {"path": "/media", "source": "db"} in dirs
 
     def test_update_settings_with_allowed_directories(self, setting_service, db_session):
         """測試 update_settings 可同時處理字串欄位和 JSON 欄位"""
@@ -192,7 +198,9 @@ class TestSettingServiceAllowedDirectories:
 
         result = setting_service.get_all_settings()
         assert result["timezone"] == "UTC"
-        assert result["allowed_directories"] == ["/downloads", "/media"]
+        dirs = result["allowed_directories"]
+        assert {"path": "/downloads", "source": "db"} in dirs
+        assert {"path": "/media", "source": "db"} in dirs
 
     def test_update_settings_creates_allowed_directories(self, setting_service, db_session):
         """測試 update_settings 可建立不存在的 allowed_directories"""
@@ -226,14 +234,15 @@ class TestSettingServiceAllowedSourceDirectories:
         assert result == ["/downloads", "/media"]
 
     def test_get_all_settings_deserializes_allowed_source_directories(self, setting_service, db_session):
-        """測試 get_all_settings 回傳時 allowed_source_directories 已反序列化為 list"""
+        """測試 get_all_settings 回傳時 allowed_source_directories 為 {path, source} 結構"""
         setting = Setting(key="allowed_source_directories", value=json.dumps(["/downloads"]))
         db_session.add(setting)
         db_session.commit()
 
         result = setting_service.get_all_settings()
-        assert result["allowed_source_directories"] == ["/downloads"]
-        assert isinstance(result["allowed_source_directories"], list)
+        dirs = result["allowed_source_directories"]
+        assert isinstance(dirs, list)
+        assert {"path": "/downloads", "source": "db"} in dirs
 
     def test_update_settings_rejects_relative_allowed_source_directories(self, setting_service):
         """測試透過 update_settings 傳入相對路徑時拋出 ValueError"""
@@ -250,6 +259,102 @@ class TestSettingServiceAllowedSourceDirectories:
 
         result = setting_service.get_allowed_source_directories()
         assert result == []
+
+
+class TestSettingServiceEnvMerge:
+    """測試 SettingService 環境變數合併邏輯"""
+
+    @patch("backend.services.setting_service.get_env_allowed_directories", return_value=["/env-dir"])
+    @patch("backend.services.setting_service.get_env_allowed_source_directories", return_value=[])
+    @patch("backend.services.setting_service.get_allow_webui_setting", return_value=True)
+    def test_get_all_settings_merges_env_directories(
+        self, _webui, _env_src, _env_dir, setting_service, db_session
+    ):
+        """測試 get_all_settings 合併環境變數與資料庫項目"""
+        setting = Setting(key="allowed_directories", value=json.dumps(["/db-dir"]))
+        db_session.add(setting)
+        db_session.commit()
+
+        result = setting_service.get_all_settings()
+        dirs = result["allowed_directories"]
+        assert {"path": "/env-dir", "source": "env"} in dirs
+        assert {"path": "/db-dir", "source": "db"} in dirs
+
+    @patch("backend.services.setting_service.get_env_allowed_directories", return_value=["/downloads"])
+    @patch("backend.services.setting_service.get_env_allowed_source_directories", return_value=[])
+    @patch("backend.services.setting_service.get_allow_webui_setting", return_value=True)
+    def test_get_all_settings_deduplicates_env_priority(
+        self, _webui, _env_src, _env_dir, setting_service, db_session
+    ):
+        """測試環境變數與資料庫重複時以環境變數優先"""
+        setting = Setting(key="allowed_directories", value=json.dumps(["/downloads"]))
+        db_session.add(setting)
+        db_session.commit()
+
+        result = setting_service.get_all_settings()
+        dirs = result["allowed_directories"]
+        assert len(dirs) == 1
+        assert dirs[0] == {"path": "/downloads", "source": "env"}
+
+    @patch("backend.services.setting_service.get_env_allowed_directories", return_value=[])
+    @patch("backend.services.setting_service.get_env_allowed_source_directories", return_value=[])
+    @patch("backend.services.setting_service.get_allow_webui_setting", return_value=False)
+    def test_get_all_settings_includes_allow_webui_setting(
+        self, _webui, _env_src, _env_dir, setting_service
+    ):
+        """測試 get_all_settings 回傳 allow_webui_setting 布林值"""
+        result = setting_service.get_all_settings()
+        assert result["allow_webui_setting"] is False
+
+    @patch("backend.services.setting_service.get_env_allowed_directories", return_value=["/env-dir"])
+    @patch("backend.services.setting_service.get_env_allowed_source_directories", return_value=[])
+    @patch("backend.services.setting_service.get_allow_webui_setting", return_value=True)
+    def test_update_settings_preserves_env_items(
+        self, _webui, _env_src, _env_dir, setting_service, db_session
+    ):
+        """測試 update_settings 中環境變數項目不可被刪除"""
+        setting = Setting(key="allowed_directories", value=json.dumps(["/env-dir", "/db-dir"]))
+        db_session.add(setting)
+        db_session.commit()
+
+        # 更新時僅傳入 /new-dir（不含 /env-dir）
+        setting_service.update_settings({
+            "allowed_directories": ["/new-dir"],
+        })
+
+        # 資料庫中應只有 /new-dir（env-dir 由環境變數提供，不在 DB）
+        db_dirs = setting_service._get_json_list_setting("allowed_directories")
+        assert "/new-dir" in db_dirs
+
+    @patch("backend.services.setting_service.get_env_allowed_directories", return_value=["/env-dir"])
+    @patch("backend.services.setting_service.get_env_allowed_source_directories", return_value=[])
+    @patch("backend.services.setting_service.get_allow_webui_setting", return_value=True)
+    def test_get_allowed_directories_merges_env(
+        self, _webui, _env_src, _env_dir, setting_service, db_session
+    ):
+        """測試 get_allowed_directories 合併環境變數"""
+        setting = Setting(key="allowed_directories", value=json.dumps(["/db-dir"]))
+        db_session.add(setting)
+        db_session.commit()
+
+        result = setting_service.get_allowed_directories()
+        assert "/env-dir" in result
+        assert "/db-dir" in result
+
+    @patch("backend.services.setting_service.get_env_allowed_directories", return_value=[])
+    @patch("backend.services.setting_service.get_env_allowed_source_directories", return_value=["/env-src"])
+    @patch("backend.services.setting_service.get_allow_webui_setting", return_value=True)
+    def test_get_allowed_source_directories_merges_env(
+        self, _webui, _env_src, _env_dir, setting_service, db_session
+    ):
+        """測試 get_allowed_source_directories 合併環境變數"""
+        setting = Setting(key="allowed_source_directories", value=json.dumps(["/db-src"]))
+        db_session.add(setting)
+        db_session.commit()
+
+        result = setting_service.get_allowed_source_directories()
+        assert "/env-src" in result
+        assert "/db-src" in result
 
 
 class TestSettingServiceAllowedDirectoriesValidation:

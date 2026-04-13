@@ -24,7 +24,7 @@ import { usePresetRuleStore } from '@/stores/presetRuleStore'
 import { useSettingStore } from '@/stores/settingStore'
 import { useTagStore } from '@/stores/tagStore'
 import { useTaskStore } from '@/stores/taskStore'
-import { AlertTriangle, Check, ChevronsUpDown, FileCode, FolderCog, Info, Pencil, Plus, Save, ShieldCheck, Tag, X } from 'lucide-vue-next'
+import { AlertTriangle, Check, ChevronsUpDown, FileCode, FolderCog, Info, Lock, Pencil, Plus, Save, ShieldCheck, Tag, X } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -181,7 +181,17 @@ async function deleteTag(tagId: string) {
 const UpdateSettings = async () => {
   isSaving.value = true
   try {
-    await settingStore.updateSettings(settings.value)
+    // 送出時僅傳送 db 來源的路徑（純字串陣列），環境變數項目由後端自動合併
+    const payload = {
+      ...settings.value,
+      allowed_directories: (settings.value.allowed_directories ?? [])
+        .filter(d => d.source === 'db')
+        .map(d => d.path),
+      allowed_source_directories: (settings.value.allowed_source_directories ?? [])
+        .filter(d => d.source === 'db')
+        .map(d => d.path),
+    }
+    await settingStore.updateSettings(payload as any)
     useNotification.showSuccess(t('notifications.settingsSaveSuccessTitle'), t('notifications.settingsSaveSuccessDesc'))
   } catch (e: unknown) {
     console.error('Failed to update settings:', e)
@@ -228,8 +238,8 @@ function addDirectory() {
   if (!settings.value.allowed_directories) {
     settings.value.allowed_directories = []
   }
-  if (!settings.value.allowed_directories.includes(path)) {
-    settings.value.allowed_directories.push(path)
+  if (!settings.value.allowed_directories.some(d => d.path === path)) {
+    settings.value.allowed_directories.push({ path, source: 'db' })
   }
   newDirectoryPath.value = ''
 }
@@ -257,8 +267,8 @@ function addSourceDirectory() {
   if (!settings.value.allowed_source_directories) {
     settings.value.allowed_source_directories = []
   }
-  if (!settings.value.allowed_source_directories.includes(path)) {
-    settings.value.allowed_source_directories.push(path)
+  if (!settings.value.allowed_source_directories.some(d => d.path === path)) {
+    settings.value.allowed_source_directories.push({ path, source: 'db' })
   }
   newSourceDirectoryPath.value = ''
 }
@@ -598,8 +608,8 @@ function removeSourceDirectory(index: number) {
         <CardDescription>{{ t('settingView.allowedDirectoriesCard.description') }}</CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <!-- 新增目錄 -->
-        <div class="space-y-1">
+        <!-- 新增目錄（ALLOW_WEBUI_SETTING=false 時隱藏） -->
+        <div v-if="settings.allow_webui_setting !== false" class="space-y-1">
           <div class="flex gap-2">
             <Input
               data-testid="add-directory-input"
@@ -629,11 +639,13 @@ function removeSourceDirectory(index: number) {
         >
           <div
             v-for="(dir, index) in settings.allowed_directories"
-            :key="dir"
+            :key="dir.path"
             class="flex items-center gap-2 p-2 border rounded-md border-foreground/20"
           >
-            <span class="flex-1 font-mono text-sm truncate">{{ dir }}</span>
+            <Lock v-if="dir.source === 'env'" class="size-4 text-amber-500 shrink-0" :title="t('settingView.lockedByEnv')" />
+            <span class="flex-1 font-mono text-sm truncate">{{ dir.path }}</span>
             <Button
+              v-if="dir.source === 'db' && settings.allow_webui_setting !== false"
               data-testid="remove-directory-btn"
               variant="ghost"
               size="sm"
@@ -665,8 +677,8 @@ function removeSourceDirectory(index: number) {
         <CardDescription>{{ t('settingView.allowedSourceDirectoriesCard.description') }}</CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <!-- 新增來源目錄 -->
-        <div class="space-y-1">
+        <!-- 新增來源目錄（ALLOW_WEBUI_SETTING=false 時隱藏） -->
+        <div v-if="settings.allow_webui_setting !== false" class="space-y-1">
           <div class="flex gap-2">
             <Input
               data-testid="add-source-directory-input"
@@ -696,11 +708,13 @@ function removeSourceDirectory(index: number) {
         >
           <div
             v-for="(dir, index) in settings.allowed_source_directories"
-            :key="dir"
+            :key="dir.path"
             class="flex items-center gap-2 p-2 border rounded-md border-foreground/20"
           >
-            <span class="flex-1 font-mono text-sm truncate">{{ dir }}</span>
+            <Lock v-if="dir.source === 'env'" class="size-4 text-amber-500 shrink-0" :title="t('settingView.lockedByEnv')" />
+            <span class="flex-1 font-mono text-sm truncate">{{ dir.path }}</span>
             <Button
+              v-if="dir.source === 'db' && settings.allow_webui_setting !== false"
               data-testid="remove-source-directory-btn"
               variant="ghost"
               size="sm"
