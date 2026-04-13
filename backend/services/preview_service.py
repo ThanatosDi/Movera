@@ -1,7 +1,8 @@
 import datetime
-import re
 
 from parse import parse
+
+from backend.utils.safe_regex import safe_compile, safe_search, safe_sub
 
 
 class ParsePreviewService:
@@ -87,7 +88,7 @@ class RegexPreviewService:
     """
 
     @staticmethod
-    def _match(pattern: str, text: str) -> re.Match | None:
+    def _match(pattern: str, text: str) -> dict | None:
         """根據指定的正則表達式模式匹配文字，並回傳匹配結果。
 
         參數:
@@ -95,12 +96,12 @@ class RegexPreviewService:
             text (str): 要被匹配的文字。
 
         回傳:
-            re.Match | None: 如果匹配成功，回傳匹配物件；否則回傳 None。
+            dict | None: 包含 named_group 和 numbered_group 的字典。
         """
-        pattern = re.compile(pattern, re.IGNORECASE)
-        match = re.search(pattern, text)
+        compiled = safe_compile(pattern)
+        match = safe_search(compiled, text)
         named_group = match.groupdict() if match else {}
-        numbered_group = [_match for _match in match.groups()]
+        numbered_group = list(match.groups()) if match else []
         return {"named_group": named_group, "numbered_group": numbered_group}
 
     @staticmethod
@@ -112,15 +113,14 @@ class RegexPreviewService:
         """
         使用指定的正則表達式模式和替換字串產生新的字串。
         參數:
-            pattern (str): 用於匹配的正則表達式模式字串。
+            src_pattern (str): 用於匹配的正則表達式模式字串。
             text (str): 要被替換的文字。
             dst_pattern (str): 用於產生新字串的替換字串。
         回傳:
             str: 使用替換字串產生的新字串。
         """
-        src_pattern = re.compile(src_pattern, re.IGNORECASE)
-        format = re.sub(src_pattern, dst_pattern, text)
-        return format
+        compiled = safe_compile(src_pattern)
+        return safe_sub(compiled, dst_pattern, text)
 
     @staticmethod
     def preview(
