@@ -3,6 +3,7 @@ from typing import Literal
 
 import parse
 
+from backend.utils.safe_format import safe_format
 from backend.utils.safe_regex import safe_compile, safe_sub
 
 
@@ -31,7 +32,7 @@ class ParseRenameRule:
         filepath = _ensure_path(self.filepath)
         filename = filepath.name
         template = parse.parse(self.src, filename)
-        renamed = self.dst.format(**template.named)
+        renamed = safe_format(self.dst, template.named)
         dst_path = filepath.parent.joinpath(renamed)
         return Path.rename(filepath, dst_path)
 

@@ -2,6 +2,7 @@ import datetime
 
 from parse import parse
 
+from backend.utils.safe_format import safe_format
 from backend.utils.safe_regex import safe_compile, safe_search, safe_sub
 
 
@@ -46,7 +47,7 @@ class ParsePreviewService:
         回傳:
             str: 使用分組資料格式化後的字串。
         """
-        return format_str.format(**groups)
+        return safe_format(format_str, groups)
 
     @staticmethod
     def preview(
