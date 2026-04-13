@@ -18,6 +18,18 @@ export interface TagCreate {
 
 export type TagUpdate = TagCreate;
 
+export interface PresetRule {
+  id: string;
+  name: string;
+  rule_type: 'parse' | 'regex';
+  field_type: 'src' | 'dst';
+  pattern: string;
+  created_at: string;
+}
+
+export type PresetRuleCreate = Omit<PresetRule, 'id' | 'created_at'>;
+export type PresetRuleUpdate = PresetRuleCreate;
+
 export interface Task {
   id: string;
   name: string;
@@ -53,10 +65,17 @@ export interface NotificationOptions {
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
+export interface DirectoryEntry {
+  path: string;
+  source: 'env' | 'db';
+}
+
 export interface Settings {
   timezone: string;
   locale: string;
-  allowed_directories?: string[];
+  allowed_directories?: DirectoryEntry[];
+  allowed_source_directories?: DirectoryEntry[];
+  allow_webui_setting?: boolean;
 }
 
 export interface DirectoryItem {

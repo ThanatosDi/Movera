@@ -10,13 +10,16 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend.database import Base
 from backend.models.log import Log
 from backend.models.setting import Setting
+from backend.models.preset_rule import PresetRule
 from backend.models.tag import Tag
 from backend.models.task import Task
 from backend.repositories.log import LogRepository
+from backend.repositories.preset_rule import PresetRuleRepository
 from backend.repositories.setting import SettingRepository
 from backend.repositories.tag import TagRepository
 from backend.repositories.task import TaskRepository
 from backend.services.log_service import LogService
+from backend.services.preset_rule_service import PresetRuleService
 from backend.services.setting_service import SettingService
 from backend.services.tag_service import TagService
 from backend.services.task_service import TaskService
@@ -75,6 +78,12 @@ def log_repository(db_session) -> LogRepository:
 
 
 @pytest.fixture
+def preset_rule_repository(db_session) -> PresetRuleRepository:
+    """建立 PresetRuleRepository 實例"""
+    return PresetRuleRepository(db=db_session)
+
+
+@pytest.fixture
 def tag_repository(db_session) -> TagRepository:
     """建立 TagRepository 實例"""
     return TagRepository(db=db_session)
@@ -99,6 +108,12 @@ def setting_service(setting_repository) -> SettingService:
 def log_service(log_repository) -> LogService:
     """建立 LogService 實例"""
     return LogService(repository=log_repository)
+
+
+@pytest.fixture
+def preset_rule_service(preset_rule_repository) -> PresetRuleService:
+    """建立 PresetRuleService 實例"""
+    return PresetRuleService(repository=preset_rule_repository)
 
 
 @pytest.fixture
@@ -153,6 +168,28 @@ def sample_tag_data_2() -> dict:
     return {
         "name": "電影",
         "color": "red",
+    }
+
+
+@pytest.fixture
+def sample_preset_rule_data() -> dict:
+    """範例常用規則資料"""
+    return {
+        "name": "動畫季番命名",
+        "rule_type": "parse",
+        "field_type": "src",
+        "pattern": "{title} - {episode}.mp4",
+    }
+
+
+@pytest.fixture
+def sample_preset_rule_data_2() -> dict:
+    """第二個範例常用規則資料"""
+    return {
+        "name": "電影字幕重命名",
+        "rule_type": "regex",
+        "field_type": "dst",
+        "pattern": r"\1 - S01E\2.mp4",
     }
 
 

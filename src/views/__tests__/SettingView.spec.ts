@@ -11,7 +11,9 @@ import SettingView from '../SettingView.vue'
 const mockSettings = ref({
   timezone: 'Asia/Taipei',
   locale: 'zh-TW',
-  allowed_directories: [] as string[],
+  allowed_directories: [] as { path: string; source: 'env' | 'db' }[],
+  allowed_source_directories: [] as { path: string; source: 'env' | 'db' }[],
+  allow_webui_setting: true,
 })
 const mockIsSaving = ref(false)
 const mockFetchSettings = vi.fn()
@@ -43,6 +45,19 @@ vi.mock('@/stores/taskStore', () => ({
   useTaskStore: () => ({
     tasks: ref([]),
     fetchTasks: vi.fn(),
+  }),
+}))
+
+// Mock presetRuleStore
+vi.mock('@/stores/presetRuleStore', () => ({
+  usePresetRuleStore: () => ({
+    presetRules: ref([]),
+    isLoading: ref(false),
+    error: ref(null),
+    fetchPresetRules: vi.fn(),
+    createPresetRule: vi.fn(),
+    updatePresetRule: vi.fn(),
+    deletePresetRule: vi.fn(),
   }),
 }))
 
@@ -83,6 +98,8 @@ describe('SettingView - allowed_directories', () => {
       timezone: 'Asia/Taipei',
       locale: 'zh-TW',
       allowed_directories: [],
+      allowed_source_directories: [],
+      allow_webui_setting: true,
     }
   })
 
@@ -118,7 +135,8 @@ describe('SettingView - allowed_directories', () => {
     expect(wrapper.find('[data-testid="allowed-directories-section"]').exists()).toBe(true)
   })
 
-  it('應能新增允許目錄路徑', async () => {
+  it('應能新增允許目錄路徑並立即保存', async () => {
+    mockUpdateSettings.mockResolvedValue(undefined)
     const wrapper = mountView()
     await flushPromises()
 
@@ -128,11 +146,16 @@ describe('SettingView - allowed_directories', () => {
     await wrapper.find('[data-testid="add-directory-btn"]').trigger('click')
     await flushPromises()
 
-    expect(mockSettings.value.allowed_directories).toContain('/downloads')
+    expect(mockSettings.value.allowed_directories).toContainEqual({ path: '/downloads', source: 'db' })
+    expect(mockUpdateSettings).toHaveBeenCalled()
   })
 
-  it('應能刪除允許目錄路徑', async () => {
-    mockSettings.value.allowed_directories = ['/downloads', '/media']
+  it('應能刪除允許目錄路徑並立即保存', async () => {
+    mockUpdateSettings.mockResolvedValue(undefined)
+    mockSettings.value.allowed_directories = [
+      { path: '/downloads', source: 'db' },
+      { path: '/media', source: 'db' },
+    ]
 
     const wrapper = mountView()
     await flushPromises()
@@ -143,7 +166,8 @@ describe('SettingView - allowed_directories', () => {
     await removeButtons[0]!.trigger('click')
     await flushPromises()
 
-    expect(mockSettings.value.allowed_directories).not.toContain('/downloads')
-    expect(mockSettings.value.allowed_directories).toContain('/media')
+    expect(mockSettings.value.allowed_directories).not.toContainEqual({ path: '/downloads', source: 'db' })
+    expect(mockSettings.value.allowed_directories).toContainEqual({ path: '/media', source: 'db' })
+    expect(mockUpdateSettings).toHaveBeenCalled()
   })
 })

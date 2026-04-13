@@ -1,10 +1,17 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
 from backend.services.setting_service import SettingService
+from backend.utils.env_config import get_allow_webui_setting
 
 from .. import schemas
 from ..dependencies import depends_setting_service
+
+_LOCKED_DIRECTORY_KEYS = {"allowed_directories", "allowed_source_directories"}
+
+# 允許透過 PUT /api/v1/settings 修改的 key 白名單。
+# 新增設定項時需同步更新此清單。
+_ALLOWED_SETTING_KEYS = {"timezone", "locale", "allowed_directories", "allowed_source_directories"}
 
 router = APIRouter(prefix="/api/v1", tags=["Settings"])
 
@@ -78,6 +85,17 @@ def update_settings(
     settings: dict,
     service: SettingService = Depends(depends_setting_service),
 ):
+    # 過濾掉不在白名單內的 key
+    settings = {k: v for k, v in settings.items() if k in _ALLOWED_SETTING_KEYS}
+
+    # ALLOW_WEBUI_SETTING=false 時拒絕修改目錄設定
+    if not get_allow_webui_setting():
+        if _LOCKED_DIRECTORY_KEYS & settings.keys():
+            raise HTTPException(
+                status_code=403,
+                detail="目錄設定已被管理者鎖定，無法透過 Web UI 修改",
+            )
+
     try:
         service.update_settings(settings)
     except ValueError as e:

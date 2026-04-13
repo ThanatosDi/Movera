@@ -5,11 +5,13 @@ from sqlalchemy.orm import Session
 
 from backend.database import SessionLocal
 from backend.repositories.log import LogRepository
+from backend.repositories.preset_rule import PresetRuleRepository
 from backend.repositories.setting import SettingRepository
 from backend.repositories.tag import TagRepository
 from backend.repositories.task import TaskRepository
 from backend.services.log_service import LogService
 from backend.services.directory_service import DirectoryService
+from backend.services.preset_rule_service import PresetRuleService
 from backend.services.preview_service import ParsePreviewService, RegexPreviewService
 from backend.services.setting_service import SettingService
 from backend.services.tag_service import TagService
@@ -71,6 +73,20 @@ def depends_parse_preview_service() -> ParsePreviewService:
 def depends_regex_preview_service() -> RegexPreviewService:
     """Dependency to get a RegexPreviewService instance."""
     return RegexPreviewService()
+
+
+def depends_preset_rule_repository(
+    db: Session = Depends(get_db),
+) -> PresetRuleRepository:
+    """Dependency to get a PresetRuleRepository instance."""
+    return PresetRuleRepository(db=db)
+
+
+def depends_preset_rule_service(
+    repository: PresetRuleRepository = Depends(depends_preset_rule_repository),
+) -> PresetRuleService:
+    """Dependency to get a PresetRuleService instance."""
+    return PresetRuleService(repository=repository)
 
 
 def depends_tag_repository(

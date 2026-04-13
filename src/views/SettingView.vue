@@ -20,10 +20,11 @@ import { useNotification } from '@/composables/useNotification'
 import { ApiError } from '@/schemas/errors'
 import { VariableEnum } from '@/enums/VariableEnum'
 import { cn } from '@/lib/utils'
+import { usePresetRuleStore } from '@/stores/presetRuleStore'
 import { useSettingStore } from '@/stores/settingStore'
 import { useTagStore } from '@/stores/tagStore'
 import { useTaskStore } from '@/stores/taskStore'
-import { Check, ChevronsUpDown, FolderCog, Info, Plus, Save, Tag, X } from 'lucide-vue-next'
+import { AlertTriangle, Check, ChevronsUpDown, FileCode, FolderCog, Info, Lock, Pencil, Plus, Save, ShieldCheck, Tag, X } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -40,6 +41,84 @@ const tagStore = useTagStore()
 const { tags } = storeToRefs(tagStore)
 
 const taskStore = useTaskStore()
+
+const presetRuleStore = usePresetRuleStore()
+const { presetRules } = storeToRefs(presetRuleStore)
+
+const RULE_TYPES = ['parse', 'regex'] as const
+const FIELD_TYPES = ['src', 'dst'] as const
+const newRuleName = ref('')
+const newRuleType = ref<string>('parse')
+const newFieldType = ref<string>('src')
+const newRulePattern = ref('')
+
+presetRuleStore.fetchPresetRules()
+
+async function addPresetRule() {
+  const name = newRuleName.value.trim()
+  const pattern = newRulePattern.value.trim()
+  if (!name || !pattern) return
+  try {
+    await presetRuleStore.createPresetRule({
+      name,
+      rule_type: newRuleType.value as 'parse' | 'regex',
+      field_type: newFieldType.value as 'src' | 'dst',
+      pattern,
+    })
+    useNotification.showSuccess(t('settingView.presetRuleCard.title'), t('settingView.presetRuleCard.createSuccess', { name }))
+    newRuleName.value = ''
+    newRulePattern.value = ''
+  } catch (e) {
+    const message = e instanceof Error ? e.message : ''
+    useNotification.showError(t('settingView.presetRuleCard.createError', { name }), message)
+  }
+}
+
+const editingRuleId = ref<string | null>(null)
+const editRuleName = ref('')
+const editRuleType = ref<string>('parse')
+const editFieldType = ref<string>('src')
+const editRulePattern = ref('')
+
+function startEditRule(rule: { id: string; name: string; rule_type: string; field_type: string; pattern: string }) {
+  editingRuleId.value = rule.id
+  editRuleName.value = rule.name
+  editRuleType.value = rule.rule_type
+  editFieldType.value = rule.field_type
+  editRulePattern.value = rule.pattern
+}
+
+async function saveEditRule() {
+  if (!editingRuleId.value || !editRuleName.value.trim() || !editRulePattern.value.trim()) return
+  const name = editRuleName.value.trim()
+  try {
+    await presetRuleStore.updatePresetRule(editingRuleId.value, {
+      name,
+      rule_type: editRuleType.value as 'parse' | 'regex',
+      field_type: editFieldType.value as 'src' | 'dst',
+      pattern: editRulePattern.value.trim(),
+    })
+    useNotification.showSuccess(t('settingView.presetRuleCard.title'), t('settingView.presetRuleCard.updateSuccess', { name }))
+    editingRuleId.value = null
+  } catch (e) {
+    const message = e instanceof Error ? e.message : ''
+    useNotification.showError(t('settingView.presetRuleCard.updateError'), message)
+  }
+}
+
+function cancelEditRule() {
+  editingRuleId.value = null
+}
+
+async function deletePresetRule(id: string) {
+  try {
+    await presetRuleStore.deletePresetRule(id)
+    useNotification.showSuccess(t('settingView.presetRuleCard.title'), t('settingView.presetRuleCard.deleteSuccess'))
+  } catch (e) {
+    const message = e instanceof Error ? e.message : ''
+    useNotification.showError(t('settingView.presetRuleCard.deleteError'), message)
+  }
+}
 
 const ALLOWED_COLORS = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'gray'] as const
 const newTagName = ref('')
@@ -102,7 +181,17 @@ async function deleteTag(tagId: string) {
 const UpdateSettings = async () => {
   isSaving.value = true
   try {
-    await settingStore.updateSettings(settings.value)
+    // 送出時僅傳送 db 來源的路徑（純字串陣列），環境變數項目由後端自動合併
+    const payload = {
+      ...settings.value,
+      allowed_directories: (settings.value.allowed_directories ?? [])
+        .filter(d => d.source === 'db')
+        .map(d => d.path),
+      allowed_source_directories: (settings.value.allowed_source_directories ?? [])
+        .filter(d => d.source === 'db')
+        .map(d => d.path),
+    }
+    await settingStore.updateSettings(payload as any)
     useNotification.showSuccess(t('notifications.settingsSaveSuccessTitle'), t('notifications.settingsSaveSuccessDesc'))
   } catch (e: unknown) {
     console.error('Failed to update settings:', e)
@@ -136,7 +225,7 @@ function isAbsolutePath(path: string): boolean {
   return /^\//.test(path) || /^[A-Za-z]:[/\\]/.test(path) || /^\\\\/.test(path)
 }
 
-function addDirectory() {
+async function addDirectory() {
   const path = newDirectoryPath.value.trim()
   if (!path) return
 
@@ -149,15 +238,62 @@ function addDirectory() {
   if (!settings.value.allowed_directories) {
     settings.value.allowed_directories = []
   }
-  if (!settings.value.allowed_directories.includes(path)) {
-    settings.value.allowed_directories.push(path)
-  }
+  if (settings.value.allowed_directories.some(d => d.path === path)) return
+
+  settings.value.allowed_directories.push({ path, source: 'db' })
   newDirectoryPath.value = ''
+  try {
+    await UpdateSettings()
+  } catch {
+    settings.value.allowed_directories = settings.value.allowed_directories.filter(d => d.path !== path)
+  }
 }
 
-function removeDirectory(index: number) {
-  if (settings.value.allowed_directories) {
-    settings.value.allowed_directories.splice(index, 1)
+async function removeDirectory(index: number) {
+  if (!settings.value.allowed_directories) return
+  const removed = settings.value.allowed_directories.splice(index, 1)
+  try {
+    await UpdateSettings()
+  } catch {
+    settings.value.allowed_directories.splice(index, 0, ...removed)
+  }
+}
+
+// Allowed source directories management
+const newSourceDirectoryPath = ref('')
+const sourceDirectoryPathError = ref('')
+
+async function addSourceDirectory() {
+  const path = newSourceDirectoryPath.value.trim()
+  if (!path) return
+
+  if (!isAbsolutePath(path)) {
+    sourceDirectoryPathError.value = t('settingView.allowedSourceDirectoriesCard.absolutePathRequired')
+    return
+  }
+
+  sourceDirectoryPathError.value = ''
+  if (!settings.value.allowed_source_directories) {
+    settings.value.allowed_source_directories = []
+  }
+  if (settings.value.allowed_source_directories.some(d => d.path === path)) return
+
+  settings.value.allowed_source_directories.push({ path, source: 'db' })
+  newSourceDirectoryPath.value = ''
+  try {
+    await UpdateSettings()
+  } catch {
+    settings.value.allowed_source_directories = settings.value.allowed_source_directories.filter(d => d.path !== path)
+  }
+}
+
+async function removeSourceDirectory(index: number) {
+  if (!settings.value.allowed_source_directories) return
+  const removed = settings.value.allowed_source_directories.splice(index, 1)
+  try {
+    await UpdateSettings()
+  } catch {
+    settings.value.allowed_source_directories.splice(index, 0, ...removed)
   }
 }
 </script>
@@ -332,6 +468,154 @@ function removeDirectory(index: number) {
       </CardContent>
     </Card>
 
+    <!-- 常用規則管理卡片 -->
+    <Card class="border border-border" data-testid="preset-rule-section">
+      <CardHeader>
+        <CardTitle class="flex items-center gap-2">
+          <FileCode class="size-5" />
+          {{ t('settingView.presetRuleCard.title') }}
+        </CardTitle>
+        <CardDescription>{{ t('settingView.presetRuleCard.description') }}</CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <!-- 新增常用規則 -->
+        <div class="space-y-2">
+          <div class="flex gap-2 items-end">
+            <div class="flex-1">
+              <Input
+                v-model="newRuleName"
+                :placeholder="t('settingView.presetRuleCard.namePlaceholder')"
+                class="border-foreground"
+                @keydown.enter.prevent="addPresetRule"
+              />
+            </div>
+            <div class="flex gap-2 items-center">
+              <select
+                v-model="newRuleType"
+                class="h-9 px-2 rounded-md border border-foreground bg-background text-foreground text-sm"
+              >
+                <option v-for="rt in RULE_TYPES" :key="rt" :value="rt">
+                  {{ t(`settingView.presetRuleCard.ruleTypes.${rt}`) }}
+                </option>
+              </select>
+              <select
+                v-model="newFieldType"
+                class="h-9 px-2 rounded-md border border-foreground bg-background text-foreground text-sm"
+              >
+                <option v-for="ft in FIELD_TYPES" :key="ft" :value="ft">
+                  {{ t(`settingView.presetRuleCard.fieldTypes.${ft}`) }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <Input
+              v-model="newRulePattern"
+              :placeholder="t('settingView.presetRuleCard.patternPlaceholder')"
+              class="flex-1 border-foreground font-mono text-sm"
+              @keydown.enter.prevent="addPresetRule"
+            />
+            <Button
+              variant="outline"
+              class="border-foreground shrink-0"
+              @click="addPresetRule"
+            >
+              <Plus class="size-4 mr-1" />
+              {{ t('settingView.presetRuleCard.add') }}
+            </Button>
+          </div>
+        </div>
+
+        <!-- 常用規則列表 -->
+        <div v-if="presetRules.length > 0" class="space-y-2">
+          <div
+            v-for="rule in presetRules"
+            :key="rule.id"
+            class="p-2 border rounded-md border-foreground/20"
+          >
+            <!-- 編輯模式 -->
+            <template v-if="editingRuleId === rule.id">
+              <div class="space-y-2">
+                <div class="flex gap-2 items-center">
+                  <Input
+                    v-model="editRuleName"
+                    class="flex-1 h-8 border-foreground"
+                    @keydown.enter.prevent="saveEditRule"
+                    @keydown.escape="cancelEditRule"
+                  />
+                  <select
+                    v-model="editRuleType"
+                    class="h-8 px-2 rounded-md border border-foreground bg-background text-foreground text-sm"
+                  >
+                    <option v-for="rt in RULE_TYPES" :key="rt" :value="rt">
+                      {{ t(`settingView.presetRuleCard.ruleTypes.${rt}`) }}
+                    </option>
+                  </select>
+                  <select
+                    v-model="editFieldType"
+                    class="h-8 px-2 rounded-md border border-foreground bg-background text-foreground text-sm"
+                  >
+                    <option v-for="ft in FIELD_TYPES" :key="ft" :value="ft">
+                      {{ t(`settingView.presetRuleCard.fieldTypes.${ft}`) }}
+                    </option>
+                  </select>
+                </div>
+                <div class="flex gap-2 items-center">
+                  <Input
+                    v-model="editRulePattern"
+                    class="flex-1 h-8 border-foreground font-mono text-sm"
+                    @keydown.enter.prevent="saveEditRule"
+                    @keydown.escape="cancelEditRule"
+                  />
+                  <Button variant="ghost" size="sm" @click="saveEditRule">
+                    <Check class="size-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" @click="cancelEditRule">
+                    <X class="size-4" />
+                  </Button>
+                </div>
+              </div>
+            </template>
+
+            <!-- 檢視模式 -->
+            <template v-else>
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-sm truncate max-w-40">{{ rule.name }}</span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                  {{ rule.rule_type }}
+                </span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                  {{ rule.field_type }}
+                </span>
+                <span class="flex-1 font-mono text-xs text-muted-foreground truncate">{{ rule.pattern }}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  class="shrink-0"
+                  @click="startEditRule(rule)"
+                >
+                  <Pencil class="size-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  class="text-red-500 hover:text-red-700 shrink-0"
+                  @click="deletePresetRule(rule.id)"
+                >
+                  <X class="size-4" />
+                </Button>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- 空狀態 -->
+        <div v-else class="text-sm text-muted-foreground p-4 text-center">
+          {{ t('settingView.presetRuleCard.empty') }}
+        </div>
+      </CardContent>
+    </Card>
+
     <!-- 允許目錄設定卡片 -->
     <Card class="border border-border" data-testid="allowed-directories-section">
       <CardHeader>
@@ -342,8 +626,8 @@ function removeDirectory(index: number) {
         <CardDescription>{{ t('settingView.allowedDirectoriesCard.description') }}</CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <!-- 新增目錄 -->
-        <div class="space-y-1">
+        <!-- 新增目錄（ALLOW_WEBUI_SETTING=false 時隱藏） -->
+        <div v-if="settings.allow_webui_setting !== false" class="space-y-1">
           <div class="flex gap-2">
             <Input
               data-testid="add-directory-input"
@@ -373,11 +657,13 @@ function removeDirectory(index: number) {
         >
           <div
             v-for="(dir, index) in settings.allowed_directories"
-            :key="dir"
+            :key="dir.path"
             class="flex items-center gap-2 p-2 border rounded-md border-foreground/20"
           >
-            <span class="flex-1 font-mono text-sm truncate">{{ dir }}</span>
+            <Lock v-if="dir.source === 'env'" class="size-4 text-amber-500 shrink-0" :title="t('settingView.lockedByEnv')" />
+            <span class="flex-1 font-mono text-sm truncate">{{ dir.path }}</span>
             <Button
+              v-if="dir.source === 'db' && settings.allow_webui_setting !== false"
               data-testid="remove-directory-btn"
               variant="ghost"
               size="sm"
@@ -395,6 +681,79 @@ function removeDirectory(index: number) {
           class="text-sm text-muted-foreground p-4 text-center"
         >
           {{ t('settingView.allowedDirectoriesCard.empty') }}
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- 檔案來源白名單卡片 -->
+    <Card class="border border-border" data-testid="allowed-source-directories-section">
+      <CardHeader>
+        <CardTitle class="flex items-center gap-2">
+          <ShieldCheck class="size-5" />
+          {{ t('settingView.allowedSourceDirectoriesCard.title') }}
+        </CardTitle>
+        <CardDescription>{{ t('settingView.allowedSourceDirectoriesCard.description') }}</CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <!-- 新增來源目錄（ALLOW_WEBUI_SETTING=false 時隱藏） -->
+        <div v-if="settings.allow_webui_setting !== false" class="space-y-1">
+          <div class="flex gap-2">
+            <Input
+              data-testid="add-source-directory-input"
+              v-model="newSourceDirectoryPath"
+              :placeholder="t('settingView.allowedSourceDirectoriesCard.placeholder')"
+              :class="['flex-1 border-foreground', sourceDirectoryPathError ? 'border-red-500' : '']"
+              @keydown.enter.prevent="addSourceDirectory"
+              @input="sourceDirectoryPathError = ''"
+            />
+            <Button
+              data-testid="add-source-directory-btn"
+              variant="outline"
+              class="border-foreground shrink-0"
+              @click="addSourceDirectory"
+            >
+              <Plus class="size-4 mr-1" />
+              {{ t('settingView.allowedSourceDirectoriesCard.add') }}
+            </Button>
+          </div>
+          <p v-if="sourceDirectoryPathError" class="text-red-500 text-sm">{{ sourceDirectoryPathError }}</p>
+        </div>
+
+        <!-- 已設定的來源目錄列表 -->
+        <div
+          v-if="settings.allowed_source_directories && settings.allowed_source_directories.length > 0"
+          class="space-y-2"
+        >
+          <div
+            v-for="(dir, index) in settings.allowed_source_directories"
+            :key="dir.path"
+            class="flex items-center gap-2 p-2 border rounded-md border-foreground/20"
+          >
+            <Lock v-if="dir.source === 'env'" class="size-4 text-amber-500 shrink-0" :title="t('settingView.lockedByEnv')" />
+            <span class="flex-1 font-mono text-sm truncate">{{ dir.path }}</span>
+            <Button
+              v-if="dir.source === 'db' && settings.allow_webui_setting !== false"
+              data-testid="remove-source-directory-btn"
+              variant="ghost"
+              size="sm"
+              class="text-red-500 hover:text-red-700 shrink-0"
+              @click="removeSourceDirectory(index)"
+            >
+              <X class="size-4" />
+            </Button>
+          </div>
+        </div>
+
+        <!-- 空狀態 + 安全提示 -->
+        <div
+          v-else
+          class="text-sm p-4 text-center space-y-2"
+        >
+          <p class="text-muted-foreground">{{ t('settingView.allowedSourceDirectoriesCard.empty') }}</p>
+          <p class="text-amber-500 flex items-center justify-center gap-1">
+            <AlertTriangle class="size-4" />
+            {{ t('settingView.allowedSourceDirectoriesCard.emptyWarning') }}
+          </p>
         </div>
       </CardContent>
     </Card>

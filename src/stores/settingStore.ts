@@ -11,6 +11,8 @@ export const useSettingStore = defineStore('settingStore', () => {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     locale: navigator.language || 'en',
     allowed_directories: [],
+    allowed_source_directories: [],
+    allow_webui_setting: true,
   })
 
   /** Fetch the current application settings from the API. */

@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { RoutersEnum } from '@/enums/RoutersEnum';
+import { usePresetRuleStore } from '@/stores/presetRuleStore';
 import { useTagStore } from '@/stores/tagStore';
 import { useTaskStore } from '@/stores/taskStore';
 import { useDark, useToggle } from '@vueuse/core';
@@ -26,10 +27,12 @@ const isDark = useDark()
 const toggleDark = useToggle(isDark)
 const taskStore = useTaskStore()
 const tagStore = useTagStore()
+const presetRuleStore = usePresetRuleStore()
 
 onMounted(() => {
   taskStore.fetchTasks()
   tagStore.fetchTags()
+  presetRuleStore.fetchPresetRules()
 })
 
 </script>

@@ -16,6 +16,10 @@ from backend.exceptions.directory_exception import (
     DirectoryAccessDenied,
     DirectoryNotFound,
 )
+from backend.exceptions.preset_rule_exception import (
+    PresetRuleAlreadyExists,
+    PresetRuleNotFound,
+)
 from backend.exceptions.tag_exception import (
     InvalidTagColor,
     TagAlreadyExists,
@@ -23,8 +27,19 @@ from backend.exceptions.tag_exception import (
 )
 from backend.exceptions.task_exception import TaskAlreadyExists, TaskNotFound
 from backend.middlewares import setup_cors, setup_gzip
-from backend.routers import directory, log, preview, setting, tag, task, webhook
+from backend.routers import (
+    directory,
+    log,
+    preset_rule,
+    preview,
+    setting,
+    tag,
+    task,
+    webhook,
+)
 from backend.utils.logger import logger
+
+from . import __version__
 
 
 def _run_alembic_upgrade():
@@ -56,7 +71,10 @@ app = FastAPI(
     lifespan=lifespan,
     title="Movera API",
     description="API for managing file moving and renaming tasks.",
-    version="4.0.0",
+    version=__version__,
+    docs_url="/api/docs" if os.getenv("ENV") == "development" else None,
+    redoc_url="/api/redoc" if os.getenv("ENV") == "development" else None,
+    openapi_url="/api/openapi.json" if os.getenv("ENV") == "development" else None,
 )
 
 
@@ -92,10 +110,20 @@ async def directory_not_found_handler(request: Request, exc: DirectoryNotFound):
 
 
 @app.exception_handler(DirectoryAccessDenied)
-async def directory_access_denied_handler(
-    request: Request, exc: DirectoryAccessDenied
-):
+async def directory_access_denied_handler(request: Request, exc: DirectoryAccessDenied):
     return JSONResponse(status_code=403, content={"detail": str(exc)})
+
+
+@app.exception_handler(PresetRuleNotFound)
+async def preset_rule_not_found_handler(request: Request, exc: PresetRuleNotFound):
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+
+@app.exception_handler(PresetRuleAlreadyExists)
+async def preset_rule_already_exists_handler(
+    request: Request, exc: PresetRuleAlreadyExists
+):
+    return JSONResponse(status_code=409, content={"detail": str(exc)})
 
 
 # Middlewares
@@ -105,6 +133,7 @@ setup_gzip(app)
 
 app.include_router(task.router)
 app.include_router(tag.router)
+app.include_router(preset_rule.router)
 app.include_router(setting.router)
 app.include_router(log.router)
 app.include_router(preview.router)
@@ -113,4 +142,5 @@ app.include_router(directory.router)
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from backend import schemas
 from backend.dependencies import depends_parse_preview_service, depends_regex_preview_service
@@ -30,8 +30,11 @@ def preview_regex(
     payload: schemas.RegexPreviewRequest,
     service: RegexPreviewService = Depends(depends_regex_preview_service),
 ):
-    return service.preview(
-        src_pattern=payload.src_pattern,
-        text=payload.text,
-        dst_pattern=payload.dst_pattern,
-    )
+    try:
+        return service.preview(
+            src_pattern=payload.src_pattern,
+            text=payload.text,
+            dst_pattern=payload.dst_pattern,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
