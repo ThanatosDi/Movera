@@ -1,14 +1,18 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 from backend import schemas
 from backend.database import SessionLocal
 from backend.exceptions.worker_exception import MoveOperationError, RenameOperationError
 from backend.repositories.log import LogRepository
+from backend.repositories.setting import SettingRepository
 from backend.repositories.task import TaskRepository
 from backend.services.log_service import LogService
+from backend.services.setting_service import SettingService
 from backend.services.task_service import TaskService
+from backend.utils.logger import logger
 from backend.utils.move import move
 from backend.utils.rename import Rename
 
@@ -23,6 +27,7 @@ class WorkerServices:
 
     task_service: TaskService
     log_service: LogService
+    setting_service: SettingService
 
 
 def create_worker_services() -> WorkerServices:
@@ -35,7 +40,17 @@ def create_worker_services() -> WorkerServices:
     return WorkerServices(
         task_service=TaskService(TaskRepository(db=db)),
         log_service=LogService(LogRepository(db=db)),
+        setting_service=SettingService(SettingRepository(db=db)),
     )
+
+
+def is_path_within_allowed(filepath: str, allowed_directories: list[str]) -> bool:
+    """檢查檔案路徑是否在允許的來源目錄白名單範圍內。"""
+    resolved = Path(filepath).resolve()
+    for allowed_dir in allowed_directories:
+        if resolved.is_relative_to(Path(allowed_dir).resolve()):
+            return True
+    return False
 
 
 def web_logger(
@@ -181,6 +196,12 @@ def process_completed_download(filepath: str, services: WorkerServices | None = 
     """
     if services is None:
         services = create_worker_services()
+
+    # 驗證檔案來源路徑是否在允許的白名單範圍內
+    allowed_source = services.setting_service.get_allowed_source_directories()
+    if allowed_source and not is_path_within_allowed(filepath, allowed_source):
+        logger.warning(f'檔案 "{filepath}" 不在允許的來源目錄範圍內，已拒絕處理')
+        return
 
     tasks = services.task_service.get_enabled_tasks()
 

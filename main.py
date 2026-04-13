@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import uvicorn
@@ -25,8 +26,10 @@ def setup_static_files():
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str):
         """處理 SPA 路由，將未匹配的路徑導向 index.html"""
-        # 嘗試提供靜態檔案
-        file_path = DIST_DIR / full_path
+        # 嘗試提供靜態檔案，並驗證路徑不會穿越出 DIST_DIR
+        file_path = (DIST_DIR / full_path).resolve()
+        if not file_path.is_relative_to(DIST_DIR.resolve()):
+            return FileResponse(DIST_DIR / "index.html")
         if file_path.exists() and file_path.is_file():
             return FileResponse(file_path)
         # 返回 index.html 讓 Vue Router 處理路由
@@ -41,6 +44,6 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         log_level="info",
-        # reload=True,
-        # reload_dirs=["backend"],
+        reload=os.getenv("ENV") == "development",
+        reload_dirs=["backend"],
     )

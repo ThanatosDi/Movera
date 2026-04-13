@@ -241,6 +241,7 @@
         "gray": "Gray"
       }
     },
+    "lockedByEnv": "Locked by environment variable, cannot be removed",
     "allowedDirectoriesCard": {
       "absolutePathRequired": "Only absolute paths are accepted (e.g. /downloads or C:\\Downloads)",
       "add": "Add",
@@ -248,6 +249,15 @@
       "empty": "No allowed directories configured",
       "placeholder": "Enter absolute path, e.g. /downloads",
       "title": "Allowed Directories"
+    },
+    "allowedSourceDirectoriesCard": {
+      "absolutePathRequired": "Only absolute paths are accepted (e.g. /downloads or C:\\Downloads)",
+      "add": "Add",
+      "description": "Configure allowed source directory paths. Webhook file paths must be within these directories to be processed.",
+      "empty": "No source directories configured",
+      "emptyWarning": "Without a source whitelist, all file paths will be accepted. Consider adding directories to enhance security.",
+      "placeholder": "Enter absolute path, e.g. /downloads",
+      "title": "Source Path Whitelist"
     },
     "description": "Manage global application settings",
     "generalCard": {
