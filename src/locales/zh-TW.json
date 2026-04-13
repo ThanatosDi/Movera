@@ -251,6 +251,15 @@
       "placeholder": "輸入絕對路徑，例如 /downloads",
       "title": "允許目錄"
     },
+    "allowedSourceDirectoriesCard": {
+      "absolutePathRequired": "僅接受絕對路徑（例如 /downloads 或 C:\\Downloads）",
+      "add": "新增",
+      "description": "設定允許作為檔案來源的目錄路徑。Webhook 傳入的檔案路徑必須在此白名單範圍內才會被處理。",
+      "empty": "尚未設定任何來源目錄",
+      "emptyWarning": "未設定來源白名單時，所有路徑皆會被允許處理。建議設定白名單以增強安全性。",
+      "placeholder": "輸入絕對路徑，例如 /downloads",
+      "title": "檔案來源白名單"
+    },
     "description": "管理全域應用程式設定",
     "generalCard": {
       "description": "調整應用程式的外觀和通知行為。",

@@ -18,7 +18,7 @@ class SettingService:
         self.repository = repository
 
     # 需要特殊序列化/反序列化的 JSON 欄位
-    _JSON_FIELDS = {"allowed_directories"}
+    _JSON_FIELDS = {"allowed_directories", "allowed_source_directories"}
 
     def get_all_settings(self) -> dict:
         """Return every setting as a plain dict, deserialising JSON fields.
@@ -70,7 +70,7 @@ class SettingService:
 
         # JSON 欄位使用 create_or_update（序列化為 JSON 字串）
         for key, value in json_fields.items():
-            if key == "allowed_directories" and isinstance(value, list):
+            if key in ("allowed_directories", "allowed_source_directories") and isinstance(value, list):
                 invalid = validate_allowed_directories(value)
                 if invalid:
                     raise ValueError(
@@ -82,14 +82,13 @@ class SettingService:
 
         return updated
 
-    def get_allowed_directories(self) -> list[str]:
-        """Return the list of allowed directory paths, defaulting to ``[]``.
+    def _get_json_list_setting(self, key: str) -> list[str]:
+        """從資料庫讀取 JSON 陣列設定，反序列化後回傳，預設為空陣列。
 
-        Why: Multiple callers (DirectoryService, path validation) need the
-        parsed list. Centralising the deserialisation and fallback logic here
-        prevents each caller from repeating JSON-decode error handling.
+        Why: allowed_directories 和 allowed_source_directories 共用相同的
+        讀取與反序列化邏輯，提取為共用方法避免重複。
         """
-        setting = self.repository.get("allowed_directories")
+        setting = self.repository.get(key)
         if setting is None:
             return []
         try:
@@ -99,6 +98,23 @@ class SettingService:
             return []
         except (json.JSONDecodeError, TypeError):
             return []
+
+    def get_allowed_source_directories(self) -> list[str]:
+        """Return the list of allowed source directory paths, defaulting to ``[]``.
+
+        Why: Webhook 傳入的檔案路徑必須在此白名單範圍內，
+        防止攻擊者透過偽造 webhook 操作任意檔案。
+        """
+        return self._get_json_list_setting("allowed_source_directories")
+
+    def get_allowed_directories(self) -> list[str]:
+        """Return the list of allowed directory paths, defaulting to ``[]``.
+
+        Why: Multiple callers (DirectoryService, path validation) need the
+        parsed list. Centralising the deserialisation and fallback logic here
+        prevents each caller from repeating JSON-decode error handling.
+        """
+        return self._get_json_list_setting("allowed_directories")
 
     def set_allowed_directories(self, directories: list[str]) -> None:
         invalid = validate_allowed_directories(directories)

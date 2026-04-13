@@ -24,7 +24,7 @@ import { usePresetRuleStore } from '@/stores/presetRuleStore'
 import { useSettingStore } from '@/stores/settingStore'
 import { useTagStore } from '@/stores/tagStore'
 import { useTaskStore } from '@/stores/taskStore'
-import { Check, ChevronsUpDown, FileCode, FolderCog, Info, Pencil, Plus, Save, Tag, X } from 'lucide-vue-next'
+import { AlertTriangle, Check, ChevronsUpDown, FileCode, FolderCog, Info, Pencil, Plus, Save, ShieldCheck, Tag, X } from 'lucide-vue-next'
 import { storeToRefs } from 'pinia'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -237,6 +237,35 @@ function addDirectory() {
 function removeDirectory(index: number) {
   if (settings.value.allowed_directories) {
     settings.value.allowed_directories.splice(index, 1)
+  }
+}
+
+// Allowed source directories management
+const newSourceDirectoryPath = ref('')
+const sourceDirectoryPathError = ref('')
+
+function addSourceDirectory() {
+  const path = newSourceDirectoryPath.value.trim()
+  if (!path) return
+
+  if (!isAbsolutePath(path)) {
+    sourceDirectoryPathError.value = t('settingView.allowedSourceDirectoriesCard.absolutePathRequired')
+    return
+  }
+
+  sourceDirectoryPathError.value = ''
+  if (!settings.value.allowed_source_directories) {
+    settings.value.allowed_source_directories = []
+  }
+  if (!settings.value.allowed_source_directories.includes(path)) {
+    settings.value.allowed_source_directories.push(path)
+  }
+  newSourceDirectoryPath.value = ''
+}
+
+function removeSourceDirectory(index: number) {
+  if (settings.value.allowed_source_directories) {
+    settings.value.allowed_source_directories.splice(index, 1)
   }
 }
 </script>
@@ -622,6 +651,77 @@ function removeDirectory(index: number) {
           class="text-sm text-muted-foreground p-4 text-center"
         >
           {{ t('settingView.allowedDirectoriesCard.empty') }}
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- 檔案來源白名單卡片 -->
+    <Card class="border border-border" data-testid="allowed-source-directories-section">
+      <CardHeader>
+        <CardTitle class="flex items-center gap-2">
+          <ShieldCheck class="size-5" />
+          {{ t('settingView.allowedSourceDirectoriesCard.title') }}
+        </CardTitle>
+        <CardDescription>{{ t('settingView.allowedSourceDirectoriesCard.description') }}</CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <!-- 新增來源目錄 -->
+        <div class="space-y-1">
+          <div class="flex gap-2">
+            <Input
+              data-testid="add-source-directory-input"
+              v-model="newSourceDirectoryPath"
+              :placeholder="t('settingView.allowedSourceDirectoriesCard.placeholder')"
+              :class="['flex-1 border-foreground', sourceDirectoryPathError ? 'border-red-500' : '']"
+              @keydown.enter.prevent="addSourceDirectory"
+              @input="sourceDirectoryPathError = ''"
+            />
+            <Button
+              data-testid="add-source-directory-btn"
+              variant="outline"
+              class="border-foreground shrink-0"
+              @click="addSourceDirectory"
+            >
+              <Plus class="size-4 mr-1" />
+              {{ t('settingView.allowedSourceDirectoriesCard.add') }}
+            </Button>
+          </div>
+          <p v-if="sourceDirectoryPathError" class="text-red-500 text-sm">{{ sourceDirectoryPathError }}</p>
+        </div>
+
+        <!-- 已設定的來源目錄列表 -->
+        <div
+          v-if="settings.allowed_source_directories && settings.allowed_source_directories.length > 0"
+          class="space-y-2"
+        >
+          <div
+            v-for="(dir, index) in settings.allowed_source_directories"
+            :key="dir"
+            class="flex items-center gap-2 p-2 border rounded-md border-foreground/20"
+          >
+            <span class="flex-1 font-mono text-sm truncate">{{ dir }}</span>
+            <Button
+              data-testid="remove-source-directory-btn"
+              variant="ghost"
+              size="sm"
+              class="text-red-500 hover:text-red-700 shrink-0"
+              @click="removeSourceDirectory(index)"
+            >
+              <X class="size-4" />
+            </Button>
+          </div>
+        </div>
+
+        <!-- 空狀態 + 安全提示 -->
+        <div
+          v-else
+          class="text-sm p-4 text-center space-y-2"
+        >
+          <p class="text-muted-foreground">{{ t('settingView.allowedSourceDirectoriesCard.empty') }}</p>
+          <p class="text-amber-500 flex items-center justify-center gap-1">
+            <AlertTriangle class="size-4" />
+            {{ t('settingView.allowedSourceDirectoriesCard.emptyWarning') }}
+          </p>
         </div>
       </CardContent>
     </Card>

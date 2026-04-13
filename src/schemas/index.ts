@@ -69,6 +69,7 @@ export interface Settings {
   timezone: string;
   locale: string;
   allowed_directories?: string[];
+  allowed_source_directories?: string[];
 }
 
 export interface DirectoryItem {

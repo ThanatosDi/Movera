@@ -9,6 +9,7 @@ from backend.exceptions.worker_exception import MoveOperationError, RenameOperat
 from backend.worker.worker import (
     WorkerServices,
     create_worker_services,
+    is_path_within_allowed,
     web_logger,
     match_task,
     perform_rename_operation,
@@ -22,9 +23,12 @@ def mock_services():
     """建立 mock 的 WorkerServices"""
     task_service = MagicMock()
     log_service = MagicMock()
+    setting_service = MagicMock()
+    setting_service.get_allowed_source_directories.return_value = []
     return WorkerServices(
         task_service=task_service,
         log_service=log_service,
+        setting_service=setting_service,
     )
 
 
@@ -36,11 +40,14 @@ class TestWorkerServices:
         with patch("backend.worker.worker.SessionLocal") as mock_session:
             with patch("backend.worker.worker.TaskRepository"):
                 with patch("backend.worker.worker.LogRepository"):
-                    with patch("backend.worker.worker.TaskService"):
-                        with patch("backend.worker.worker.LogService"):
-                            services = create_worker_services()
-                            assert services.task_service is not None
-                            assert services.log_service is not None
+                    with patch("backend.worker.worker.SettingRepository"):
+                        with patch("backend.worker.worker.TaskService"):
+                            with patch("backend.worker.worker.LogService"):
+                                with patch("backend.worker.worker.SettingService"):
+                                    services = create_worker_services()
+                                    assert services.task_service is not None
+                                    assert services.log_service is not None
+                                    assert services.setting_service is not None
 
     def test_no_global_state(self):
         """確認模組中不存在 global 變數宣告"""
@@ -244,8 +251,75 @@ class TestPerformMoveOperation:
         assert "移動失敗" in exc_info.value.reason
 
 
+class TestIsPathWithinAllowed:
+    """測試 is_path_within_allowed 函數"""
+
+    def test_path_within_allowed(self):
+        """測試路徑在允許範圍內"""
+        assert is_path_within_allowed("/downloads/anime/test.mp4", ["/downloads"]) is True
+
+    def test_path_not_within_allowed(self):
+        """測試路徑不在允許範圍內"""
+        assert is_path_within_allowed("/etc/passwd", ["/downloads"]) is False
+
+    def test_path_with_multiple_allowed(self):
+        """測試多個允許目錄"""
+        assert is_path_within_allowed("/media/movie.mp4", ["/downloads", "/media"]) is True
+
+    def test_empty_allowed_list(self):
+        """測試空白名單"""
+        assert is_path_within_allowed("/downloads/test.mp4", []) is False
+
+
 class TestProcessCompletedDownload:
     """測試 process_completed_download 函數"""
+
+    @patch("backend.worker.worker.perform_move_operation")
+    @patch("backend.worker.worker.perform_rename_operation")
+    @patch("backend.worker.worker.match_task")
+    def test_process_completed_download_blocked_by_source_whitelist(
+        self, mock_match_task, mock_rename, mock_move, mock_services,
+    ):
+        """測試來源路徑不在白名單內時拒絕處理"""
+        mock_services.setting_service.get_allowed_source_directories.return_value = ["/downloads"]
+
+        result = process_completed_download("/etc/passwd", services=mock_services)
+
+        assert result is None
+        mock_services.task_service.get_enabled_tasks.assert_not_called()
+        mock_match_task.assert_not_called()
+        mock_rename.assert_not_called()
+        mock_move.assert_not_called()
+
+    @patch("backend.worker.worker.perform_move_operation")
+    @patch("backend.worker.worker.perform_rename_operation")
+    @patch("backend.worker.worker.match_task")
+    def test_process_completed_download_allowed_by_source_whitelist(
+        self, mock_match_task, mock_rename, mock_move, mock_services,
+    ):
+        """測試來源路徑在白名單內時正常處理"""
+        mock_services.setting_service.get_allowed_source_directories.return_value = ["/downloads"]
+        mock_services.task_service.get_enabled_tasks.return_value = []
+        mock_match_task.return_value = None
+
+        process_completed_download("/downloads/test.mp4", services=mock_services)
+
+        mock_services.task_service.get_enabled_tasks.assert_called_once()
+
+    @patch("backend.worker.worker.perform_move_operation")
+    @patch("backend.worker.worker.perform_rename_operation")
+    @patch("backend.worker.worker.match_task")
+    def test_process_completed_download_empty_whitelist_allows_all(
+        self, mock_match_task, mock_rename, mock_move, mock_services,
+    ):
+        """測試白名單為空時允許所有路徑（向後相容）"""
+        mock_services.setting_service.get_allowed_source_directories.return_value = []
+        mock_services.task_service.get_enabled_tasks.return_value = []
+        mock_match_task.return_value = None
+
+        process_completed_download("/any/path/test.mp4", services=mock_services)
+
+        mock_services.task_service.get_enabled_tasks.assert_called_once()
 
     @patch("backend.worker.worker.perform_move_operation")
     @patch("backend.worker.worker.perform_rename_operation")

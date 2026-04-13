@@ -205,6 +205,53 @@ class TestSettingServiceAllowedDirectories:
         assert result == ["/new/path"]
 
 
+class TestSettingServiceAllowedSourceDirectories:
+    """測試 SettingService 的 allowed_source_directories 相關方法"""
+
+    def test_get_allowed_source_directories_default_empty(self, setting_service):
+        """測試未設定時回傳空陣列"""
+        result = setting_service.get_allowed_source_directories()
+        assert result == []
+
+    def test_get_allowed_source_directories_with_data(self, setting_service, db_session):
+        """測試已設定時回傳路徑列表"""
+        dirs = ["/downloads", "/media"]
+        setting = Setting(
+            key="allowed_source_directories", value=json.dumps(dirs)
+        )
+        db_session.add(setting)
+        db_session.commit()
+
+        result = setting_service.get_allowed_source_directories()
+        assert result == ["/downloads", "/media"]
+
+    def test_get_all_settings_deserializes_allowed_source_directories(self, setting_service, db_session):
+        """測試 get_all_settings 回傳時 allowed_source_directories 已反序列化為 list"""
+        setting = Setting(key="allowed_source_directories", value=json.dumps(["/downloads"]))
+        db_session.add(setting)
+        db_session.commit()
+
+        result = setting_service.get_all_settings()
+        assert result["allowed_source_directories"] == ["/downloads"]
+        assert isinstance(result["allowed_source_directories"], list)
+
+    def test_update_settings_rejects_relative_allowed_source_directories(self, setting_service):
+        """測試透過 update_settings 傳入相對路徑時拋出 ValueError"""
+        with pytest.raises(ValueError, match="僅接受絕對路徑"):
+            setting_service.update_settings({
+                "allowed_source_directories": ["not/absolute"],
+            })
+
+    def test_allowed_source_directories_invalid_json_returns_empty(self, setting_service, db_session):
+        """測試 allowed_source_directories 值為無效 JSON 時回傳空陣列"""
+        setting = Setting(key="allowed_source_directories", value="not-valid-json")
+        db_session.add(setting)
+        db_session.commit()
+
+        result = setting_service.get_allowed_source_directories()
+        assert result == []
+
+
 class TestSettingServiceAllowedDirectoriesValidation:
     """測試 allowed_directories 絕對路徑驗證"""
 
