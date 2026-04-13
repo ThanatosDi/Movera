@@ -258,3 +258,40 @@ class TestUpdateSettingsWebuiLock:
         )
 
         assert response.status_code == 200
+
+
+class TestUpdateSettingsKeyWhitelist:
+    """測試 settings key 白名單過濾"""
+
+    def test_unknown_key_is_ignored(self, client, mock_setting_service):
+        """測試未知 key 被靜默忽略"""
+        mock_setting_service.update_settings.return_value = []
+        mock_setting_service.get_all_settings.return_value = {"timezone": "UTC"}
+
+        response = client.put(
+            "/api/v1/settings",
+            json={"timezone": "UTC", "malicious_key": "evil_value"},
+        )
+
+        assert response.status_code == 200
+        # 確認傳給 service 的 dict 不包含 malicious_key
+        call_args = mock_setting_service.update_settings.call_args[0][0]
+        assert "malicious_key" not in call_args
+        assert "timezone" in call_args
+
+    def test_valid_keys_pass_through(self, client, mock_setting_service):
+        """測試合法 key 正常傳遞"""
+        mock_setting_service.update_settings.return_value = []
+        mock_setting_service.get_all_settings.return_value = {
+            "timezone": "UTC",
+            "locale": "en",
+        }
+
+        response = client.put(
+            "/api/v1/settings",
+            json={"timezone": "UTC", "locale": "en"},
+        )
+
+        assert response.status_code == 200
+        call_args = mock_setting_service.update_settings.call_args[0][0]
+        assert call_args == {"timezone": "UTC", "locale": "en"}

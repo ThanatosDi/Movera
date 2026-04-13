@@ -1,8 +1,10 @@
-import re
 from pathlib import Path
 from typing import Literal
 
 import parse
+
+from backend.utils.safe_format import safe_format
+from backend.utils.safe_regex import safe_compile, safe_sub
 
 
 def _ensure_path(filepath: str | Path) -> Path:
@@ -30,7 +32,7 @@ class ParseRenameRule:
         filepath = _ensure_path(self.filepath)
         filename = filepath.name
         template = parse.parse(self.src, filename)
-        renamed = self.dst.format(**template.named)
+        renamed = safe_format(self.dst, template.named)
         dst_path = filepath.parent.joinpath(renamed)
         return Path.rename(filepath, dst_path)
 
@@ -50,8 +52,8 @@ class RegexRenameRule:
     def rename(self) -> Path:
         filepath = _ensure_path(self.filepath)
         filename = filepath.name
-        src_filename_regex = re.compile(self.src, re.IGNORECASE)
-        renamed = re.sub(src_filename_regex, self.dst, filename)
+        src_filename_regex = safe_compile(self.src)
+        renamed = safe_sub(src_filename_regex, self.dst, filename)
         dst_path = filepath.parent.joinpath(renamed)
         return Path.rename(filepath, dst_path)
 
