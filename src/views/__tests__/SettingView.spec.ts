@@ -135,7 +135,8 @@ describe('SettingView - allowed_directories', () => {
     expect(wrapper.find('[data-testid="allowed-directories-section"]').exists()).toBe(true)
   })
 
-  it('應能新增允許目錄路徑', async () => {
+  it('應能新增允許目錄路徑並立即保存', async () => {
+    mockUpdateSettings.mockResolvedValue(undefined)
     const wrapper = mountView()
     await flushPromises()
 
@@ -146,9 +147,11 @@ describe('SettingView - allowed_directories', () => {
     await flushPromises()
 
     expect(mockSettings.value.allowed_directories).toContainEqual({ path: '/downloads', source: 'db' })
+    expect(mockUpdateSettings).toHaveBeenCalled()
   })
 
-  it('應能刪除允許目錄路徑', async () => {
+  it('應能刪除允許目錄路徑並立即保存', async () => {
+    mockUpdateSettings.mockResolvedValue(undefined)
     mockSettings.value.allowed_directories = [
       { path: '/downloads', source: 'db' },
       { path: '/media', source: 'db' },
@@ -165,5 +168,6 @@ describe('SettingView - allowed_directories', () => {
 
     expect(mockSettings.value.allowed_directories).not.toContainEqual({ path: '/downloads', source: 'db' })
     expect(mockSettings.value.allowed_directories).toContainEqual({ path: '/media', source: 'db' })
+    expect(mockUpdateSettings).toHaveBeenCalled()
   })
 })

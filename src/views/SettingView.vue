@@ -225,7 +225,7 @@ function isAbsolutePath(path: string): boolean {
   return /^\//.test(path) || /^[A-Za-z]:[/\\]/.test(path) || /^\\\\/.test(path)
 }
 
-function addDirectory() {
+async function addDirectory() {
   const path = newDirectoryPath.value.trim()
   if (!path) return
 
@@ -238,15 +238,24 @@ function addDirectory() {
   if (!settings.value.allowed_directories) {
     settings.value.allowed_directories = []
   }
-  if (!settings.value.allowed_directories.some(d => d.path === path)) {
-    settings.value.allowed_directories.push({ path, source: 'db' })
-  }
+  if (settings.value.allowed_directories.some(d => d.path === path)) return
+
+  settings.value.allowed_directories.push({ path, source: 'db' })
   newDirectoryPath.value = ''
+  try {
+    await UpdateSettings()
+  } catch {
+    settings.value.allowed_directories = settings.value.allowed_directories.filter(d => d.path !== path)
+  }
 }
 
-function removeDirectory(index: number) {
-  if (settings.value.allowed_directories) {
-    settings.value.allowed_directories.splice(index, 1)
+async function removeDirectory(index: number) {
+  if (!settings.value.allowed_directories) return
+  const removed = settings.value.allowed_directories.splice(index, 1)
+  try {
+    await UpdateSettings()
+  } catch {
+    settings.value.allowed_directories.splice(index, 0, ...removed)
   }
 }
 
@@ -254,7 +263,7 @@ function removeDirectory(index: number) {
 const newSourceDirectoryPath = ref('')
 const sourceDirectoryPathError = ref('')
 
-function addSourceDirectory() {
+async function addSourceDirectory() {
   const path = newSourceDirectoryPath.value.trim()
   if (!path) return
 
@@ -267,15 +276,24 @@ function addSourceDirectory() {
   if (!settings.value.allowed_source_directories) {
     settings.value.allowed_source_directories = []
   }
-  if (!settings.value.allowed_source_directories.some(d => d.path === path)) {
-    settings.value.allowed_source_directories.push({ path, source: 'db' })
-  }
+  if (settings.value.allowed_source_directories.some(d => d.path === path)) return
+
+  settings.value.allowed_source_directories.push({ path, source: 'db' })
   newSourceDirectoryPath.value = ''
+  try {
+    await UpdateSettings()
+  } catch {
+    settings.value.allowed_source_directories = settings.value.allowed_source_directories.filter(d => d.path !== path)
+  }
 }
 
-function removeSourceDirectory(index: number) {
-  if (settings.value.allowed_source_directories) {
-    settings.value.allowed_source_directories.splice(index, 1)
+async function removeSourceDirectory(index: number) {
+  if (!settings.value.allowed_source_directories) return
+  const removed = settings.value.allowed_source_directories.splice(index, 1)
+  try {
+    await UpdateSettings()
+  } catch {
+    settings.value.allowed_source_directories.splice(index, 0, ...removed)
   }
 }
 </script>
