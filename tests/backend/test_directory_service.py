@@ -26,6 +26,8 @@ def temp_dir_structure():
         os.makedirs(os.path.join(root, "anime", "show2"))
         os.makedirs(os.path.join(root, "movies"))
         os.makedirs(os.path.join(root, ".hidden"))
+        os.makedirs(os.path.join(root, "#recycle"))
+        os.makedirs(os.path.join(root, "@eaDir"))
         # 建立一個檔案（不應出現在結果中）
         with open(os.path.join(root, "file.txt"), "w") as f:
             f.write("test")
@@ -150,3 +152,33 @@ class TestDirectoryServiceListDirectories:
         result = path_service.list_directories(temp_dir_structure)
         names = [d["name"] for d in result]
         assert ".hidden" not in names
+
+    def test_list_directories_excludes_hash_prefix(
+        self, path_service, setting_service, db_session, temp_dir_structure
+    ):
+        """測試排除 # 開頭的系統目錄"""
+        setting = Setting(
+            key="allowed_directories",
+            value=json.dumps([temp_dir_structure]),
+        )
+        db_session.add(setting)
+        db_session.commit()
+
+        result = path_service.list_directories(temp_dir_structure)
+        names = [d["name"] for d in result]
+        assert "#recycle" not in names
+
+    def test_list_directories_excludes_at_prefix(
+        self, path_service, setting_service, db_session, temp_dir_structure
+    ):
+        """測試排除 @ 開頭的系統目錄"""
+        setting = Setting(
+            key="allowed_directories",
+            value=json.dumps([temp_dir_structure]),
+        )
+        db_session.add(setting)
+        db_session.commit()
+
+        result = path_service.list_directories(temp_dir_structure)
+        names = [d["name"] for d in result]
+        assert "@eaDir" not in names

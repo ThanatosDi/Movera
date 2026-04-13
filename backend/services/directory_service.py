@@ -8,26 +8,24 @@ from backend.services.setting_service import SettingService
 
 
 class DirectoryService:
-    """Browse the filesystem within administrator-allowed directories.
+    """在管理者允許的目錄範圍內瀏覽檔案系統。
 
-    Why: Direct filesystem access from the frontend would be a security risk.
-    This service enforces an allow-list so users can only see directories
-    explicitly permitted in settings.
+    Why: 前端直接存取檔案系統會有安全風險。
+    此服務透過白名單機制，確保使用者只能看到設定中明確允許的目錄。
     """
 
     def __init__(self, setting_service: SettingService):
         self.setting_service = setting_service
 
     def list_directories(self, path: str | None) -> list[dict]:
-        """Return child directories for *path*, or the allowed root list when *path* is None.
+        """回傳 *path* 的子目錄清單，若 *path* 為 None 則回傳允許的根目錄清單。
 
-        Why: The frontend tree-view needs both a root listing (allowed dirs)
-        and drill-down into sub-directories; this single method handles both
-        cases while enforcing access control.
+        Why: 前端樹狀檢視需要根目錄列表（允許的目錄）和子目錄展開功能；
+        此方法同時處理兩種情境，並強制執行存取控制。
 
         Raises:
-            DirectoryNotFound: *path* does not point to an existing directory.
-            DirectoryAccessDenied: *path* is outside every allowed directory.
+            DirectoryNotFound: *path* 指向的目錄不存在。
+            DirectoryAccessDenied: *path* 不在任何允許的目錄範圍內。
         """
         allowed = self.setting_service.get_allowed_directories()
 
@@ -69,11 +67,16 @@ class DirectoryService:
         except ValueError:
             return False
 
+    @staticmethod
+    def _is_hidden_directory(name: str) -> bool:
+        """檢查目錄名稱是否為隱藏或系統目錄（.、#、@ 開頭）。"""
+        return name.startswith((".", "#", "@"))
+
     def _scan_directories(self, path: Path) -> list[dict]:
         result = []
         try:
             for entry in sorted(path.iterdir()):
-                if entry.is_dir() and not entry.name.startswith("."):
+                if entry.is_dir() and not self._is_hidden_directory(entry.name):
                     result.append({
                         "name": entry.name,
                         "path": str(entry),
@@ -86,7 +89,7 @@ class DirectoryService:
     def _has_subdirectories(self, path: Path) -> bool:
         try:
             for entry in path.iterdir():
-                if entry.is_dir() and not entry.name.startswith("."):
+                if entry.is_dir() and not self._is_hidden_directory(entry.name):
                     return True
         except PermissionError:
             pass
