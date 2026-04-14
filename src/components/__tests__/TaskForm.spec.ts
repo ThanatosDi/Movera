@@ -98,7 +98,7 @@ describe('TaskForm - move_to 目錄選擇', () => {
 })
 
 describe('TaskForm - Episode 偏移', () => {
-  const defaultTask = {
+  const defaultTask: Record<string, unknown> = {
     name: '測試任務',
     include: '測試',
     move_to: '/downloads',

@@ -133,8 +133,8 @@ const episodeOffsetEnabled = computed({
   }
 })
 
-function handleOffsetGroupChange(value: string) {
-  task.value.episode_offset_group = value
+function handleOffsetGroupChange(value: unknown) {
+  task.value.episode_offset_group = value != null ? String(value) : null
 }
 
 </script>

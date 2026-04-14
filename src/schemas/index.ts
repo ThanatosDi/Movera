@@ -38,9 +38,9 @@ export interface Task {
   src_filename: string | null;
   dst_filename: string | null;
   rename_rule: 'regex' | 'parse' | null;
-  episode_offset_enabled: boolean;
-  episode_offset_group: string | null;
-  episode_offset_value: number;
+  episode_offset_enabled?: boolean;
+  episode_offset_group?: string | null;
+  episode_offset_value?: number;
   enabled: boolean;
   created_at: string; // ISO 8601 date string
   logs: Log[];
