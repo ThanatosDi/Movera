@@ -96,3 +96,93 @@ describe('TaskForm - move_to 目錄選擇', () => {
     expect(wrapper.emitted('update:modelValue')).toBeTruthy()
   })
 })
+
+describe('TaskForm - Episode 偏移', () => {
+  const defaultTask: Record<string, unknown> = {
+    name: '測試任務',
+    include: '測試',
+    move_to: '/downloads',
+    src_filename: null,
+    dst_filename: null,
+    rename_rule: null,
+    episode_offset_enabled: false,
+    episode_offset_group: null,
+    episode_offset_value: 0,
+    enabled: true,
+  }
+
+  const mountForm = (task = { ...defaultTask }, extraProps = {}) => {
+    return mount(TaskForm, {
+      props: {
+        modelValue: task,
+        ...extraProps,
+      },
+      attachTo: document.body,
+      global: {
+        stubs: {
+          Dialog: { template: '<div><slot /></div>', props: ['open'] },
+          DialogContent: { template: '<div><slot /></div>' },
+          DialogHeader: { template: '<div><slot /></div>' },
+          DialogTitle: { template: '<div><slot /></div>' },
+          DialogDescription: { template: '<div><slot /></div>' },
+          DialogFooter: { template: '<div><slot /></div>' },
+        },
+      },
+    })
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('rename_rule 為 null 時不顯示 episode 偏移區塊', async () => {
+    const wrapper = mountForm()
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="episode-offset-section"]').exists()).toBe(false)
+  })
+
+  it('rename_rule 為 parse 時顯示 episode 偏移區塊', async () => {
+    const wrapper = mountForm({
+      ...defaultTask,
+      rename_rule: 'parse',
+    }, { isRenameRuleRequired: true })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="episode-offset-section"]').exists()).toBe(true)
+  })
+
+  it('rename_rule 為 regex 時顯示 episode 偏移區塊', async () => {
+    const wrapper = mountForm({
+      ...defaultTask,
+      rename_rule: 'regex',
+    }, { isRenameRuleRequired: true })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="episode-offset-section"]').exists()).toBe(true)
+  })
+
+  it('偏移開關啟用後顯示 group 選擇與偏移量輸入', async () => {
+    const wrapper = mountForm({
+      ...defaultTask,
+      rename_rule: 'parse',
+      episode_offset_enabled: true,
+    }, { isRenameRuleRequired: true })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="episode-offset-group"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="episode-offset-value"]').exists()).toBe(true)
+  })
+
+  it('偏移開關停用時隱藏詳細設定', async () => {
+    const wrapper = mountForm({
+      ...defaultTask,
+      rename_rule: 'parse',
+      episode_offset_enabled: false,
+    }, { isRenameRuleRequired: true })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="episode-offset-group"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="episode-offset-value"]').exists()).toBe(false)
+  })
+})

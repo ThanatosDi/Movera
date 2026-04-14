@@ -1,8 +1,7 @@
-
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import relationship
 
 from backend.models.tag import task_tags
@@ -52,6 +51,24 @@ class Task(Base):
         nullable=True,
         default=None,
         comment="重新命名規則",
+    )
+    episode_offset_enabled = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+        comment="是否啟用 episode 偏移",
+    )
+    episode_offset_group = Column(
+        String,
+        nullable=True,
+        default=None,
+        comment="偏移目標的 group 名稱",
+    )
+    episode_offset_value = Column(
+        Integer,
+        default=0,
+        nullable=False,
+        comment="episode 偏移量",
     )
     enabled = Column(
         Boolean,

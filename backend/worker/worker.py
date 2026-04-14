@@ -132,6 +132,9 @@ def perform_rename_operation(
             src=task.src_filename,
             dst=task.dst_filename,
             rule=task.rename_rule,
+            episode_offset_enabled=task.episode_offset_enabled,
+            episode_offset_group=task.episode_offset_group,
+            episode_offset_value=task.episode_offset_value,
         ).execute_rename()
 
         web_logger(
@@ -184,7 +187,9 @@ def perform_move_operation(
         raise MoveOperationError(filepath, task.move_to, str(e)) from e
 
 
-def process_completed_download(filepath: str, services: WorkerServices | None = None) -> None:
+def process_completed_download(
+    filepath: str, services: WorkerServices | None = None
+) -> None:
     """處理已完成的下載任務。
 
     Why: 接受可選的 services 參數，讓測試可以注入 mock 服務，

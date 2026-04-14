@@ -2,8 +2,11 @@ import os
 from pathlib import Path
 
 import uvicorn
+from dotenv import load_dotenv
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+
+load_dotenv()
 
 from backend.backend import app
 

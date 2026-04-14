@@ -146,7 +146,16 @@
         "parse": "模板解析 Parse",
         "regex": "正規表示 Regex"
       },
-      "srcFilename": "來源檔名規則 (Src Filename Pattern)"
+      "srcFilename": "來源檔名規則 (Src Filename Pattern)",
+      "episodeOffset": {
+        "label": "Episode 偏移",
+        "enabled": "啟用 Episode 偏移",
+        "group": "偏移目標群組",
+        "groupPlaceholder": "選擇群組...",
+        "groupEmpty": "請先完成來源檔名規則預覽以顯示可用群組",
+        "value": "偏移量",
+        "description": "在重新命名時自動對選定群組的 episode 數值進行加減偏移"
+      }
     }
   },
   "createTaskView": {

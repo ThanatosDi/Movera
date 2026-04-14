@@ -30,6 +30,9 @@ const createTaskData = ref<TaskCreate>({
   rename_rule: null,
   src_filename: null,
   dst_filename: null,
+  episode_offset_enabled: false,
+  episode_offset_group: null,
+  episode_offset_value: 0,
   enabled: true,
   tag_ids: [],
 })
