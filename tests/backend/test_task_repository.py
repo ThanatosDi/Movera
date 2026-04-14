@@ -168,6 +168,82 @@ class TestTaskRepositoryDelete:
         assert deleted_task is None
 
 
+class TestTaskRepositoryEpisodeOffset:
+    """測試 TaskRepository 的 episode 偏移欄位"""
+
+    def test_create_task_with_episode_offset(self, task_repository):
+        """測試建立任務時包含偏移設定"""
+        task_data = {
+            "name": "偏移測試任務",
+            "include": "關鍵字",
+            "move_to": "/downloads/test",
+            "rename_rule": "parse",
+            "src_filename": "{title} - {episode}.mp4",
+            "dst_filename": "{title} - S02E{episode}.mp4",
+            "episode_offset_enabled": True,
+            "episode_offset_group": "episode",
+            "episode_offset_value": 12,
+        }
+        task_create = schemas.TaskCreate(**task_data)
+        task = task_repository.create(task_create)
+
+        assert task.episode_offset_enabled is True
+        assert task.episode_offset_group == "episode"
+        assert task.episode_offset_value == 12
+
+    def test_create_task_default_episode_offset(self, task_repository):
+        """測試建立任務時偏移欄位有正確預設值"""
+        task_data = {
+            "name": "預設偏移任務",
+            "include": "關鍵字",
+            "move_to": "/downloads/test",
+        }
+        task_create = schemas.TaskCreate(**task_data)
+        task = task_repository.create(task_create)
+
+        assert task.episode_offset_enabled is False
+        assert task.episode_offset_group is None
+        assert task.episode_offset_value == 0
+
+    def test_update_task_episode_offset(self, task_repository, sample_task_data):
+        """測試更新任務偏移設定"""
+        task_create = schemas.TaskCreate(**sample_task_data)
+        created_task = task_repository.create(task_create)
+
+        update_data = schemas.TaskUpdate(
+            name=sample_task_data["name"],
+            include=sample_task_data["include"],
+            move_to=sample_task_data["move_to"],
+            episode_offset_enabled=True,
+            episode_offset_group="episode",
+            episode_offset_value=24,
+        )
+        updated_task = task_repository.update(created_task.id, update_data)
+
+        assert updated_task.episode_offset_enabled is True
+        assert updated_task.episode_offset_group == "episode"
+        assert updated_task.episode_offset_value == 24
+
+    def test_get_task_includes_episode_offset(self, task_repository):
+        """測試取得任務時包含偏移欄位"""
+        task_data = {
+            "name": "偏移查詢任務",
+            "include": "關鍵字",
+            "move_to": "/downloads/test",
+            "episode_offset_enabled": True,
+            "episode_offset_group": "ep",
+            "episode_offset_value": -5,
+        }
+        task_create = schemas.TaskCreate(**task_data)
+        created_task = task_repository.create(task_create)
+
+        found_task = task_repository.get_by_id(created_task.id)
+
+        assert found_task.episode_offset_enabled is True
+        assert found_task.episode_offset_group == "ep"
+        assert found_task.episode_offset_value == -5
+
+
 class TestTaskRepositoryGetStats:
     """測試 TaskRepository.get_stats 方法"""
 

@@ -146,7 +146,16 @@
         "parse": "Template Parsing (Parse)",
         "regex": "Regular Expression (Regex)"
       },
-      "srcFilename": "Source Filename Pattern"
+      "srcFilename": "Source Filename Pattern",
+      "episodeOffset": {
+        "label": "Episode Offset",
+        "enabled": "Enable Episode Offset",
+        "group": "Offset Target Group",
+        "groupPlaceholder": "Select a group...",
+        "groupEmpty": "Complete source filename preview to see available groups",
+        "value": "Offset Value",
+        "description": "Automatically add/subtract a number from the selected group's episode value during rename"
+      }
     }
   },
   "createTaskView": {

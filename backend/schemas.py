@@ -26,7 +26,9 @@ class LogBase(BaseModel):
         description="日誌的等級",
         examples=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
     )
-    message: str = Field(..., max_length=5000, description="日誌的內容訊息", examples=[""])
+    message: str = Field(
+        ..., max_length=5000, description="日誌的內容訊息", examples=[""]
+    )
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(UTC),
         description="日誌的建立時間",
@@ -54,9 +56,14 @@ class TaskUUID(BaseModel):
 
 
 class TaskBase(BaseModel):
-    name: str = Field(..., max_length=255, description="任務的名稱", examples=["公爵千金的家庭教師"])
+    name: str = Field(
+        ..., max_length=255, description="任務的名稱", examples=["公爵千金的家庭教師"]
+    )
     include: str = Field(
-        ..., max_length=1000, description="用於匹配檔案的包含規則", examples=["公爵千金的家庭教師"]
+        ...,
+        max_length=1000,
+        description="用於匹配檔案的包含規則",
+        examples=["公爵千金的家庭教師"],
     )
     move_to: str = Field(
         ...,
@@ -64,11 +71,20 @@ class TaskBase(BaseModel):
         description="檔案移動到的目標目錄路徑",
         examples=["/Downloads/anime/公爵千金的家庭教師"],
     )
-    src_filename: Optional[str] = Field(None, max_length=1000, description="來源檔案名稱規則")
-    dst_filename: Optional[str] = Field(None, max_length=1000, description="目標檔案名稱模板")
+    src_filename: Optional[str] = Field(
+        None, max_length=1000, description="來源檔案名稱規則"
+    )
+    dst_filename: Optional[str] = Field(
+        None, max_length=1000, description="目標檔案名稱模板"
+    )
     rename_rule: Optional[Literal["regex", "parse"]] = Field(
         None, description="重新命名規則的類型"
     )
+    episode_offset_enabled: bool = Field(False, description="是否啟用 episode 偏移")
+    episode_offset_group: Optional[str] = Field(
+        None, max_length=255, description="偏移目標的 group 名稱"
+    )
+    episode_offset_value: int = Field(0, description="episode 偏移量")
     enabled: bool = Field(True, description="任務的啟用狀態")
 
 
@@ -95,12 +111,23 @@ class TaskStats(BaseModel):
 
 # --- Tag Schemas ---
 
-ALLOWED_TAG_COLORS = {"red", "orange", "yellow", "green", "blue", "purple", "pink", "gray"}
+ALLOWED_TAG_COLORS = {
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "purple",
+    "pink",
+    "gray",
+}
 
 
 class TagBase(BaseModel):
     name: str = Field(..., max_length=255, description="標籤名稱", examples=["動畫"])
-    color: str = Field(..., max_length=20, description="標籤顏色（預定義色票名稱）", examples=["blue"])
+    color: str = Field(
+        ..., max_length=20, description="標籤顏色（預定義色票名稱）", examples=["blue"]
+    )
 
 
 class TagCreate(TagBase):
@@ -129,10 +156,21 @@ ALLOWED_FIELD_TYPES = {"src", "dst"}
 
 
 class PresetRuleBase(BaseModel):
-    name: str = Field(..., max_length=255, description="常用規則名稱", examples=["動畫季番命名"])
-    rule_type: Literal["parse", "regex"] = Field(..., description="規則引擎類型", examples=["parse"])
-    field_type: Literal["src", "dst"] = Field(..., description="對應欄位類型", examples=["src"])
-    pattern: str = Field(..., max_length=1000, description="規則內容", examples=["{title} - {episode}.mp4"])
+    name: str = Field(
+        ..., max_length=255, description="常用規則名稱", examples=["動畫季番命名"]
+    )
+    rule_type: Literal["parse", "regex"] = Field(
+        ..., description="規則引擎類型", examples=["parse"]
+    )
+    field_type: Literal["src", "dst"] = Field(
+        ..., description="對應欄位類型", examples=["src"]
+    )
+    pattern: str = Field(
+        ...,
+        max_length=1000,
+        description="規則內容",
+        examples=["{title} - {episode}.mp4"],
+    )
 
 
 class PresetRuleCreate(PresetRuleBase):
@@ -159,16 +197,25 @@ class PresetRule_(PresetRuleBase, OrmBaseModel):
 
 class SettingBase(BaseModel):
     key: str = Field(
-        ..., max_length=255, description="設定名稱", json_schema_extra={"example": "timezone"}
+        ...,
+        max_length=255,
+        description="設定名稱",
+        json_schema_extra={"example": "timezone"},
     )
     value: str = Field(
-        ..., max_length=5000, description="設定值", json_schema_extra={"example": "Asia/Taipei"}
+        ...,
+        max_length=5000,
+        description="設定值",
+        json_schema_extra={"example": "Asia/Taipei"},
     )
 
 
 class SettingUpdate(BaseModel):
     value: str = Field(
-        ..., max_length=5000, description="設定值", json_schema_extra={"example": "Asia/Taipei"}
+        ...,
+        max_length=5000,
+        description="設定值",
+        json_schema_extra={"example": "Asia/Taipei"},
     )
 
 
@@ -273,12 +320,8 @@ class RegexPreviewResponse(RegexPreviewRequest):
 
 class DirectoryItem(BaseModel):
     name: str = Field(..., description="目錄名稱", examples=["anime"])
-    path: str = Field(
-        ..., description="完整路徑", examples=["/downloads/anime"]
-    )
-    has_children: bool = Field(
-        ..., description="是否有子目錄", examples=[True]
-    )
+    path: str = Field(..., description="完整路徑", examples=["/downloads/anime"])
+    has_children: bool = Field(..., description="是否有子目錄", examples=[True])
 
 
 class DirectoryListResponse(BaseModel):

@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import DirectoryPickerModal from '@/components/DirectoryPickerModal.vue'
 import PresetRuleModal from '@/components/PresetRuleModal.vue'
@@ -28,6 +36,10 @@ const props = defineProps({
   isRenameRuleRequired: {
     type: Boolean,
     default: false,
+  },
+  availableGroups: {
+    type: Array as () => string[],
+    default: () => [],
   }
 })
 
@@ -79,11 +91,52 @@ function handleDirectorySelect(path: string) {
   emit('update:modelValue', { ...task.value, move_to: path })
 }
 
+// 從 src_filename pattern 解析出可用的 group 名稱
+const computedAvailableGroups = computed<string[]>(() => {
+  const src = task.value.src_filename
+  const rule = task.value.rename_rule
+  if (!src || !rule) return []
+
+  if (rule === 'parse') {
+    // 提取 {groupname} 格式的 group（排除格式指定符如 {episode:02d}）
+    const matches = src.matchAll(/\{([a-zA-Z_]\w*)(?::[^}]*)?\}/g)
+    return [...matches].map(m => m[1])
+  }
+
+  if (rule === 'regex') {
+    // 提取 (?P<groupname>...) 格式的 named group
+    const matches = src.matchAll(/\(\?P<([a-zA-Z_]\w*)>/g)
+    return [...matches].map(m => m[1])
+  }
+
+  return []
+})
+
+// 合併 props 傳入的 groups 與自動計算的 groups
+const mergedAvailableGroups = computed(() => {
+  const fromProps = props.availableGroups ?? []
+  const fromPattern = computedAvailableGroups.value
+  const combined = new Set([...fromPattern, ...fromProps])
+  return [...combined]
+})
+
 const tagIds = computed(() => task.value.tag_ids ?? task.value.tags?.map((t: { id: string }) => t.id) ?? [])
 
 function handleTagIdsUpdate(value: string[]) {
   emit('update:modelValue', { ...task.value, tag_ids: value })
 }
+
+const episodeOffsetEnabled = computed({
+  get: () => task.value.episode_offset_enabled ?? false,
+  set: (value: boolean | 'indeterminate' | null) => {
+    task.value.episode_offset_enabled = value === true
+  }
+})
+
+function handleOffsetGroupChange(value: string) {
+  task.value.episode_offset_group = value
+}
+
 </script>
 
 <template>
@@ -248,6 +301,80 @@ function handleTagIdsUpdate(value: string[]) {
         >
           <FileCode class="size-4" />
         </Button>
+      </div>
+    </div>
+
+    <!-- Episode 偏移設定 -->
+    <div
+      v-if="isRenameRuleRequired"
+      data-testid="episode-offset-section"
+      class="space-y-3 rounded-md border border-foreground/20 p-4"
+    >
+      <div class="flex items-center space-x-2">
+        <Checkbox
+          id="episode_offset_enabled"
+          data-testid="episode-offset-enabled"
+          v-model="episodeOffsetEnabled"
+        />
+        <Label for="episode_offset_enabled" class="cursor-pointer">
+          {{ t('components.taskForm.episodeOffset.enabled') }}
+        </Label>
+      </div>
+      <p class="text-xs text-muted-foreground">
+        {{ t('components.taskForm.episodeOffset.description') }}
+      </p>
+
+      <div
+        v-if="episodeOffsetEnabled"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2"
+      >
+        <!-- Group 選擇 -->
+        <div class="space-y-2">
+          <Label for="episode_offset_group">
+            {{ t('components.taskForm.episodeOffset.group') }}
+          </Label>
+          <Select
+            :model-value="task.episode_offset_group ?? undefined"
+            @update:model-value="handleOffsetGroupChange"
+          >
+            <SelectTrigger
+              id="episode_offset_group"
+              data-testid="episode-offset-group"
+              class="border-foreground"
+            >
+              <SelectValue :placeholder="t('components.taskForm.episodeOffset.groupPlaceholder')" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="group in mergedAvailableGroups"
+                :key="group"
+                :value="group"
+              >
+                {{ group }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <p
+            v-if="mergedAvailableGroups.length === 0"
+            class="text-xs text-muted-foreground"
+          >
+            {{ t('components.taskForm.episodeOffset.groupEmpty') }}
+          </p>
+        </div>
+
+        <!-- 偏移量 -->
+        <div class="space-y-2">
+          <Label for="episode_offset_value">
+            {{ t('components.taskForm.episodeOffset.value') }}
+          </Label>
+          <Input
+            id="episode_offset_value"
+            data-testid="episode-offset-value"
+            type="number"
+            class="border-foreground"
+            v-model.number="task.episode_offset_value"
+          />
+        </div>
       </div>
     </div>
 
