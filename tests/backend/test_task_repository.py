@@ -269,6 +269,191 @@ class TestTaskRepositoryGetStats:
         assert stats.disabled == 1
 
 
+class TestTaskRepositoryBatchCreate:
+    """測試 TaskRepository.batch_create 方法"""
+
+    def test_batch_create_success(
+        self, task_repository, sample_task_data, sample_task_data_2
+    ):
+        """成功批量建立多筆，DB 內可查得"""
+        items = [
+            schemas.TaskCreate(**sample_task_data),
+            schemas.TaskCreate(**sample_task_data_2),
+        ]
+
+        created = task_repository.batch_create(items)
+
+        assert len(created) == 2
+        assert created[0].name == sample_task_data["name"]
+        assert created[1].name == sample_task_data_2["name"]
+        # 驗證 DB 實際可查得
+        assert task_repository.get_by_name(sample_task_data["name"]) is not None
+        assert task_repository.get_by_name(sample_task_data_2["name"]) is not None
+
+    def test_batch_create_conflicts_with_existing_name(
+        self, task_repository, sample_task_data, sample_task_data_2
+    ):
+        """批量中某筆 name 與 DB 現有重複，拋出 TaskAlreadyExists，整體未寫入"""
+        from backend.exceptions.task_exception import TaskAlreadyExists
+
+        # 先建立一筆
+        task_repository.create(schemas.TaskCreate(**sample_task_data))
+
+        # 批量建立：第 2 筆是新 name，第 1 筆與既有重名
+        items = [
+            schemas.TaskCreate(**sample_task_data),
+            schemas.TaskCreate(**sample_task_data_2),
+        ]
+
+        with pytest.raises(TaskAlreadyExists):
+            task_repository.batch_create(items)
+
+        # 第 2 筆不應該被寫入（rollback）
+        assert task_repository.get_by_name(sample_task_data_2["name"]) is None
+        # 全部任務應仍然只有最初的 1 筆
+        assert len(task_repository.get_all()) == 1
+
+    def test_batch_create_intra_batch_duplicate(
+        self, task_repository, sample_task_data
+    ):
+        """批量內部兩筆同名，拋出 TaskAlreadyExists，整體未寫入"""
+        from backend.exceptions.task_exception import TaskAlreadyExists
+
+        items = [
+            schemas.TaskCreate(**sample_task_data),
+            schemas.TaskCreate(**sample_task_data),
+        ]
+
+        with pytest.raises(TaskAlreadyExists):
+            task_repository.batch_create(items)
+
+        assert task_repository.get_all() == []
+
+
+class TestTaskRepositoryBatchUpdate:
+    """測試 TaskRepository.batch_update 方法"""
+
+    def test_batch_update_enabled_success(
+        self, task_repository, sample_task_data, sample_task_data_2
+    ):
+        """批量更新 enabled=False"""
+        t1 = task_repository.create(schemas.TaskCreate(**sample_task_data))
+        t2 = task_repository.create(schemas.TaskCreate(**sample_task_data_2))
+        t3_data = {**sample_task_data, "name": "第三個任務"}
+        t3 = task_repository.create(schemas.TaskCreate(**t3_data))
+
+        items = [
+            schemas.TaskBatchUpdateItem(id=t1.id, patch=schemas.TaskPatch(enabled=False)),
+            schemas.TaskBatchUpdateItem(id=t2.id, patch=schemas.TaskPatch(enabled=False)),
+            schemas.TaskBatchUpdateItem(id=t3.id, patch=schemas.TaskPatch(enabled=False)),
+        ]
+
+        updated = task_repository.batch_update(items)
+
+        assert len(updated) == 3
+        for u in updated:
+            assert u.enabled is False
+
+    def test_batch_update_missing_id_raises_not_found(
+        self, task_repository, sample_task_data
+    ):
+        """其中一筆 id 不存在，拋出 TaskNotFound，整體未更新（rollback）"""
+        from backend.exceptions.task_exception import TaskNotFound
+
+        t1 = task_repository.create(schemas.TaskCreate(**sample_task_data))
+        # 原本 enabled=True
+        assert t1.enabled is True
+
+        items = [
+            schemas.TaskBatchUpdateItem(id=t1.id, patch=schemas.TaskPatch(enabled=False)),
+            schemas.TaskBatchUpdateItem(
+                id="non-existent-id", patch=schemas.TaskPatch(enabled=False)
+            ),
+        ]
+
+        with pytest.raises(TaskNotFound):
+            task_repository.batch_update(items)
+
+        # t1 不應該被變更
+        refreshed = task_repository.get_by_id(t1.id)
+        assert refreshed is not None
+        assert refreshed.enabled is True
+
+    def test_batch_update_intra_batch_name_conflict(
+        self, task_repository, sample_task_data, sample_task_data_2
+    ):
+        """兩筆 patch 欲改同名，拋出 TaskAlreadyExists"""
+        from backend.exceptions.task_exception import TaskAlreadyExists
+
+        t1 = task_repository.create(schemas.TaskCreate(**sample_task_data))
+        t2 = task_repository.create(schemas.TaskCreate(**sample_task_data_2))
+
+        items = [
+            schemas.TaskBatchUpdateItem(id=t1.id, patch=schemas.TaskPatch(name="衝突名稱")),
+            schemas.TaskBatchUpdateItem(id=t2.id, patch=schemas.TaskPatch(name="衝突名稱")),
+        ]
+
+        with pytest.raises(TaskAlreadyExists):
+            task_repository.batch_update(items)
+
+        # 雙方名稱皆未變
+        assert task_repository.get_by_id(t1.id).name == sample_task_data["name"]
+        assert task_repository.get_by_id(t2.id).name == sample_task_data_2["name"]
+
+    def test_batch_update_partial_patch_preserves_other_fields(
+        self, task_repository, sample_task_data
+    ):
+        """patch 僅含部分欄位時，其他欄位不變"""
+        t1 = task_repository.create(schemas.TaskCreate(**sample_task_data))
+        original_include = t1.include
+        original_move_to = t1.move_to
+
+        items = [
+            schemas.TaskBatchUpdateItem(id=t1.id, patch=schemas.TaskPatch(enabled=False)),
+        ]
+        updated = task_repository.batch_update(items)
+
+        assert updated[0].enabled is False
+        assert updated[0].include == original_include
+        assert updated[0].move_to == original_move_to
+
+
+class TestTaskRepositoryBatchDelete:
+    """測試 TaskRepository.batch_delete 方法"""
+
+    def test_batch_delete_success(
+        self, task_repository, sample_task_data, sample_task_data_2
+    ):
+        """批量刪除存在的多筆，DB 中被移除"""
+        t1 = task_repository.create(schemas.TaskCreate(**sample_task_data))
+        t2 = task_repository.create(schemas.TaskCreate(**sample_task_data_2))
+
+        deleted = task_repository.batch_delete([t1.id, t2.id])
+
+        assert set(deleted) == {t1.id, t2.id}
+        assert task_repository.get_by_id(t1.id) is None
+        assert task_repository.get_by_id(t2.id) is None
+
+    def test_batch_delete_missing_id_raises_not_found(
+        self, task_repository, sample_task_data
+    ):
+        """ids 含不存在 id，拋出 TaskNotFound，整體未刪除"""
+        from backend.exceptions.task_exception import TaskNotFound
+
+        t1 = task_repository.create(schemas.TaskCreate(**sample_task_data))
+
+        with pytest.raises(TaskNotFound):
+            task_repository.batch_delete([t1.id, "non-existent-id"])
+
+        # t1 不應該被刪除
+        assert task_repository.get_by_id(t1.id) is not None
+
+    def test_batch_delete_empty_ids_raises(self, task_repository):
+        """ids 為空，拋出 ValueError"""
+        with pytest.raises(ValueError):
+            task_repository.batch_delete([])
+
+
 class TestTaskRepositoryGetEnabledTasks:
     """測試 TaskRepository.get_enabled_tasks 方法"""
 

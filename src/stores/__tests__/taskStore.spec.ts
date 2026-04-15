@@ -365,42 +365,106 @@ describe('TaskStore', () => {
   })
 
   describe('批量操作', () => {
-    it('batchDelete 應該刪除所有選中的任務', async () => {
+    it('batchDelete 應該只呼叫一次 batch API 並移除所選任務', async () => {
       const store = useTaskStore()
       store.tasks = [{ ...sampleTask }, { ...sampleTask2 }]
       store.selectedTaskIds = new Set([sampleTask.id, sampleTask2.id])
-      mockRequest.mockResolvedValue(undefined)
+      mockRequest.mockResolvedValueOnce({
+        items: [],
+        deleted_ids: [sampleTask.id, sampleTask2.id],
+      })
 
       await store.batchDelete()
 
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledWith(
+        'DELETE',
+        '/api/v1/tasks/batch',
+        { ids: [sampleTask.id, sampleTask2.id] }
+      )
       expect(store.tasks).toHaveLength(0)
       expect(store.selectedTaskIds.size).toBe(0)
     })
 
-    it('batchEnable 應該啟用所有選中的停用任務', async () => {
+    it('batchEnable 應該只呼叫一次 batch API 並依回應更新本地任務', async () => {
       const store = useTaskStore()
       store.tasks = [{ ...sampleTask2 }] // sampleTask2.enabled = false
       store.selectedTaskIds = new Set([sampleTask2.id])
 
       const enabledTask = { ...sampleTask2, enabled: true }
-      mockRequest.mockResolvedValueOnce(enabledTask)
+      mockRequest.mockResolvedValueOnce({
+        items: [enabledTask],
+        deleted_ids: [],
+      })
 
       await store.batchEnable()
 
-      expect(mockRequest).toHaveBeenCalled()
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledWith(
+        'PUT',
+        '/api/v1/tasks/batch',
+        { items: [{ id: sampleTask2.id, patch: { enabled: true } }] }
+      )
+      expect(store.tasks[0]!.enabled).toBe(true)
+      expect(store.selectedTaskIds.size).toBe(0)
     })
 
-    it('batchDisable 應該停用所有選中的啟用任務', async () => {
+    it('batchDisable 應該只呼叫一次 batch API 並依回應更新本地任務', async () => {
       const store = useTaskStore()
       store.tasks = [{ ...sampleTask }] // sampleTask.enabled = true
       store.selectedTaskIds = new Set([sampleTask.id])
 
       const disabledTask = { ...sampleTask, enabled: false }
-      mockRequest.mockResolvedValueOnce(disabledTask)
+      mockRequest.mockResolvedValueOnce({
+        items: [disabledTask],
+        deleted_ids: [],
+      })
 
       await store.batchDisable()
 
-      expect(mockRequest).toHaveBeenCalled()
+      expect(mockRequest).toHaveBeenCalledTimes(1)
+      expect(mockRequest).toHaveBeenCalledWith(
+        'PUT',
+        '/api/v1/tasks/batch',
+        { items: [{ id: sampleTask.id, patch: { enabled: false } }] }
+      )
+      expect(store.tasks[0]!.enabled).toBe(false)
+      expect(store.selectedTaskIds.size).toBe(0)
+    })
+
+    it('batchDelete 在 API 失敗時不修改本地狀態', async () => {
+      const store = useTaskStore()
+      store.tasks = [{ ...sampleTask }, { ...sampleTask2 }]
+      store.selectedTaskIds = new Set([sampleTask.id, sampleTask2.id])
+      mockRequest.mockRejectedValueOnce(new Error('network error'))
+
+      await expect(store.batchDelete()).rejects.toThrow('network error')
+
+      expect(store.tasks).toHaveLength(2)
+      expect(store.selectedTaskIds.size).toBe(2)
+      expect(store.error).toBe('network error')
+    })
+
+    it('batchSetEnabled 在 API 失敗時不修改本地狀態', async () => {
+      const store = useTaskStore()
+      store.tasks = [{ ...sampleTask }]
+      store.selectedTaskIds = new Set([sampleTask.id])
+      mockRequest.mockRejectedValueOnce(new Error('server error'))
+
+      await expect(store.batchEnable()).rejects.toThrow('server error')
+
+      expect(store.tasks[0]!.enabled).toBe(true) // unchanged
+      expect(store.selectedTaskIds.size).toBe(1) // unchanged
+      expect(store.error).toBe('server error')
+    })
+
+    it('batchDelete 未選取任務時不發出請求', async () => {
+      const store = useTaskStore()
+      store.selectedTaskIds = new Set()
+
+      await store.batchDelete()
+
+      expect(mockRequest).not.toHaveBeenCalled()
     })
   })
 

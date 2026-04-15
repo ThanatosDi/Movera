@@ -109,6 +109,61 @@ class TaskStats(BaseModel):
     disabled: int = 0
 
 
+# --- Task Batch Schemas ---
+
+TASK_BATCH_MAX_ITEMS = 500
+
+
+class TaskPatch(BaseModel):
+    """批量更新時的部分欄位 patch。所有欄位皆為 Optional。"""
+
+    name: Optional[str] = Field(None, max_length=255, description="任務的名稱")
+    include: Optional[str] = Field(None, max_length=1000, description="包含規則")
+    move_to: Optional[str] = Field(None, max_length=4096, description="目標目錄路徑")
+    src_filename: Optional[str] = Field(None, max_length=1000, description="來源檔案名稱規則")
+    dst_filename: Optional[str] = Field(None, max_length=1000, description="目標檔案名稱模板")
+    rename_rule: Optional[Literal["regex", "parse"]] = Field(None, description="重新命名規則類型")
+    episode_offset_enabled: Optional[bool] = Field(None, description="是否啟用 episode 偏移")
+    episode_offset_group: Optional[str] = Field(None, max_length=255, description="偏移 group 名稱")
+    episode_offset_value: Optional[int] = Field(None, description="episode 偏移量")
+    enabled: Optional[bool] = Field(None, description="任務的啟用狀態")
+    tag_ids: Optional[List[str]] = Field(None, description="關聯的標籤 ID 列表")
+
+    model_config = {"extra": "forbid"}
+
+
+class TaskBatchCreate(BaseModel):
+    """批量建立任務請求。"""
+
+    items: List[TaskCreate] = Field(..., description="要建立的任務清單")
+
+
+class TaskBatchUpdateItem(BaseModel):
+    """批量更新時的單筆項目。"""
+
+    id: str = Field(..., description="任務 ID")
+    patch: TaskPatch = Field(..., description="要套用的部分欄位更新")
+
+
+class TaskBatchUpdate(BaseModel):
+    """批量更新任務請求。"""
+
+    items: List[TaskBatchUpdateItem] = Field(..., description="要更新的任務清單")
+
+
+class TaskBatchDelete(BaseModel):
+    """批量刪除任務請求。"""
+
+    ids: List[str] = Field(..., description="要刪除的任務 ID 清單")
+
+
+class TaskBatchResult(BaseModel):
+    """批量 CRUD 回應結果。"""
+
+    items: List[Task] = Field(default_factory=list, description="建立或更新後的任務清單")
+    deleted_ids: List[str] = Field(default_factory=list, description="已刪除的任務 ID 清單")
+
+
 # --- Tag Schemas ---
 
 ALLOWED_TAG_COLORS = {

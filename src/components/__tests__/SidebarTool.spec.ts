@@ -101,4 +101,46 @@ describe('SidebarTool - 選擇模式批量操作列', () => {
       })
     })
   })
+
+  describe('批量操作按鈕呼叫 store', () => {
+    it('點擊「刪除」應呼叫 taskStore.batchDelete 一次', async () => {
+      store.isSelectMode = true
+      store.selectedTaskIds = new Set(['1'])
+      const spy = vi.spyOn(store, 'batchDelete').mockResolvedValue(undefined)
+
+      const wrapper = mountComponent()
+      const buttons = wrapper.find('[class*="bg-sidebar-accent"]').findAll('button')
+      const actionButtons = buttons.filter(b => !b.text().includes('已選擇'))
+      // 順序：啟用、停用、刪除
+      await actionButtons[2]!.trigger('click')
+
+      expect(spy).toHaveBeenCalledTimes(1)
+    })
+
+    it('點擊「啟用」應呼叫 taskStore.batchEnable 一次', async () => {
+      store.isSelectMode = true
+      store.selectedTaskIds = new Set(['1'])
+      const spy = vi.spyOn(store, 'batchEnable').mockResolvedValue(undefined)
+
+      const wrapper = mountComponent()
+      const buttons = wrapper.find('[class*="bg-sidebar-accent"]').findAll('button')
+      const actionButtons = buttons.filter(b => !b.text().includes('已選擇'))
+      await actionButtons[0]!.trigger('click')
+
+      expect(spy).toHaveBeenCalledTimes(1)
+    })
+
+    it('點擊「停用」應呼叫 taskStore.batchDisable 一次', async () => {
+      store.isSelectMode = true
+      store.selectedTaskIds = new Set(['1'])
+      const spy = vi.spyOn(store, 'batchDisable').mockResolvedValue(undefined)
+
+      const wrapper = mountComponent()
+      const buttons = wrapper.find('[class*="bg-sidebar-accent"]').findAll('button')
+      const actionButtons = buttons.filter(b => !b.text().includes('已選擇'))
+      await actionButtons[1]!.trigger('click')
+
+      expect(spy).toHaveBeenCalledTimes(1)
+    })
+  })
 })
