@@ -6,22 +6,24 @@ on:
       - "v*.*.*"
 
 jobs:
-  build-movera:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+            slug: "amd64"
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+            slug: "arm64"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: |
-            thanatosdi/movera
-          # generate Docker tags based on the following events/attributes
-          tags: |
-            type=raw,value=latest
-            type=semver,pattern={{version}}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to Docker Hub
         uses: docker/login-action@v4
@@ -29,17 +31,46 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Build and push
+      - name: Build and push by digest
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,name=thanatosdi/movera,push-by-digest=true,push=true
+          cache-from: type=gha,scope=build-${{ matrix.slug }}
+          cache-to: type=gha,mode=max,scope=build-${{ matrix.slug }}
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          # touch "/tmp/digests/${digest#sha256:}"
+          echo "${digest#sha256:}" > "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload Digest Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: movera-${{ matrix.slug }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract version
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Merge manifests
+        uses: ThanatosDi/merge-images-digests@main
+        with:
+          image-name: thanatosdi/movera
+          artifact-pattern: movera-*
+          tags: |
+            latest
+            ${{ steps.version.outputs.version }}
+          registry-username: ${{ vars.DOCKERHUB_USERNAME }}
+          registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
