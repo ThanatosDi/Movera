@@ -50,6 +50,34 @@ export interface Task {
 export type TaskCreate = Omit<Task, 'id' | 'created_at' | 'logs' | 'tags'> & { tag_ids: string[] };
 export type TaskUpdate = Omit<Task, 'id' | 'created_at' | 'logs' | 'tags'> & { tag_ids: string[] };
 
+// --- Task Batch Schemas ---
+
+export type TaskPatch = Partial<Omit<Task, 'id' | 'created_at' | 'logs' | 'tags'>> & {
+  tag_ids?: string[];
+};
+
+export interface TaskBatchUpdateItem {
+  id: string;
+  patch: TaskPatch;
+}
+
+export interface TaskBatchCreateRequest {
+  items: TaskCreate[];
+}
+
+export interface TaskBatchUpdateRequest {
+  items: TaskBatchUpdateItem[];
+}
+
+export interface TaskBatchDeleteRequest {
+  ids: string[];
+}
+
+export interface TaskBatchResult {
+  items: Task[];
+  deleted_ids: string[];
+}
+
 export interface Log {
   id: number;
   task_id: number;

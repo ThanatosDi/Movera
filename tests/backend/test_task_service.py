@@ -191,3 +191,101 @@ class TestTaskServiceDeleteTask:
             task_service.delete_task("non-existent-id")
 
         assert "non-existent-id" in str(exc_info.value)
+
+
+class TestTaskServiceBatch:
+    """測試 TaskService 的批量方法"""
+
+    def test_batch_create_tasks_success(
+        self, task_service, sample_task_data, sample_task_data_2
+    ):
+        """批量建立委派至 repository 並回傳結果"""
+        items = [
+            schemas.TaskCreate(**sample_task_data),
+            schemas.TaskCreate(**sample_task_data_2),
+        ]
+        created = task_service.batch_create_tasks(items)
+
+        assert len(created) == 2
+        assert created[0].name == sample_task_data["name"]
+
+    def test_batch_create_propagates_duplicate_error(
+        self, task_service, sample_task_data
+    ):
+        """批量建立重名時例外往上拋"""
+        task_service.create_task(schemas.TaskCreate(**sample_task_data))
+
+        items = [schemas.TaskCreate(**sample_task_data)]
+        with pytest.raises(TaskAlreadyExists):
+            task_service.batch_create_tasks(items)
+
+    def test_batch_update_tasks_success(
+        self, task_service, sample_task_data, sample_task_data_2
+    ):
+        """批量更新 enabled=False"""
+        t1 = task_service.create_task(schemas.TaskCreate(**sample_task_data))
+        t2 = task_service.create_task(schemas.TaskCreate(**sample_task_data_2))
+
+        items = [
+            schemas.TaskBatchUpdateItem(
+                id=t1.id, patch=schemas.TaskPatch(enabled=False)
+            ),
+            schemas.TaskBatchUpdateItem(
+                id=t2.id, patch=schemas.TaskPatch(enabled=True)
+            ),
+        ]
+        updated = task_service.batch_update_tasks(items)
+
+        assert len(updated) == 2
+        assert updated[0].enabled is False
+        assert updated[1].enabled is True
+
+    def test_batch_update_name_conflict_propagates(
+        self, task_service, sample_task_data, sample_task_data_2
+    ):
+        """批量更新時 patch name 與其他既有任務衝突，例外往上拋"""
+        t1 = task_service.create_task(schemas.TaskCreate(**sample_task_data))
+        task_service.create_task(schemas.TaskCreate(**sample_task_data_2))
+
+        # 將 t1 的 name 改為 t2 的 name
+        items = [
+            schemas.TaskBatchUpdateItem(
+                id=t1.id,
+                patch=schemas.TaskPatch(name=sample_task_data_2["name"]),
+            ),
+        ]
+        with pytest.raises(TaskAlreadyExists):
+            task_service.batch_update_tasks(items)
+
+    def test_batch_update_not_found_propagates(self, task_service):
+        """批量更新 id 不存在，TaskNotFound 往上拋"""
+        items = [
+            schemas.TaskBatchUpdateItem(
+                id="non-existent", patch=schemas.TaskPatch(enabled=False)
+            ),
+        ]
+        with pytest.raises(TaskNotFound):
+            task_service.batch_update_tasks(items)
+
+    def test_batch_delete_tasks_success(
+        self, task_service, sample_task_data, sample_task_data_2
+    ):
+        """批量刪除委派至 repository"""
+        t1 = task_service.create_task(schemas.TaskCreate(**sample_task_data))
+        t2 = task_service.create_task(schemas.TaskCreate(**sample_task_data_2))
+
+        deleted = task_service.batch_delete_tasks([t1.id, t2.id])
+
+        assert set(deleted) == {t1.id, t2.id}
+        assert task_service.get_task_by_id(t1.id) is None
+        assert task_service.get_task_by_id(t2.id) is None
+
+    def test_batch_delete_not_found_propagates(self, task_service, sample_task_data):
+        """批量刪除 id 不存在，TaskNotFound 往上拋"""
+        t1 = task_service.create_task(schemas.TaskCreate(**sample_task_data))
+
+        with pytest.raises(TaskNotFound):
+            task_service.batch_delete_tasks([t1.id, "non-existent"])
+
+        # t1 仍存在
+        assert task_service.get_task_by_id(t1.id) is not None

@@ -1,5 +1,12 @@
 import { request } from '@/composables/useHttpService'
-import type { Log, Task, TaskCreate, TaskUpdate } from '@/schemas'
+import type {
+  Log,
+  Task,
+  TaskBatchResult,
+  TaskBatchUpdateItem,
+  TaskCreate,
+  TaskUpdate,
+} from '@/schemas'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
@@ -208,27 +215,69 @@ export const useTaskStore = defineStore('taskStore', () => {
   /** Number of currently selected tasks. */
   const selectedCount = computed(() => selectedTaskIds.value.size)
 
-  /** Delete all currently selected tasks. */
-  async function batchDelete() {
-    const idsToDelete = Array.from(selectedTaskIds.value)
-    for (const id of idsToDelete) {
-      await deleteTask(id)
+  /**
+   * Merge a batch result's items back into the local tasks list by id.
+   * @param items - Tasks returned by the batch API to replace local counterparts.
+   */
+  function mergeBatchItems(items: Task[]) {
+    for (const item of items) {
+      const idx = tasks.value.findIndex(t => t.id === item.id)
+      if (idx !== -1) {
+        tasks.value[idx] = item
+      }
     }
-    selectedTaskIds.value = new Set()
   }
 
   /**
-   * Set enabled state for all selected tasks.
+   * Delete all currently selected tasks in a single batch API call.
+   * Local state is only mutated after the request succeeds.
+   */
+  async function batchDelete() {
+    const idsToDelete = Array.from(selectedTaskIds.value)
+    if (idsToDelete.length === 0) {
+      return
+    }
+    error.value = null
+    try {
+      const response = await request<TaskBatchResult>(
+        'DELETE',
+        '/api/v1/tasks/batch',
+        { ids: idsToDelete }
+      )
+      const deletedSet = new Set(response.deleted_ids)
+      tasks.value = tasks.value.filter(t => !deletedSet.has(t.id))
+      selectedTaskIds.value = new Set()
+    } catch (e) {
+      error.value = (e as Error).message
+      throw e
+    }
+  }
+
+  /**
+   * Set enabled state for all selected tasks in a single batch API call.
    * @param enabled - Whether to enable or disable the tasks.
    */
   async function batchSetEnabled(enabled: boolean) {
     const ids = Array.from(selectedTaskIds.value)
-    for (const id of ids) {
-      const task = getRefTaskById(id)
-      if (task && task.enabled !== enabled) {
-        const { id: _, created_at, logs, tags, ...taskData } = task
-        await updateTask(id, { ...taskData, enabled, tag_ids: tags?.map(t => t.id) || [] })
-      }
+    if (ids.length === 0) {
+      return
+    }
+    const items: TaskBatchUpdateItem[] = ids.map(id => ({
+      id,
+      patch: { enabled },
+    }))
+    error.value = null
+    try {
+      const response = await request<TaskBatchResult>(
+        'PUT',
+        '/api/v1/tasks/batch',
+        { items }
+      )
+      mergeBatchItems(response.items)
+      selectedTaskIds.value = new Set()
+    } catch (e) {
+      error.value = (e as Error).message
+      throw e
     }
   }
 

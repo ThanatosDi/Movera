@@ -139,3 +139,55 @@ class TaskService:
         """
         self._get_task_or_raise(task_id)
         return self.repository.delete(task_id)
+
+    # --- Batch operations ---
+
+    def batch_create_tasks(
+        self,
+        items: list[schemas.TaskCreate],
+    ) -> list[models.Task]:
+        """批量建立任務
+
+        Args:
+            items: 要建立的任務清單
+
+        Returns:
+            list[models.Task]: 已建立的任務清單
+
+        Raises:
+            TaskAlreadyExists: 批量內有重名，或與既有任務重名
+        """
+        return self.repository.batch_create(items)
+
+    def batch_update_tasks(
+        self,
+        items: list[schemas.TaskBatchUpdateItem],
+    ) -> list[models.Task]:
+        """批量更新任務
+
+        Args:
+            items: 批量更新項目清單
+
+        Returns:
+            list[models.Task]: 已更新的任務清單
+
+        Raises:
+            TaskNotFound: 任一 id 不存在
+            TaskAlreadyExists: 更新後名稱與其他任務重名
+        """
+        return self.repository.batch_update(items)
+
+    def batch_delete_tasks(self, ids: list[str]) -> list[str]:
+        """批量刪除任務
+
+        Args:
+            ids: 要刪除的任務 ID 清單
+
+        Returns:
+            list[str]: 已刪除的任務 ID 清單
+
+        Raises:
+            TaskNotFound: 任一 id 不存在
+            ValueError: 當 ids 為空
+        """
+        return self.repository.batch_delete(ids)

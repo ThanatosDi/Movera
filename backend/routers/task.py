@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends, HTTPException
 
 from backend import schemas
 from backend.dependencies import depends_task_service
+from backend.schemas import TASK_BATCH_MAX_ITEMS
 from backend.services.task_service import TaskService
 
 router = APIRouter(prefix="/api/v1", tags=["Tasks"])
@@ -14,6 +15,74 @@ router = APIRouter(prefix="/api/v1", tags=["Tasks"])
 )
 def get_all_tasks(service: TaskService = Depends(depends_task_service)):
     return service.get_all_tasks()
+
+
+# --- Batch endpoints (placed before `/tasks/{task_id}` to avoid path conflict) ---
+
+
+@router.post(
+    "/tasks/batch",
+    response_model=schemas.TaskBatchResult,
+    status_code=201,
+    summary="批量建立任務",
+)
+def batch_create_tasks(
+    payload: schemas.TaskBatchCreate,
+    service: TaskService = Depends(depends_task_service),
+):
+    if len(payload.items) == 0:
+        raise HTTPException(status_code=400, detail="items must not be empty")
+    if len(payload.items) > TASK_BATCH_MAX_ITEMS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"items exceeds maximum of {TASK_BATCH_MAX_ITEMS}",
+        )
+    created = service.batch_create_tasks(payload.items)
+    return schemas.TaskBatchResult(
+        items=[schemas.Task.model_validate(t) for t in created]
+    )
+
+
+@router.put(
+    "/tasks/batch",
+    response_model=schemas.TaskBatchResult,
+    summary="批量更新任務",
+)
+def batch_update_tasks(
+    payload: schemas.TaskBatchUpdate,
+    service: TaskService = Depends(depends_task_service),
+):
+    if len(payload.items) == 0:
+        raise HTTPException(status_code=400, detail="items must not be empty")
+    if len(payload.items) > TASK_BATCH_MAX_ITEMS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"items exceeds maximum of {TASK_BATCH_MAX_ITEMS}",
+        )
+    updated = service.batch_update_tasks(payload.items)
+    return schemas.TaskBatchResult(
+        items=[schemas.Task.model_validate(t) for t in updated]
+    )
+
+
+@router.delete(
+    "/tasks/batch",
+    response_model=schemas.TaskBatchResult,
+    summary="批量刪除任務",
+)
+def batch_delete_tasks(
+    payload: schemas.TaskBatchDelete = Body(...),
+    service: TaskService = Depends(depends_task_service),
+):
+    if len(payload.ids) == 0:
+        raise HTTPException(status_code=400, detail="ids must not be empty")
+    if len(payload.ids) > TASK_BATCH_MAX_ITEMS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"ids exceeds maximum of {TASK_BATCH_MAX_ITEMS}",
+        )
+    deleted_ids = service.batch_delete_tasks(payload.ids)
+    return schemas.TaskBatchResult(deleted_ids=deleted_ids)
 
 
 @router.get(
