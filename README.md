@@ -16,7 +16,8 @@ Movera 整合多種 BT 下載器（qBittorrent、Transmission、Deluge、rTorren
 
 - **多種 BT 下載器整合** — 支援 qBittorrent、Transmission、Deluge、rTorrent、Aria2
 - **靈活的重命名規則** — 支援 Regex 和 Parse 兩種模式，即時預覽結果
-- **任務管理系統** — 建立、編輯、啟用/停用任務，批量操作
+- **預設規則** — 可建立常用的重命名模式，快速套用到任務
+- **任務管理系統** — 建立、編輯、啟用/停用任務，批量操作（單次最多 100 筆）
 - **標籤分類** — 彩色標籤管理，快速分類任務
 - **即時日誌** — 透過 WebSocket 即時查看處理狀態
 - **現代化 Web UI** — Vue 3 + Tailwind CSS 響應式界面，支援手機版面
@@ -63,10 +64,14 @@ services:
 
 ### 環境變數
 
-| 變數   | 預設值 | 說明                |
-| ------ | ------ | ------------------- |
-| `PUID` | `1000` | 執行程式的使用者 ID |
-| `PGID` | `1000` | 執行程式的群組 ID   |
+| 變數                         | 預設值        | 說明                                            |
+| ---------------------------- | ------------- | ----------------------------------------------- |
+| `PUID`                       | `1000`        | 執行程式的使用者 ID                             |
+| `PGID`                       | `1000`        | 執行程式的群組 ID                               |
+| `ENV`                        | `production`  | 環境模式（`development` 開啟 API 文件）         |
+| `ALLOWED_DIRECTORIES`        | —             | 目錄瀏覽器允許的路徑，逗號分隔（如 `/downloads,/media`） |
+| `ALLOWED_SOURCE_DIRECTORIES` | —             | Webhook 來源檔案路徑白名單，逗號分隔            |
+| `ALLOW_WEBUI_SETTING`        | `true`        | 是否允許透過 Web UI 修改目錄設定                |
 
 ### Volume 說明
 
@@ -94,7 +99,7 @@ services:
 設定 → **下載** → **種子完成時執行外部程式**：
 
 ```bash
-/path/to/scripts/qBittorrent http://movera:8000/webhook/qbittorrent "%F" "%L" "%G"
+/path/to/scripts/qBittorrent http://movera:8000/webhook/qbittorrent/on-complete "%F" "%L" "%G"
 ```
 
 ### Transmission
@@ -104,7 +109,7 @@ services:
 ```json
 {
   "script-torrent-done-enabled": true,
-  "script-torrent-done-filename": "/path/to/scripts/Transmission http://movera:8000/webhook/qbittorrent"
+  "script-torrent-done-filename": "/path/to/scripts/Transmission http://movera:8000/webhook/on-complete"
 }
 ```
 
@@ -115,7 +120,7 @@ services:
 3. Command：
 
 ```bash
-/path/to/scripts/Deluge http://movera:8000/webhook/qbittorrent
+/path/to/scripts/Deluge http://movera:8000/webhook/on-complete
 ```
 
 ### rTorrent
@@ -123,7 +128,7 @@ services:
 在 `.rtorrent.rc` 中加入：
 
 ```bash
-method.set_key = event.download.finished,movera,"execute2={/path/to/scripts/rTorrent,http://movera:8000/webhook/qbittorrent,$d.base_path=,$d.custom1=}"
+method.set_key = event.download.finished,movera,"execute2={/path/to/scripts/rTorrent,http://movera:8000/webhook/on-complete,$d.base_path=,$d.custom1=}"
 ```
 
 ### Aria2
@@ -131,7 +136,7 @@ method.set_key = event.download.finished,movera,"execute2={/path/to/scripts/rTor
 啟動參數或 `aria2.conf`：
 
 ```bash
-on-download-complete=/path/to/scripts/Aria2 http://movera:8000/webhook/qbittorrent
+on-download-complete=/path/to/scripts/Aria2 http://movera:8000/webhook/on-complete
 ```
 
 > [!NOTE]
@@ -213,10 +218,13 @@ uv run pytest tests/backend/ -v
 
 ## API 文件
 
-啟動伺服器後，可透過以下路徑存取 API 文件：
+啟動伺服器後，設定環境變數 `ENV=development` 即可存取 API 文件：
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: http://localhost:8000/api/docs
+- **ReDoc**: http://localhost:8000/api/redoc
+
+> [!NOTE]
+> 預設 production 模式不開放 API 文件。
 
 ## 技術棧
 
