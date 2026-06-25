@@ -4,3 +4,5 @@ from .preset_rule import PresetRule
 from .setting import Setting
 from .tag import Tag, task_tags
 from .task import Task
+from .user import User
+from .webhook_token import WebhookToken

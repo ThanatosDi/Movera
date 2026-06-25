@@ -1,5 +1,6 @@
 export const RoutersEnum = {
   Home: '/',
+  Login: '/login',
   CreateTask: '/create',
   Tasks: '/tasks',
   TaskDetail: (taskId: string) => `/task/${taskId}`,

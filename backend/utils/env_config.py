@@ -34,3 +34,21 @@ def get_allow_webui_setting() -> bool:
     預設為 True（允許）。設為 'false'（大小寫不敏感）時回傳 False。
     """
     return os.getenv("ALLOW_WEBUI_SETTING", "true").lower() != "false"
+
+
+def get_env_secret_key() -> str | None:
+    """從環境變數 MOVERA_SECRET_KEY 取得 JWT 簽章 secret，未設定回傳 None。"""
+    value = os.getenv("MOVERA_SECRET_KEY", "").strip()
+    return value or None
+
+
+def get_env_admin_username() -> str | None:
+    """從環境變數 MOVERA_ADMIN_USERNAME 取得預設管理員帳號，未設定回傳 None。"""
+    value = os.getenv("MOVERA_ADMIN_USERNAME", "").strip()
+    return value or None
+
+
+def get_env_admin_password() -> str | None:
+    """從環境變數 MOVERA_ADMIN_PASSWORD 取得預設管理員密碼（明文），未設定回傳 None。"""
+    value = os.getenv("MOVERA_ADMIN_PASSWORD", "")
+    return value or None

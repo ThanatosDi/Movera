@@ -118,3 +118,28 @@ export interface DirectoryItem {
 export interface DirectoryListResponse {
   directories: DirectoryItem[];
 }
+
+// --- Auth Schemas ---
+
+export interface AuthStatus {
+  needs_setup: boolean;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+}
+
+// --- Webhook Token Schemas ---
+
+export interface WebhookToken {
+  id: string;
+  name: string;
+  created_at: string;
+  revoked_at: string | null;
+}
+
+export interface WebhookTokenCreated extends WebhookToken {
+  /** 完整明文 token（movera_ 前綴），僅於建立當下回傳一次。 */
+  token: string;
+}

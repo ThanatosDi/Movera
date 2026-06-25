@@ -7,6 +7,7 @@
 
 import { ApiError } from '@/schemas/errors'
 import type { ApiErrorDetail } from '@/schemas/errors'
+import { getToken, handleUnauthorized } from '@/composables/useAuthToken'
 
 // 從環境變數讀取 API 的基本 URL，如果未設定則使用預設值
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
@@ -26,6 +27,10 @@ function handleResponse(response: Response): Promise<void>;
 function handleResponse<T>(response: Response): Promise<T>;
 async function handleResponse<T>(response: Response): Promise<T | void> {
   if (!response.ok) {
+    // 收到 401 時清除 token 並導向登入（由 useAuthToken 註冊的處理執行）
+    if (response.status === 401) {
+      handleUnauthorized();
+    }
     const errorData: ApiErrorDetail = await response
       .json()
       .catch(() => ({ message: response.statusText }));
@@ -49,9 +54,15 @@ async function handleResponse<T>(response: Response): Promise<T | void> {
  * @returns - RequestInit 設定物件
  */
 function createRequestOptions(method: string, data?: unknown): RequestInit {
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
+
+  // 若已登入則附帶 JWT 存取憑證
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
   const options: RequestInit = {
     method,

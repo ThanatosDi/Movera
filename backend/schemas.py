@@ -385,6 +385,51 @@ class DirectoryListResponse(BaseModel):
     )
 
 
+# --- Auth Schemas ---
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(..., max_length=255, description="使用者名稱")
+    password: str = Field(
+        ..., max_length=255, description="前端 SHA-256 雜湊後的密碼值"
+    )
+
+
+class SetupRequest(LoginRequest):
+    """初始化建立第一組管理員帳密（僅在尚無帳號時可用）。"""
+
+
+class TokenResponse(BaseModel):
+    access_token: str = Field(..., description="JWT 存取憑證")
+    token_type: str = Field("bearer", description="憑證類型")
+
+
+class AuthStatusResponse(BaseModel):
+    needs_setup: bool = Field(
+        ..., description="是否尚未建立任何管理員帳號（需初始化設定）"
+    )
+
+
+# --- Webhook Token Schemas ---
+
+
+class WebhookTokenCreate(BaseModel):
+    name: str = Field(..., max_length=255, description="token 名稱", examples=["qBittorrent"])
+
+
+class WebhookToken_(OrmBaseModel):
+    id: str = Field(..., description="token ID（UUID）")
+    name: str = Field(..., description="token 名稱")
+    created_at: datetime = Field(..., description="建立時間")
+    revoked_at: Optional[datetime] = Field(None, description="撤銷時間，null 表示有效")
+
+
+class WebhookTokenCreated(WebhookToken_):
+    """建立 token 時的回應，額外包含一次性明文 token。"""
+
+    token: str = Field(..., description="完整明文 token（movera_ 前綴），僅顯示一次")
+
+
 # --- Webhook Schemas ---
 
 

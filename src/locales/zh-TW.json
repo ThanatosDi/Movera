@@ -1,4 +1,33 @@
 {
+  "login": {
+    "subtitle": "請登入以繼續",
+    "setupSubtitle": "首次使用，請建立管理員帳號",
+    "username": "使用者名稱",
+    "usernamePlaceholder": "請輸入使用者名稱",
+    "password": "密碼",
+    "passwordPlaceholder": "請輸入密碼",
+    "submit": "登入",
+    "setupSubmit": "建立帳號並登入",
+    "invalidCredentials": "使用者名稱或密碼錯誤",
+    "failed": "登入失敗，請稍後再試"
+  },
+  "webhookToken": {
+    "title": "Webhook Token",
+    "description": "管理 webhook 的存取憑證。建立第一個 token 後，所有 webhook 請求都需附帶有效 token。",
+    "namePlaceholder": "Token 名稱（例如 qBittorrent）",
+    "create": "建立",
+    "createFailed": "建立 token 失敗",
+    "copyWarning": "請立即複製並妥善保存，此 token 僅顯示一次。",
+    "copied": "已複製到剪貼簿",
+    "dismiss": "我已保存",
+    "active": "有效",
+    "revoked": "已撤銷",
+    "revoke": "撤銷",
+    "revokeFailed": "撤銷 token 失敗",
+    "delete": "刪除",
+    "deleteFailed": "刪除 token 失敗",
+    "empty": "尚未建立任何 token"
+  },
   "common": {
     "about": "關於",
     "cancel": "取消",
@@ -12,6 +41,7 @@
     "home": "首頁",
     "language": "語言",
     "loading": "載入中...",
+    "logout": "登出",
     "matchSuccess": "匹配成功",
     "noMatch": "無匹配",
     "reload": "重新載入",

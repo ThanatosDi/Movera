@@ -11,11 +11,12 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { RoutersEnum } from '@/enums/RoutersEnum';
+import { useAuthStore } from '@/stores/authStore';
 import { usePresetRuleStore } from '@/stores/presetRuleStore';
 import { useTagStore } from '@/stores/tagStore';
 import { useTaskStore } from '@/stores/taskStore';
 import { useDark, useToggle } from '@vueuse/core';
-import { CircleUser, Home, Moon, Sun } from 'lucide-vue-next';
+import { CircleUser, Home, LogOut, Moon, Sun } from 'lucide-vue-next';
 import { onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -28,12 +29,18 @@ const toggleDark = useToggle(isDark)
 const taskStore = useTaskStore()
 const tagStore = useTagStore()
 const presetRuleStore = usePresetRuleStore()
+const authStore = useAuthStore()
 
 onMounted(() => {
   taskStore.fetchTasks()
   tagStore.fetchTags()
   presetRuleStore.fetchPresetRules()
 })
+
+function handleLogout() {
+  authStore.logout()
+  router.push(RoutersEnum.Login)
+}
 
 </script>
 
@@ -84,6 +91,11 @@ onMounted(() => {
                 <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
               </DropdownMenuItem>
             </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem @click="handleLogout">
+              <LogOut class="mr-2 h-4 w-4" />
+              <span>{{ t('common.logout') }}</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

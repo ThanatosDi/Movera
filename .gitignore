@@ -362,3 +362,4 @@ vite.config.ts.timestamp-*
 *.db
 
 settings.local.json
+.secret_key

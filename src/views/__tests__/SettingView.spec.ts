@@ -123,6 +123,7 @@ describe('SettingView - allowed_directories', () => {
           ComboboxItem: { template: '<div><slot /></div>' },
           ComboboxItemIndicator: { template: '<div><slot /></div>' },
           LocaleSelect: { template: '<div />', props: ['locale'] },
+          WebhookTokenManager: { template: '<div />' },
         },
       },
     })
