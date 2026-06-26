@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 # --- Base Configuration ---
 
@@ -61,10 +61,19 @@ class TaskBase(BaseModel):
     )
     include: str = Field(
         ...,
+        min_length=1,
         max_length=1000,
         description="用於匹配檔案的包含規則",
         examples=["公爵千金的家庭教師"],
     )
+
+    @field_validator("include")
+    @classmethod
+    def _include_not_blank(cls, v: str) -> str:
+        # 拒絕純空白：空字串／空白 include 會命中所有檔案路徑（RT-02）
+        if not v or not v.strip():
+            raise ValueError("include 不可為空字串或純空白")
+        return v
     move_to: str = Field(
         ...,
         max_length=4096,
@@ -118,7 +127,15 @@ class TaskPatch(BaseModel):
     """批量更新時的部分欄位 patch。所有欄位皆為 Optional。"""
 
     name: Optional[str] = Field(None, max_length=255, description="任務的名稱")
-    include: Optional[str] = Field(None, max_length=1000, description="包含規則")
+    include: Optional[str] = Field(None, min_length=1, max_length=1000, description="包含規則")
+
+    @field_validator("include")
+    @classmethod
+    def _patch_include_not_blank(cls, v: Optional[str]) -> Optional[str]:
+        # 允許 None（不更新此欄），但若提供則拒絕純空白（RT-02）
+        if v is not None and not v.strip():
+            raise ValueError("include 不可為空字串或純空白")
+        return v
     move_to: Optional[str] = Field(None, max_length=4096, description="目標目錄路徑")
     src_filename: Optional[str] = Field(None, max_length=1000, description="來源檔案名稱規則")
     dst_filename: Optional[str] = Field(None, max_length=1000, description="目標檔案名稱模板")

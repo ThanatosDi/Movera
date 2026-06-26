@@ -94,6 +94,9 @@ def match_task(
         符合的任務，或 None 如果沒有符合
     """
     for task in tasks:
+        # 拒絕空字串／純空白 include：否則 `in` 會命中所有檔案路徑（RT-02）
+        if not task.include or not task.include.strip():
+            continue
         if task.include in filepath:
             web_logger(
                 services=services,
@@ -202,9 +205,12 @@ def process_completed_download(
     if services is None:
         services = create_worker_services()
 
-    # 驗證檔案來源路徑是否在允許的白名單範圍內
+    # 驗證檔案來源路徑是否在允許的白名單範圍內（fail-closed：未設定即拒絕，RT-08）
     allowed_source = services.setting_service.get_allowed_source_directories()
-    if allowed_source and not is_path_within_allowed(filepath, allowed_source):
+    if not allowed_source:
+        logger.warning("未設定來源目錄白名單，已拒絕處理 webhook 檔案（fail-closed）")
+        return
+    if not is_path_within_allowed(filepath, allowed_source):
         logger.warning(f'檔案 "{filepath}" 不在允許的來源目錄範圍內，已拒絕處理')
         return
 

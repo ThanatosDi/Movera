@@ -70,7 +70,7 @@ services:
 | `PGID`                       | `1000`        | 執行程式的群組 ID                               |
 | `ENV`                        | `production`  | 環境模式（`development` 開啟 API 文件）         |
 | `ALLOWED_DIRECTORIES`        | —             | 目錄瀏覽器允許的路徑，逗號分隔（如 `/downloads,/media`） |
-| `ALLOWED_SOURCE_DIRECTORIES` | —             | Webhook 來源檔案路徑白名單，逗號分隔            |
+| `ALLOWED_SOURCE_DIRECTORIES` | —             | Webhook 來源檔案路徑白名單，逗號分隔。**4.4.0 起必填**：未設定時所有 webhook 檔案處理一律被拒（fail-closed） |
 | `ALLOW_WEBUI_SETTING`        | `true`        | 是否允許透過 Web UI 修改目錄設定                |
 | `MOVERA_SECRET_KEY`          | 自動產生      | JWT 簽章用的 HMAC secret，未設定時首次啟動自動產生並持久化 |
 | `MOVERA_ADMIN_USERNAME`      | —             | 預設管理員帳號，資料庫無帳號時於首次啟動建立    |
@@ -88,6 +88,15 @@ services:
 ## 身分驗證與安全
 
 Movera 內建兩道分離的驗證機制：
+
+> [!WARNING]
+> **4.4.0 破壞性變更｜來源目錄白名單改為 fail-closed**
+>
+> 4.3.x 以前，未設定 `ALLOWED_SOURCE_DIRECTORIES` 時 webhook 會處理任意來源路徑（fail-open）。4.4.0 起改為 **fail-closed**：白名單為空即拒絕所有 webhook 檔案處理。
+>
+> 升級後**必須**設定 `ALLOWED_SOURCE_DIRECTORIES`（或於設定頁加入來源目錄），否則 webhook 觸發的搬移／重新命名將完全停擺。此變更修補無認證任意檔案搬移漏洞（audit RT-02／RT-08）。
+>
+> 同時，任務的 `include` 規則不再接受空字串或純空白（避免命中所有檔案）。
 
 ### 管理 API 與 Web UI 登入
 
