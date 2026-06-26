@@ -1,4 +1,33 @@
 {
+  "login": {
+    "subtitle": "Please sign in to continue",
+    "setupSubtitle": "First time here — create an admin account",
+    "username": "Username",
+    "usernamePlaceholder": "Enter username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "submit": "Sign in",
+    "setupSubmit": "Create account & sign in",
+    "invalidCredentials": "Incorrect username or password",
+    "failed": "Sign in failed, please try again"
+  },
+  "webhookToken": {
+    "title": "Webhook Token",
+    "description": "Manage access tokens for webhooks. Once the first token is created, all webhook requests must include a valid token.",
+    "namePlaceholder": "Token name (e.g. qBittorrent)",
+    "create": "Create",
+    "createFailed": "Failed to create token",
+    "copyWarning": "Copy and store it now — this token is shown only once.",
+    "copied": "Copied to clipboard",
+    "dismiss": "I've saved it",
+    "active": "Active",
+    "revoked": "Revoked",
+    "revoke": "Revoke",
+    "revokeFailed": "Failed to revoke token",
+    "delete": "Delete",
+    "deleteFailed": "Failed to delete token",
+    "empty": "No tokens created yet"
+  },
   "common": {
     "about": "About",
     "cancel": "Cancel",
@@ -12,6 +41,7 @@
     "home": "Home",
     "language": "Language",
     "loading": "Loading...",
+    "logout": "Logout",
     "matchSuccess": "Match successful",
     "noMatch": "No match",
     "reload": "Reload",

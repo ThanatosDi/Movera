@@ -9,8 +9,10 @@ from contextlib import asynccontextmanager
 
 from alembic import command
 from alembic.config import Config
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
+
+from backend.dependencies import require_jwt, require_webhook_token
 
 from backend.exceptions.directory_exception import (
     DirectoryAccessDenied,
@@ -28,6 +30,7 @@ from backend.exceptions.tag_exception import (
 from backend.exceptions.task_exception import TaskAlreadyExists, TaskNotFound
 from backend.middlewares import setup_cors, setup_gzip
 from backend.routers import (
+    auth,
     directory,
     log,
     preset_rule,
@@ -36,6 +39,7 @@ from backend.routers import (
     tag,
     task,
     webhook,
+    webhook_token,
 )
 from backend.utils.logger import logger
 
@@ -58,10 +62,41 @@ async def run_migrations():
         raise
 
 
+def _initialize_auth(app: FastAPI):
+    """解析 JWT secret 並（必要時）依環境變數建立管理員帳號。
+
+    必須在資料庫遷移完成後執行，因為 secret 與帳號皆需讀寫資料表。
+    """
+    from backend.database import SessionLocal
+    from backend.repositories.setting import SettingRepository
+    from backend.repositories.user import UserRepository
+    from backend.services.auth_service import AuthService
+    from backend.services.secret_service import SecretService
+    from backend.utils.env_config import (
+        get_env_admin_password,
+        get_env_admin_username,
+    )
+
+    db = SessionLocal()
+    try:
+        secret = SecretService(SettingRepository(db)).resolve_secret()
+        app.state.secret_key = secret
+
+        admin_username = get_env_admin_username()
+        admin_password = get_env_admin_password()
+        if admin_username and admin_password:
+            AuthService(UserRepository(db), secret).seed_admin_from_env(
+                admin_username, admin_password
+            )
+    finally:
+        db.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Load
     await run_migrations()
+    _initialize_auth(app)
     yield
     # Clean up
     pass
@@ -131,14 +166,22 @@ setup_cors(app)
 setup_gzip(app)
 
 
-app.include_router(task.router)
-app.include_router(tag.router)
-app.include_router(preset_rule.router)
-app.include_router(setting.router)
-app.include_router(log.router)
-app.include_router(preview.router)
-app.include_router(webhook.router)
-app.include_router(directory.router)
+# 公開端點（不需 JWT）：登入、初始化、認證狀態
+app.include_router(auth.router)
+
+# 受保護的 /api/v1/* 端點：要求合法 JWT
+_protected = [Depends(require_jwt)]
+app.include_router(task.router, dependencies=_protected)
+app.include_router(tag.router, dependencies=_protected)
+app.include_router(preset_rule.router, dependencies=_protected)
+app.include_router(setting.router, dependencies=_protected)
+app.include_router(log.router, dependencies=_protected)
+app.include_router(preview.router, dependencies=_protected)
+app.include_router(directory.router, dependencies=_protected)
+app.include_router(webhook_token.router, dependencies=_protected)
+
+# Webhook 端點：相容式 token 驗證（無有效 token 放行，有則強制）
+app.include_router(webhook.router, dependencies=[Depends(require_webhook_token)])
 
 if __name__ == "__main__":
     import uvicorn

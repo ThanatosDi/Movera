@@ -1,7 +1,9 @@
+import { getToken } from '@/composables/useAuthToken'
 import { createRouter, createWebHistory } from 'vue-router'
 // 懶加載組件
 const Layout = () => import('@/layouts/Layout.vue')
 const HomeView = () => import('@/views/HomeView.vue')
+const LoginView = () => import('@/views/LoginView.vue')
 const SettingView = () => import('@/views/SettingView.vue')
 const TaskDetailView = () => import('@/views/TaskDetailView.vue')
 const CreateTaskView = () => import('@/views/CreateTaskView.vue')
@@ -12,6 +14,16 @@ const TasksListView = () => import('@/views/TasksListView.vue')
  * 路由配置
  */
 const routes = [
+  // 登入頁（公開，不套用驗證守衛）
+  {
+    path: '/login',
+    name: 'login',
+    component: LoginView,
+    meta: {
+      title: '登入',
+      public: true,
+    },
+  },
   {
     path: '/',
     name: 'layout',
@@ -98,6 +110,18 @@ router.beforeEach((to, _from, next) => {
     document.title = `${to.meta.title} - Movera`
   } else {
     document.title = 'Movera'
+  }
+
+  // 驗證守衛：未登入存取受保護頁面時導向登入頁
+  const isPublic = to.meta?.public === true
+  if (!isPublic && !getToken()) {
+    next({ name: 'login' })
+    return
+  }
+  // 已登入時不應停留在登入頁
+  if (to.name === 'login' && getToken()) {
+    next({ path: '/' })
+    return
   }
 
   next()

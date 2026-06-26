@@ -70,8 +70,11 @@ services:
 | `PGID`                       | `1000`        | 執行程式的群組 ID                               |
 | `ENV`                        | `production`  | 環境模式（`development` 開啟 API 文件）         |
 | `ALLOWED_DIRECTORIES`        | —             | 目錄瀏覽器允許的路徑，逗號分隔（如 `/downloads,/media`） |
-| `ALLOWED_SOURCE_DIRECTORIES` | —             | Webhook 來源檔案路徑白名單，逗號分隔            |
+| `ALLOWED_SOURCE_DIRECTORIES` | —             | Webhook 來源檔案路徑白名單，逗號分隔。**4.4.0 起必填**：未設定時所有 webhook 檔案處理一律被拒（fail-closed） |
 | `ALLOW_WEBUI_SETTING`        | `true`        | 是否允許透過 Web UI 修改目錄設定                |
+| `MOVERA_SECRET_KEY`          | 自動產生      | JWT 簽章用的 HMAC secret，未設定時首次啟動自動產生並持久化 |
+| `MOVERA_ADMIN_USERNAME`      | —             | 預設管理員帳號，資料庫無帳號時於首次啟動建立    |
+| `MOVERA_ADMIN_PASSWORD`      | —             | 預設管理員密碼，需與 `MOVERA_ADMIN_USERNAME` 同時設定 |
 
 ### Volume 說明
 
@@ -81,6 +84,46 @@ services:
 | `/media`           | 媒體檔案的目標目錄         |
 | `/movera/database` | SQLite 資料庫持久化        |
 | `/movera/storages` | 應用程式設定與儲存空間     |
+
+## 身分驗證與安全
+
+Movera 內建兩道分離的驗證機制：
+
+> [!WARNING]
+> **4.4.0 破壞性變更｜來源目錄白名單改為 fail-closed**
+>
+> 4.3.x 以前，未設定 `ALLOWED_SOURCE_DIRECTORIES` 時 webhook 會處理任意來源路徑（fail-open）。4.4.0 起改為 **fail-closed**：白名單為空即拒絕所有 webhook 檔案處理。
+>
+> 升級後**必須**設定 `ALLOWED_SOURCE_DIRECTORIES`（或於設定頁加入來源目錄），否則 webhook 觸發的搬移／重新命名將完全停擺。此變更修補無認證任意檔案搬移漏洞（audit RT-02／RT-08）。
+>
+> 同時，任務的 `include` 規則不再接受空字串或純空白（避免命中所有檔案）。
+
+### 管理 API 與 Web UI 登入
+
+- 所有 `/api/v1/*` 管理 API 都需要登入後取得的 JWT 憑證。
+- 首次啟動：
+  - 若設定了 `MOVERA_ADMIN_USERNAME` 與 `MOVERA_ADMIN_PASSWORD`，會自動建立管理員帳號。
+  - 否則開啟 Web UI 時會進入「初始化設定」頁，手動建立第一組帳密。
+- 密碼於前端先以 SHA-256 雜湊再傳送，後端加 salt 後存於 SQLite，不保存明文。
+- JWT 以 `MOVERA_SECRET_KEY` 簽發（有效期 12 小時）；變更或清除 secret 會使所有既發憑證失效，可作為緊急撤銷手段。
+
+> [!IMPORTANT]
+> 前端 SHA-256 僅避免明文密碼於網路傳輸，**不能取代傳輸層加密**。請務必將 Movera 部署於 HTTPS 反向代理之後。
+
+### Webhook Token
+
+- `/webhook/*` 端點採「相容式」驗證：**尚未建立任何 token 前維持開放**，不影響既有下載器腳本。
+- 於設定頁建立第一個 webhook token 後，所有 webhook 請求都必須帶上 `Authorization: Bearer movera_...`，否則回應 401。
+- Token 開頭為 `movera_`，僅於建立當下顯示一次（資料庫只存雜湊）；可隨時新增、命名與撤銷。
+
+啟用 webhook token 後，需在下載器呼叫中加上 Authorization 標頭，例如 qBittorrent：
+
+```bash
+/path/to/scripts/qBittorrent http://movera:8000/webhook/qbittorrent/on-complete "%F" "%L" "%G" --header "Authorization: Bearer movera_你的token"
+```
+
+> [!NOTE]
+> 請依各下載器腳本的參數格式調整帶入 Authorization 標頭的方式。
 
 ## BT 下載器整合
 

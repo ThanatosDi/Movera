@@ -13,16 +13,23 @@ from backend.models.setting import Setting
 from backend.models.preset_rule import PresetRule
 from backend.models.tag import Tag
 from backend.models.task import Task
+from backend.models.user import User
+from backend.models.webhook_token import WebhookToken
 from backend.repositories.log import LogRepository
 from backend.repositories.preset_rule import PresetRuleRepository
 from backend.repositories.setting import SettingRepository
 from backend.repositories.tag import TagRepository
 from backend.repositories.task import TaskRepository
+from backend.repositories.user import UserRepository
+from backend.repositories.webhook_token import WebhookTokenRepository
+from backend.services.auth_service import AuthService
 from backend.services.log_service import LogService
 from backend.services.preset_rule_service import PresetRuleService
+from backend.services.secret_service import SecretService
 from backend.services.setting_service import SettingService
 from backend.services.tag_service import TagService
 from backend.services.task_service import TaskService
+from backend.services.webhook_token_service import WebhookTokenService
 
 
 @pytest.fixture(scope="function")
@@ -89,6 +96,18 @@ def tag_repository(db_session) -> TagRepository:
     return TagRepository(db=db_session)
 
 
+@pytest.fixture
+def user_repository(db_session) -> UserRepository:
+    """建立 UserRepository 實例"""
+    return UserRepository(db=db_session)
+
+
+@pytest.fixture
+def webhook_token_repository(db_session) -> WebhookTokenRepository:
+    """建立 WebhookTokenRepository 實例"""
+    return WebhookTokenRepository(db=db_session)
+
+
 # --- Service Fixtures ---
 
 
@@ -120,6 +139,24 @@ def preset_rule_service(preset_rule_repository) -> PresetRuleService:
 def tag_service(tag_repository) -> TagService:
     """建立 TagService 實例"""
     return TagService(repository=tag_repository)
+
+
+@pytest.fixture
+def secret_service(setting_repository) -> SecretService:
+    """建立 SecretService 實例"""
+    return SecretService(repository=setting_repository)
+
+
+@pytest.fixture
+def auth_service(user_repository) -> AuthService:
+    """建立 AuthService 實例（使用固定測試 secret）"""
+    return AuthService(repository=user_repository, secret="test-secret")
+
+
+@pytest.fixture
+def webhook_token_service(webhook_token_repository) -> WebhookTokenService:
+    """建立 WebhookTokenService 實例"""
+    return WebhookTokenService(repository=webhook_token_repository)
 
 
 # --- Sample Data Fixtures ---

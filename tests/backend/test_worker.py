@@ -24,7 +24,9 @@ def mock_services():
     task_service = MagicMock()
     log_service = MagicMock()
     setting_service = MagicMock()
-    setting_service.get_allowed_source_directories.return_value = []
+    # 預設給定白名單，使流程測試可通過 fail-closed 來源檢查；
+    # 需驗證空白名單行為的測試自行覆寫為 []。
+    setting_service.get_allowed_source_directories.return_value = ["/downloads"]
     return WorkerServices(
         task_service=task_service,
         log_service=log_service,
@@ -309,17 +311,21 @@ class TestProcessCompletedDownload:
     @patch("backend.worker.worker.perform_move_operation")
     @patch("backend.worker.worker.perform_rename_operation")
     @patch("backend.worker.worker.match_task")
-    def test_process_completed_download_empty_whitelist_allows_all(
+    def test_process_completed_download_empty_whitelist_rejects_all(
         self, mock_match_task, mock_rename, mock_move, mock_services,
     ):
-        """測試白名單為空時允許所有路徑（向後相容）"""
+        """測試白名單為空時拒絕所有路徑（fail-closed，RT-08）"""
         mock_services.setting_service.get_allowed_source_directories.return_value = []
         mock_services.task_service.get_enabled_tasks.return_value = []
         mock_match_task.return_value = None
 
-        process_completed_download("/any/path/test.mp4", services=mock_services)
+        result = process_completed_download("/any/path/test.mp4", services=mock_services)
 
-        mock_services.task_service.get_enabled_tasks.assert_called_once()
+        assert result is None
+        mock_services.task_service.get_enabled_tasks.assert_not_called()
+        mock_match_task.assert_not_called()
+        mock_rename.assert_not_called()
+        mock_move.assert_not_called()
 
     @patch("backend.worker.worker.perform_move_operation")
     @patch("backend.worker.worker.perform_rename_operation")

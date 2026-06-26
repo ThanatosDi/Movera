@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import LocaleSelect from '@/components/LocaleSelect.vue'
 import TagBadge from '@/components/TagBadge.vue'
+import WebhookTokenManager from '@/components/WebhookTokenManager.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -53,6 +54,9 @@ const newFieldType = ref<string>('src')
 const newRulePattern = ref('')
 
 presetRuleStore.fetchPresetRules()
+// 登入後首次進入本頁時 app 初始化階段尚無 token，settings 未載入，
+// 因此在此重新抓取，確保環境變數預設的允許目錄／來源白名單正常顯示。
+settingStore.fetchSettings()
 
 async function addPresetRule() {
   const name = newRuleName.value.trim()
@@ -757,6 +761,9 @@ async function removeSourceDirectory(index: number) {
         </div>
       </CardContent>
     </Card>
+
+    <!-- Webhook Token 管理 -->
+    <WebhookTokenManager />
 
     <!-- 關於卡片 -->
     <Card class="border border-border">
