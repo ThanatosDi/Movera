@@ -8,6 +8,11 @@
 import { ApiError } from '@/schemas/errors'
 import type { ApiErrorDetail } from '@/schemas/errors'
 import { getToken, handleUnauthorized } from '@/composables/useAuthToken'
+import {
+  isGatewayBlockPage,
+  isGatewayIntercepting,
+  reloadForGateway,
+} from '@/composables/useAuthGateway'
 
 // 從環境變數讀取 API 的基本 URL，如果未設定則使用預設值
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
@@ -30,6 +35,10 @@ async function handleResponse<T>(response: Response): Promise<T | void> {
     // 收到 401 時清除 token 並導向登入（由 useAuthToken 註冊的處理執行）
     if (response.status === 401) {
       handleUnauthorized();
+    }
+    // 反向代理 SSO 的阻擋頁：需以整頁重載交還閘道處理
+    if (isGatewayBlockPage(response)) {
+      reloadForGateway();
     }
     const errorData: ApiErrorDetail = await response
       .json()
@@ -88,7 +97,19 @@ export async function request(method: string, endpoint: string, data?: unknown):
 export async function request<T>(method: string, endpoint: string, data?: unknown): Promise<T>;
 export async function request<T>(method: string, endpoint: string, data?: unknown): Promise<T | void> {
   const options = createRequestOptions(method, data);
-  const response = await fetch(`${BASE_URL}${endpoint}`, options);
+
+  let response: Response;
+  try {
+    response = await fetch(`${BASE_URL}${endpoint}`, options);
+  } catch (error) {
+    // fetch 在網路層失敗時讀不到狀態碼。被反向代理 302 到跨來源 SSO 而遭 CORS
+    // 擋下也是這個路徑，需另行探測才能與單純離線區分。
+    if (await isGatewayIntercepting(BASE_URL)) {
+      reloadForGateway();
+    }
+    throw error;
+  }
+
   return handleResponse<T>(response);
 }
 

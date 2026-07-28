@@ -1,5 +1,5 @@
 import App from '@/App.vue'
-import { clearToken, getToken, onUnauthorized } from '@/composables/useAuthToken'
+import { clearToken, isTokenExpired, onUnauthorized } from '@/composables/useAuthToken'
 import { createI18nInstance } from '@/locales'
 import routers from '@/routers'
 import { useSettingStore } from '@/stores/settingStore'
@@ -34,8 +34,8 @@ async function initializeApp() {
   // 必須在 app.use(pinia) 之後才能使用 stores
   const settingStore = useSettingStore()
 
-  // 僅在已登入時載入設定（設定 API 受 JWT 保護）
-  if (getToken()) {
+  // 僅在憑證仍有效時載入設定（設定 API 受 JWT 保護），避免發出必然失敗的請求
+  if (!isTokenExpired()) {
     try {
       await settingStore.fetchSettings()
     } catch (error) {

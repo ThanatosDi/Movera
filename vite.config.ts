@@ -42,15 +42,29 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
-        // 排除 API 和 FastAPI 文檔路徑不被快取
-        navigateFallbackDenylist: [
-          /^\/api/,
-          /^\/webhook/,
-          /^\/docs/,
-          /^\/redoc/,
-          /^\/openapi\.json/,
-        ],
+        // 導覽請求改由下方 NetworkFirst 規則處理，因此關閉 precache 的導覽路由。
+        //
+        // Why: precache 是 cache-first，會讓 `/` 完全不經過網路。部署在帶 SSO 的
+        // 反向代理（Pangolin、Cloudflare Zero Trust 等）之後時，閘道就沒有機會把
+        // 過期 session 以 302 導向登入頁，使用者會停在快取的畫面上。
+        // navigateFallback 為 vite-plugin-pwa 預設值，需顯式覆寫；directoryIndex
+        // 則是 workbox 用來讓 `/` 命中 precache 的 `index.html`。
+        navigateFallback: undefined,
+        directoryIndex: null,
         runtimeCaching: [
+          {
+            // 導覽請求一律先問網路，離線時才回退到最近一次成功的回應
+            urlPattern: ({ request, url }) =>
+              request.mode === 'navigate' &&
+              !/^\/(api|webhook|docs|redoc)\b/.test(url.pathname) &&
+              url.pathname !== '/openapi.json',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'movera-navigations',
+              networkTimeoutSeconds: 3,
+              cacheableResponse: { statuses: [200] },
+            },
+          },
           {
             urlPattern: /\/api\//,
             handler: 'NetworkOnly',

@@ -1,4 +1,4 @@
-import { getToken } from '@/composables/useAuthToken'
+import { discardTokenIfExpired } from '@/composables/useAuthToken'
 import { createRouter, createWebHistory } from 'vue-router'
 // 懶加載組件
 const Layout = () => import('@/layouts/Layout.vue')
@@ -112,14 +112,16 @@ router.beforeEach((to, _from, next) => {
     document.title = 'Movera'
   }
 
-  // 驗證守衛：未登入存取受保護頁面時導向登入頁
+  // 驗證守衛：未登入或憑證已過期時導向登入頁。
+  // 在此檢查 exp 而非等後端回 401，避免帶著過期憑證停留在受保護頁面。
   const isPublic = to.meta?.public === true
-  if (!isPublic && !getToken()) {
+  const isExpired = discardTokenIfExpired()
+  if (!isPublic && isExpired) {
     next({ name: 'login' })
     return
   }
   // 已登入時不應停留在登入頁
-  if (to.name === 'login' && getToken()) {
+  if (to.name === 'login' && !isExpired) {
     next({ path: '/' })
     return
   }
