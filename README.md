@@ -1,4 +1,5 @@
 # Movera
+<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/32263514-f4b8-421c-bcff-106a93454ce2" />
 
 <p align="center">
   <strong>輕量級媒體檔案自動化管理工具</strong>
