@@ -1,4 +1,4 @@
-import { clearToken, getToken, setToken } from '@/composables/useAuthToken'
+import { clearToken, discardTokenIfExpired, getToken, setToken } from '@/composables/useAuthToken'
 import { request } from '@/composables/useHttpService'
 import { sha256Hex } from '@/lib/hash'
 import type { AuthStatus, TokenResponse } from '@/schemas'
@@ -6,7 +6,8 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 export const useAuthStore = defineStore('authStore', () => {
-  const token = ref<string | null>(getToken())
+  // 過期憑證直接丟棄，避免 isAuthenticated 誤判為已登入
+  const token = ref<string | null>(discardTokenIfExpired() ? null : getToken())
   const needsSetup = ref<boolean>(false)
   const error = ref<string | null>(null)
 
