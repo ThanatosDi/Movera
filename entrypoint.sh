@@ -73,4 +73,11 @@ if ! command -v setpriv > /dev/null 2>&1; then
     exit 1
 fi
 
+# gosu 會在切換 UID 後自動設定 HOME，setpriv 不動任何環境變數。
+# 若不補上，HOME 會維持繼承自 root 的 /root，uv 便嘗試寫入
+# /root/.cache/uv 而失敗：Permission denied (os error 13)。
+HOME=$(getent passwd movera | cut -d: -f6)
+export HOME="${HOME:-/home/movera}"
+logger "HOME 設定為 $HOME"
+
 exec setpriv --reuid=movera --regid=movera --init-groups --inh-caps=-all "$@"
