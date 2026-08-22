@@ -63,6 +63,14 @@ chown -R movera:movera /movera
 
 logger "權限設定完成。以 'movera' 使用者身份執行主程式..."
 
-# 使用 gosu (一個安全的 sudo/su 替代品)
-# 將執行權限從 root 切換到 movera 使用者，然後執行傳遞給此腳本的所有參數 ($@)
-exec gosu movera "$@"
+# 使用 setpriv (util-linux 內建的降權工具，取代 gosu)
+# --reuid / --regid：切換為 movera 的 UID/GID
+# --init-groups：依 /etc/group 初始化附屬群組
+# --inh-caps=-all：清除可繼承的 capabilities，避免子行程提權
+# 與 gosu 相同直接 exec（不 fork），PID 1 的訊號轉發與退出碼行為不變
+if ! command -v setpriv > /dev/null 2>&1; then
+    echo "[Entrypoint] 錯誤：找不到 setpriv，請確認 base image 含 util-linux"
+    exit 1
+fi
+
+exec setpriv --reuid=movera --regid=movera --init-groups --inh-caps=-all "$@"
