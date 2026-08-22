@@ -1,0 +1,33 @@
+# 統一換行符號：所有文字檔在工作目錄與 git blob 皆使用 LF
+# 原因：Docker 的 COPY 讀取的是工作目錄而非 git blob，
+# Windows 上的 CRLF 會讓 entrypoint.sh 的 shebang 變成 "#!/bin/sh\r"，
+# 導致容器啟動時報 exec ...: no such file or directory
+* text=auto eol=lf
+
+# 容器內執行的檔案，強制 LF（不依賴 text=auto 的偵測）
+*.sh      text eol=lf
+Dockerfile text eol=lf
+.env.example text eol=lf
+
+# 二進位檔案不做任何換行轉換
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.svg text eol=lf
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# lock 檔保留 diff：依賴版本變更需要能被審查（供應鏈安全）
+uv.lock            text eol=lf
+package-lock.json  text eol=lf

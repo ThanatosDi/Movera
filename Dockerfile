@@ -15,11 +15,9 @@ FROM python:3.14-slim-trixie
 EXPOSE 8000
 WORKDIR /movera
 
-# 安裝 gosu，它是 Debian/Ubuntu 上安全的權限切換工具
-# 並清理 apt 快取以保持鏡像大小
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gosu && \
-    rm -rf /var/lib/apt/lists/*
+# 降權工具使用 setpriv（util-linux，base image 已內建，無需額外安裝）
+# 不使用 gosu：Debian 的 gosu 為靜態連結 Go 執行檔，會把整份 Go 標準庫
+# 的已知 CVE 帶進鏡像（實際不可利用，但掃描結果難以維護）
 
 # 複製 entrypoint 腳本到鏡像中
 COPY ./entrypoint.sh /usr/local/bin/
