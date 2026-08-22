@@ -1,0 +1,65 @@
+# Docker 建置上下文排除清單
+#
+# Docker 不讀 .gitignore，這份檔案是唯一的過濾來源。沒有它，Dockerfile 的
+# COPY . /movera 會把本機的 .env、node_modules、.venv、.git 一併烤進映像。
+#
+# 注意：builder stage 需要 src/、public/、package.json、package-lock.json、
+# index.html、vite.config.ts、tsconfig*.json，這些不可排除。
+# README.md 也需保留：pyproject.toml 的 readme 欄位指向它，uv sync 會讀取。
+
+# --- 機密：絕不可進入映像 ---
+.env
+.env.*
+.secret_key
+**/settings.local.json
+
+# --- 版控與 CI ---
+.git
+.gitignore
+.gitattributes
+.github
+
+# --- 依賴目錄（映像內由 npm ci / uv sync 重建）---
+node_modules
+.venv
+__pycache__
+**/__pycache__
+*.py[cod]
+
+# --- 本機建置產物（正式產物由 builder stage 提供，避免陳舊檔案混入）---
+dist
+.vite
+*.tsbuildinfo
+
+# --- 測試與快取 ---
+tests
+vitest.config.ts
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+.coverage.*
+coverage
+coverage.xml
+htmlcov
+.nyc_output
+
+# --- 執行期資料（掛載卷，或由程式自建）---
+# storages/logs 由 backend/utils/logger.py 以 mkdir(parents=True) 建立
+storages
+*.db
+*.sqlite3
+*.log
+logs
+
+# --- 開發工具設定與規格文件 ---
+.claude
+.gemini
+.vscode
+openspec
+specs
+
+# --- 建置自身的檔案，映像內無用 ---
+Dockerfile
+.dockerignore
+SECURITY_AUDIT_REPORT.html
