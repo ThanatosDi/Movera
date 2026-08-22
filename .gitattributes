@@ -28,6 +28,6 @@ Dockerfile text eol=lf
 *.sqlite binary
 *.sqlite3 binary
 
-# lock 檔視為文字但避免產生 diff 噪音
-uv.lock            text eol=lf -diff
-package-lock.json  text eol=lf -diff
+# lock 檔保留 diff：依賴版本變更需要能被審查（供應鏈安全）
+uv.lock            text eol=lf
+package-lock.json  text eol=lf
